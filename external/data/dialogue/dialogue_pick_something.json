@@ -1,0 +1,105 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"dialogue_initial_dialogue_state_object_id": "dialogue_state_pick_something_initial",
+		"dialogue_option_id_to_dialogue_options": {
+			"dialogue_pick_something_option_1": {
+				"dialogue_option_actions": [
+					{
+						"res://scripts/actions/ActionAddHealth.gd": {
+							"health_amount": -10.0
+						}
+					},
+					{
+						"res://scripts/actions/player_actions/ActionAddMoney.gd": {
+							"money_amount": 100.0
+						}
+					}
+				],
+				"dialogue_option_bbcode": "[color=red]Lose 10 HP[/color] and [color=green]Gain 100 Money[/color]",
+				"dialogue_option_failed_validator_bbcode": "[color=grey][Locked]: Insufficient Health[/color]",
+				"dialogue_option_next_dialogue_state_id": "",
+				"dialogue_option_validators": [
+					{
+						"res://scripts/validators/ValidatorPlayerHealth.gd": {
+							"health_amount": 11.0
+						}
+					}
+				],
+				"dialogue_option_visible_on_failed_validation": true,
+				"object_id": "dialogue_pick_something_option_1"
+			},
+			"dialogue_pick_something_option_2": {
+				"dialogue_option_actions": [
+					{
+						"res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+							"action_data": [
+								{
+									"res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {
+
+									}
+								}
+							],
+							"card_pick_type": 8.0,
+							"draft_from_card_pool": true,
+							"draft_is_weighted": false,
+							"draft_max_card_amount": 1.0,
+							"draft_use_pity_system": false,
+							"draft_use_player_draft": false,
+							"max_card_amount": 1.0,
+							"min_card_amount": 1.0,
+							"pick_draft_cards": false,
+							"random_selection": true,
+							"rng_name": "rng_events",
+							"validator_data": [
+								{
+									"res://scripts/validators/card/ValidatorCardRarity.gd": {
+										"card_rarities": [
+											3.0
+										]
+									}
+								},
+								{
+									"res://scripts/validators/card/ValidatorCardDraftable.gd": {
+
+									}
+								}
+							]
+						}
+					},
+					{
+						"res://scripts/actions/player_actions/ActionAddMoney.gd": {
+							"money_amount": -50.0
+						}
+					}
+				],
+				"dialogue_option_bbcode": "[color=red]Lose 50 Money[/color] and [color=green]Gain Random Rare Card[/color]",
+				"dialogue_option_failed_validator_bbcode": "[color=grey][Locked]: Insufficient Money[/color]",
+				"dialogue_option_next_dialogue_state_id": "",
+				"dialogue_option_validators": [
+					{
+						"res://scripts/validators/ValidatorMoney.gd": {
+							"money_amount": 50.0
+						}
+					}
+				],
+				"dialogue_option_visible_on_failed_validation": true,
+				"object_id": "dialogue_pick_something_option_2"
+			}
+		},
+		"dialogue_state_id_to_dialogue_states": {
+			"dialogue_state_pick_something_initial": {
+				"dialogue_state_dialogue_option_object_ids": [
+					"dialogue_pick_something_option_1",
+					"dialogue_pick_something_option_2"
+				],
+				"dialogue_state_dialogue_texture_path": "external/sprites/events/event_pick_something.png",
+				"dialogue_state_prompt_bbcode": "Test Event. Select an option...",
+				"object_id": "dialogue_state_pick_something_initial"
+			}
+		},
+		"object_id": "dialogue_pick_something"
+	}
+}

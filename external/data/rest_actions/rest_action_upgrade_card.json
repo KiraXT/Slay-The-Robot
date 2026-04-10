@@ -1,0 +1,44 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "rest_action_upgrade_card",
+		"rest_action_cost_type": 2,
+		"rest_action_name": "Upgrade",
+		"rest_action_texture_path": "",
+		"rest_action_validators": [
+			{
+				"res://scripts/validators/deck/ValidatorDeckHasUpgradeableCard.gd": {
+
+				}
+			}
+		],
+		"rest_actions": [
+			{
+				"res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+					"action_data": [
+						{
+							"res://scripts/actions/cardset_actions/ActionUpgradeCards.gd": {
+								"upgrade_parent_card": true
+							}
+						}
+					],
+					"card_pick_text": "Choose up to {0} card(s) to upgrade. {1} cards selected",
+					"card_pick_type": 1.0,
+					"max_card_amount": 1.0,
+					"min_card_amount": 1.0,
+					"min_cards_are_required_for_action": true,
+					"random_selection": false,
+					"validator_data": [
+						{
+							"res://scripts/validators/card/ValidatorCardUpgradeable.gd": {
+
+							}
+						}
+					]
+				}
+			}
+		]
+	}
+}

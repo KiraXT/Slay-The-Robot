@@ -1,0 +1,10 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"keyword_child_keyword_object_ids": [],
+		"keyword_text_bb_code": "[color=orange]Bomb[/color]\nDeals damage to all enemies when timer runs out ",
+		"object_id": "keyword_bomb"
+	}
+}

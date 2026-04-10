@@ -1,0 +1,19 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "rest_action_add_random_consumable",
+		"rest_action_cost_type": 0,
+		"rest_action_name": "Add Random\nConsumable",
+		"rest_action_texture_path": "",
+		"rest_action_validators": [],
+		"rest_actions": [
+			{
+				"res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+					"random_consumable": true
+				}
+			}
+		]
+	}
+}

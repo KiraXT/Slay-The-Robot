@@ -1,0 +1,14 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_modifier_difficulty_2",
+		"run_modifier_description": "Description of Modifier",
+		"run_modifier_exclusive_to_modifier_ids": [],
+		"run_modifier_interceptor_script_paths": [],
+		"run_modifier_is_custom": false,
+		"run_modifier_modifier_script_path": "res://scripts/run_modifiers/difficulties/RunModifierDifficulty2.gd",
+		"run_modifier_name": "Difficulty 2 (Increased Minibosss Health)"
+	}
+}

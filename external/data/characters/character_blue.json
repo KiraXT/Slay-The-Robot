@@ -1,0 +1,40 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"character_background_texture_path": "",
+		"character_color_id": "color_blue",
+		"character_description": "If they were green they would die.",
+		"character_icon_texture_path": "external/sprites/characters/character_blue/character_blue_icon.png",
+		"character_name": "Blue Guy",
+		"character_player_id": "player_blue",
+		"character_starting_artifact_ids": [
+			"artifact_see_top_of_draw_pile"
+		],
+		"character_starting_artifact_pack_ids": [
+			"artifact_pack_white",
+			"artifact_pack_blue"
+		],
+		"character_starting_card_draft_card_pack_ids": [
+			"card_pack_blue"
+		],
+		"character_starting_card_object_ids": [
+			"improving_retain_block_card",
+			"randomize_hand_card",
+			"card_attack_corrosion",
+			"end_turn_card",
+			"add_health_card",
+			"transform_hand_card",
+			"card_reshuffle_draw",
+			"card_duplicate_attacks",
+			"card_attack_heal_unblocked_damage",
+			"card_attack_rng"
+		],
+		"character_starting_health": 70,
+		"character_starting_money": 999,
+		"character_text_energy_texture_path": "external/sprites/characters/character_blue/character_blue_text_energy.png",
+		"character_texture_path": "external/sprites/characters/character_blue/character_blue.png",
+		"object_id": "character_blue"
+	}
+}

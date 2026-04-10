@@ -1,0 +1,15 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"event_pool_event_object_ids": [
+			"event_act_1_easy_combat_1",
+			"event_act_1_easy_combat_2",
+			"event_act_1_easy_combat_3",
+			"event_act_1_easy_combat_4"
+		],
+		"event_pool_fallback_event_object_id": "",
+		"object_id": "event_pool_act_1_easy"
+	}
+}

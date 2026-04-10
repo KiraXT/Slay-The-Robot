@@ -1,0 +1,9 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"custom_ui_asset_path": "res://scenes/ui/custom/CustomUISeeTopOfDrawPile.tscn",
+		"object_id": "custom_ui_see_top_of_draw_pile"
+	}
+}

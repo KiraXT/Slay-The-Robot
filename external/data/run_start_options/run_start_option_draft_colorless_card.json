@@ -1,0 +1,29 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_start_option_draft_colorless_card",
+		"run_start_option_actions": [
+			{
+				"res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+					"action_data": [
+						{
+							"res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {
+
+							}
+						}
+					],
+					"card_pick_type": 8.0,
+					"draft_card_pack_id": "card_pack_white",
+					"draft_from_card_pool": true,
+					"pick_draft_cards": false,
+					"rng_name": "rng_card_drafting",
+					"validator_data": []
+				}
+			}
+		],
+		"run_start_option_bb_code": "[color=green]Draft a colorless card[/color]",
+		"run_start_option_type": 0
+	}
+}

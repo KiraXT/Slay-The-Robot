@@ -1,0 +1,17 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_start_option_reduce_max_hp",
+		"run_start_option_actions": [
+			{
+				"res://scripts/actions/ActionAddHealth.gd": {
+					"health_max_amount": -10.0
+				}
+			}
+		],
+		"run_start_option_bb_code": "[color=red]Lose 10 Max HP[/color]",
+		"run_start_option_type": 1
+	}
+}

@@ -1,0 +1,47 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "rest_action_remove_cards",
+		"rest_action_cost_type": 1,
+		"rest_action_name": "Remove Cards",
+		"rest_action_texture_path": "",
+		"rest_action_validators": [
+			{
+				"res://scripts/validators/deck/ValidatorPileSize.gd": {
+					"card_pick_type": 1.0,
+					"card_type_maximum": 4.0,
+					"card_types": [
+						0.0,
+						1.0,
+						2.0,
+						3.0,
+						4.0
+					],
+					"invert_validation": false
+				}
+			}
+		],
+		"rest_actions": [
+			{
+				"res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+					"action_data": [
+						{
+							"res://scripts/actions/cardset_actions/ActionRemoveCardsFromDeck.gd": {
+
+							}
+						}
+					],
+					"card_pick_text": "Choose {0} card(s) to remove. {1} cards selected",
+					"card_pick_type": 1.0,
+					"max_card_amount": 2.0,
+					"min_card_amount": 1.0,
+					"min_cards_are_required_for_action": true,
+					"random_selection": false,
+					"use_parent_card": false
+				}
+			}
+		]
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"consumable_actions": [
+			{
+				"res://scripts/actions/ActionDirectDamage.gd": {
+					"bypass_block": false,
+					"damage": 10.0,
+					"target_override": 4.0
+				}
+			}
+		],
+		"consumable_description": "Damages all enemies for 10",
+		"consumable_name": "Multiple Damage Item",
+		"consumable_rarity": 0,
+		"consumable_requires_target": false,
+		"consumable_texture_path": "res://icon.svg",
+		"object_id": "consumable_multi_damaging"
+	}
+}

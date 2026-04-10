@@ -1,0 +1,13 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"event_pool_event_object_ids": [
+			"event_act_1_miniboss_1",
+			"event_act_1_miniboss_2"
+		],
+		"event_pool_fallback_event_object_id": "",
+		"object_id": "event_pool_act_1_miniboss"
+	}
+}

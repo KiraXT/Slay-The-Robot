@@ -1,0 +1,31 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "status_effect_preserve_block",
+		"status_effect_action_process_times": [
+			0,
+			4
+		],
+		"status_effect_allows_multiples": false,
+		"status_effect_can_be_negative": false,
+		"status_effect_decay_rate": 0,
+		"status_effect_decay_type": 0,
+		"status_effect_enemy_actions": [],
+		"status_effect_healthbar_layer_color": "",
+		"status_effect_healthbar_reserve_type": 0,
+		"status_effect_interceptor_ids": [
+			"interceptor_preserve_block"
+		],
+		"status_effect_is_visible": true,
+		"status_effect_name": "Preserve Block",
+		"status_effect_negative_charges_texture_path": "",
+		"status_effect_player_actions": [],
+		"status_effect_priority": 0,
+		"status_effect_script_path": "res://scripts/status_effects/BaseStatusEffect.gd",
+		"status_effect_stacks": false,
+		"status_effect_texture_path": "",
+		"status_effect_type": 0
+	}
+}

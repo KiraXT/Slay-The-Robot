@@ -1,0 +1,14 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_modifier_draft_all_colors",
+		"run_modifier_description": "Draft all card colors",
+		"run_modifier_exclusive_to_modifier_ids": [],
+		"run_modifier_interceptor_script_paths": [],
+		"run_modifier_is_custom": true,
+		"run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustomDraftAllColors.gd",
+		"run_modifier_name": "Prismatic"
+	}
+}

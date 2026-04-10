@@ -11,3 +11,10 @@ export_presets.cfg
 .mono/
 /external/saves
 external/profile.json
+
+# Auto-generated card JSON files (source of truth is CSV)
+external/data/cards/*.json
+
+# Python cache
+__pycache__/
+*.pyc

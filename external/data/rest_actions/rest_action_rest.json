@@ -1,0 +1,19 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "rest_action_rest",
+		"rest_action_cost_type": 0,
+		"rest_action_name": "Rest",
+		"rest_action_texture_path": "",
+		"rest_action_validators": [],
+		"rest_actions": [
+			{
+				"res://scripts/actions/ActionHealPercent.gd": {
+					"percentage_heal_amount": 0.4
+				}
+			}
+		]
+	}
+}

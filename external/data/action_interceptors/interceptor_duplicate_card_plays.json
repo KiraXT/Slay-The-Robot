@@ -1,0 +1,14 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"action_intercepted_action_paths": [
+			"res://scripts/actions/meta_actions/ActionCardPlay.gd"
+		],
+		"action_interceptor_modifies_parent": true,
+		"action_interceptor_priority": 10000,
+		"action_interceptor_script_path": "res://scripts/action_interceptors/InterceptorDuplicateCardPlays.gd",
+		"object_id": "interceptor_duplicate_card_plays"
+	}
+}

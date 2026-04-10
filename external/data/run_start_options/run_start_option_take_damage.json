@@ -1,0 +1,17 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_start_option_take_damage",
+		"run_start_option_actions": [
+			{
+				"res://scripts/actions/ActionAddHealth.gd": {
+					"health_amount": -5.0
+				}
+			}
+		],
+		"run_start_option_bb_code": "[color=red]Lose 5 HP[/color]",
+		"run_start_option_type": 1
+	}
+}

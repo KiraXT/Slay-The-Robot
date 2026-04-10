@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python external/tools/extract_cards_from_godot.py)",
+      "Bash(pip --version)",
+      "Bash(python -c \"import openpyxl; print\\('openpyxl:', openpyxl.__version__\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python external/tools/csv_to_json.py)",
+      "Bash(python3 -c ':*)",
+      "Bash(python -c ':*)",
+      "Bash(awk -F',' '{print NF}')",
+      "Bash(python external/tools/create_cards_csv.py)",
+      "Bash(python /tmp/fix_encoding.py)"
+    ]
+  }
+}

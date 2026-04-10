@@ -1,0 +1,10 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"custom_signal_is_stat": true,
+		"custom_signal_stat_name": "CUSTOM_STAT_SPECIAL_DISCARD",
+		"object_id": "custom_signal_special_discard"
+	}
+}

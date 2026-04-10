@@ -1,0 +1,19 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"act_action_script_path": "res://scripts/actions/world_generation_actions/ActionGenerateAct.gd",
+		"act_background_texture_path": "",
+		"act_boss_event_pool_object_id": "event_pool_act_1_boss",
+		"act_easy_combat_event_pool_object_id": "event_pool_act_1_easy",
+		"act_hard_combat_event_pool_object_id": "event_pool_act_1_easy",
+		"act_miniboss_event_pool_object_id": "event_pool_act_1_miniboss",
+		"act_name": "Act 2",
+		"act_next_act_ids": [
+			"act_3"
+		],
+		"act_non_combat_event_pool_object_id": "event_pool_act_1_dialogue",
+		"object_id": "act_2"
+	}
+}

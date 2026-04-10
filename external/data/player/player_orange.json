@@ -1,0 +1,61 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"location_id_to_location_data": {
+
+		},
+		"object_id": "player_orange",
+		"object_uid": "",
+		"player_act": 1,
+		"player_act_id": "act_1",
+		"player_act_max": 3,
+		"player_artifact_pack_ids": [],
+		"player_artifact_pool": [],
+		"player_artifact_uid_to_artifact_data": {
+
+		},
+		"player_available_rest_action_object_ids": [
+			"rest_action_rest",
+			"rest_action_upgrade_card",
+			"rest_action_remove_cards",
+			"rest_action_add_random_consumable"
+		],
+		"player_character_object_id": "character_orange",
+		"player_consumable_slot_count": 3,
+		"player_consumable_slot_to_consumable_object_id": {
+
+		},
+		"player_current_combat_stats": null,
+		"player_deck": [],
+		"player_energy_max": 10,
+		"player_event_blacklisted_ids": [],
+		"player_event_pools": {
+
+		},
+		"player_health": 50,
+		"player_health_max": 50,
+		"player_location_id": "location_0",
+		"player_money": 0,
+		"player_previous_combat_stats": [],
+		"player_rare_card_increment_rate": 1.5,
+		"player_rare_card_modifier_base": 0.0,
+		"player_rare_card_modifier_current": 0.0,
+		"player_reward_draft_card_id_blacklist": [],
+		"player_reward_draft_card_id_whitelist": [],
+		"player_rng": {
+
+		},
+		"player_run_difficulty_level": 0,
+		"player_run_modifier_object_ids": [],
+		"player_run_seed": 0,
+		"player_shop_data": null,
+		"player_values": {
+
+		},
+		"reward_cards_per_draft": 3,
+		"reward_draft_card_pack_ids": [],
+		"reward_drafts": 1
+	}
+}

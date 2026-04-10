@@ -1,0 +1,13 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"card_pack_card_ids": [],
+		"card_pack_color_id": "color_red",
+		"card_pack_validators": [],
+		"exclude_non_standard_rarities": true,
+		"exclude_non_standard_types": true,
+		"object_id": "card_pack_red"
+	}
+}

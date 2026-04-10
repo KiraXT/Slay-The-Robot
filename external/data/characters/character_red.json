@@ -1,0 +1,46 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"character_background_texture_path": "",
+		"character_color_id": "color_red",
+		"character_description": "Fought in the red guy wars",
+		"character_icon_texture_path": "external/sprites/characters/character_red/character_red_icon.png",
+		"character_name": "Red Guy",
+		"character_player_id": "player_red",
+		"character_starting_artifact_ids": [
+			"artifact_block_on_attacks"
+		],
+		"character_starting_artifact_pack_ids": [
+			"artifact_pack_white",
+			"artifact_pack_red"
+		],
+		"character_starting_card_draft_card_pack_ids": [
+			"card_pack_red"
+		],
+		"character_starting_card_object_ids": [
+			"card_attack_basic",
+			"card_attack_basic",
+			"card_attack_basic",
+			"card_requires_adjacency",
+			"attack_with_conditional_block_card",
+			"card_damage_increase",
+			"ignore_damage_increase_attack_card",
+			"card_block_basic",
+			"card_block_basic",
+			"card_block_basic",
+			"card_block_basic",
+			"card_block_basic",
+			"card_block_basic",
+			"card_weaken_enemies",
+			"card_vulnerable_enemies",
+			"card_grant_energy"
+		],
+		"character_starting_health": 80,
+		"character_starting_money": 999,
+		"character_text_energy_texture_path": "external/sprites/characters/character_red/character_red_text_energy.png",
+		"character_texture_path": "external/sprites/characters/character_red/character_red.png",
+		"object_id": "character_red"
+	}
+}

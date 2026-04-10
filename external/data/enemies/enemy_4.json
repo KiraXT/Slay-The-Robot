@@ -1,0 +1,83 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"enemy_actions_on_death": [
+			{
+				"res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+					"status_charge_amount": 5.0,
+					"status_effect_object_id": "status_effect_corrosion",
+					"target_override": 3.0,
+					"time_delay": 0.5
+				}
+			}
+		],
+		"enemy_attack_states": {
+			"1": {
+				"attack_damage": 10.0,
+				"block": 0.0,
+				"custom_actions": [
+					{
+						"res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+							"status_effect_charges": 2.0,
+							"status_effect_object_id": "status_effect_vulnerable",
+							"target_override": 2.0
+						}
+					}
+				],
+				"next_attack_weights": {
+					"2": 1.0
+				},
+				"number_of_attacks": 1.0
+			},
+			"2": {
+				"attack_damage": 4.0,
+				"block": 0.0,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"2": 1.0,
+					"3": 1.0
+				},
+				"number_of_attacks": 2.0
+			},
+			"3": {
+				"attack_damage": 0.0,
+				"block": 10.0,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"1": 1.0
+				},
+				"number_of_attacks": 0.0
+			},
+			"initial": {
+				"attack_damage": 0.0,
+				"block": 0.0,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"1": 1.0
+				},
+				"number_of_attacks": 0.0
+			}
+		},
+		"enemy_block": 0,
+		"enemy_difficulty_to_enemy_modfiers": {
+			"1": {
+				"enemy_health": 50.0,
+				"enemy_health_max": 50.0
+			}
+		},
+		"enemy_health": 40,
+		"enemy_health_max": 40,
+		"enemy_initial_status_effects": {
+
+		},
+		"enemy_is_minion": false,
+		"enemy_name": "Big Attack Enemy",
+		"enemy_object_id": "",
+		"enemy_texture_path": "external/sprites/enemies/enemy_purple_medium.png",
+		"enemy_type": 0,
+		"object_id": "enemy_4",
+		"object_uid": ""
+	}
+}

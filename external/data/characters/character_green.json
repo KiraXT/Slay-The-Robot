@@ -1,0 +1,38 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"character_background_texture_path": "",
+		"character_color_id": "color_green",
+		"character_description": "Puts pineapple on their pizza",
+		"character_icon_texture_path": "external/sprites/characters/character_green/character_green_icon.png",
+		"character_name": "Green Guy",
+		"character_player_id": "player_green",
+		"character_starting_artifact_ids": [
+			"artifact_draw_on_combat_start"
+		],
+		"character_starting_artifact_pack_ids": [
+			"artifact_pack_white",
+			"artifact_pack_green"
+		],
+		"character_starting_card_draft_card_pack_ids": [
+			"card_pack_green"
+		],
+		"character_starting_card_object_ids": [
+			"card_attack_basic",
+			"card_attack_basic",
+			"card_attack_basic",
+			"custom_block_card",
+			"attack_lower_cost_on_discard_card",
+			"card_preserve_block",
+			"card_duplicate_plays",
+			"card_draft_random_attack"
+		],
+		"character_starting_health": 75,
+		"character_starting_money": 999,
+		"character_text_energy_texture_path": "external/sprites/characters/character_green/character_green_text_energy.png",
+		"character_texture_path": "external/sprites/characters/character_green/character_green.png",
+		"object_id": "character_green"
+	}
+}

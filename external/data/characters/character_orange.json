@@ -1,0 +1,49 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"character_background_texture_path": "",
+		"character_color_id": "color_orange",
+		"character_description": "Has a tragic backstory",
+		"character_icon_texture_path": "external/sprites/characters/character_orange/character_orange_icon.png",
+		"character_name": "Orange Guy",
+		"character_player_id": "player_orange",
+		"character_starting_artifact_ids": [
+			"artifact_increase_attack_on_rest",
+			"artifact_see_top_of_draw_pile"
+		],
+		"character_starting_artifact_pack_ids": [
+			"artifact_pack_white",
+			"artifact_pack_orange"
+		],
+		"character_starting_card_draft_card_pack_ids": [
+			"card_pack_orange"
+		],
+		"character_starting_card_object_ids": [
+			"card_attack_basic",
+			"card_attack_basic",
+			"card_attack_basic",
+			"card_restart_combat",
+			"card_block_basic",
+			"card_block_basic",
+			"card_block_basic",
+			"retain_hand_card",
+			"card_play_from_discard",
+			"card_draw",
+			"card_energy_on_draw",
+			"card_improving_block",
+			"card_improving_attack",
+			"card_play_random_from_hand",
+			"card_bomb",
+			"add_to_draw_from_discard_card",
+			"add_to_draw_from_discard_card",
+			"card_banish_attack"
+		],
+		"character_starting_health": 70,
+		"character_starting_money": 999,
+		"character_text_energy_texture_path": "external/sprites/characters/character_orange/character_orange_text_energy.png",
+		"character_texture_path": "external/sprites/characters/character_orange/character_orange.png",
+		"object_id": "character_orange"
+	}
+}

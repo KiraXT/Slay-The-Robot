@@ -1,0 +1,44 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_start_option_draft_common_card",
+		"run_start_option_actions": [
+			{
+				"res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+					"action_data": [
+						{
+							"res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {
+
+							}
+						}
+					],
+					"card_pick_type": 8.0,
+					"draft_from_card_pool": true,
+					"draft_is_weighted": false,
+					"draft_use_pity_system": false,
+					"draft_use_player_draft": false,
+					"pick_draft_cards": false,
+					"rng_name": "rng_card_drafting",
+					"validator_data": [
+						{
+							"res://scripts/validators/card/ValidatorCardRarity.gd": {
+								"card_rarities": [
+									1.0
+								]
+							}
+						},
+						{
+							"res://scripts/validators/card/ValidatorCardDraftable.gd": {
+
+							}
+						}
+					]
+				}
+			}
+		],
+		"run_start_option_bb_code": "[color=green]Draft a common card[/color]",
+		"run_start_option_type": 0
+	}
+}

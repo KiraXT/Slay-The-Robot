@@ -1,0 +1,12 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"keyword_child_keyword_object_ids": [
+			"keyword_exhaust"
+		],
+		"keyword_text_bb_code": "[color=orange]Ethereal[/color]\nExhausts if in hand end of turn",
+		"object_id": "keyword_ethereal"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"artifact_pack_artifact_ids": [],
+		"artifact_pack_color_id": "color_blue",
+		"exclude_non_standard_rarities": false,
+		"object_id": "artifact_pack_blue"
+	}
+}

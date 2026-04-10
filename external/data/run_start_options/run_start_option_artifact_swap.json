@@ -1,0 +1,17 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"object_id": "run_start_option_artifact_swap",
+		"run_start_option_actions": [
+			{
+				"res://scripts/actions/player_actions/ActionSwapBossArtifact.gd": {
+
+				}
+			}
+		],
+		"run_start_option_bb_code": "[color=green]Replace Starting Artifact With Boss Artifact[/color]",
+		"run_start_option_type": 2
+	}
+}

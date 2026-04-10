@@ -1,0 +1,14 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"action_intercepted_action_paths": [
+			"res://scripts/actions/generated_actions/ActionAttack.gd"
+		],
+		"action_interceptor_modifies_parent": false,
+		"action_interceptor_priority": 9000,
+		"action_interceptor_script_path": "res://scripts/action_interceptors/InterceptorVulnerable.gd",
+		"object_id": "interceptor_vulnerable"
+	}
+}
