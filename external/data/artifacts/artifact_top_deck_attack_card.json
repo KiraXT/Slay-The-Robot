@@ -1,83 +1,79 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"artifact_add_actions": [
-			{
-				"res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
-					"action_data": [
-						{
-							"res://scripts/actions/cardset_actions/ActionChangeCardProperties.gd": {
-								"card_properties": {
-									"card_first_shuffle_priority": 1.0,
-									"card_unremovable_from_deck": true,
-									"card_untransformable_from_deck": true
-								},
-								"change_parent_card": false
-							}
-						}
-					],
-					"card_pick_text": "Choose a card to make top deck",
-					"card_pick_type": 1.0,
-					"max_card_amount": 1.0,
-					"min_card_amount": 1.0,
-					"min_cards_are_required_for_action": true,
-					"quick_pick": true,
-					"random_selection": false,
-					"validator_data": [
-						{
-							"res://scripts/validators/card/ValidatorCardType.gd": {
-								"card_types": [
-									0.0
-								]
-							}
-						},
-						{
-							"res://scripts/validators/card/ValidatorCardRarity.gd": {
-								"card_rarities_exclude": [
-									4.0
-								]
-							}
-						},
-						{
-							"res://scripts/validators/card/ValidatorCardProperties.gd": {
-								"card_property_name": "card_unremovable_from_deck",
-								"comparison_value": false,
-								"operator": "=="
-							}
-						}
-					]
-				}
-			}
-		],
-		"artifact_appears_in_artifact_packs": true,
-		"artifact_color_id": "color_white",
-		"artifact_counter": 0,
-		"artifact_counter_max": 1,
-		"artifact_counter_reset_on_combat_end": -1,
-		"artifact_counter_reset_on_turn_start": -1,
-		"artifact_counter_wraparound": true,
-		"artifact_description": "Select an attack card to make appear at the top of your deck.",
-		"artifact_end_of_combat_actions": [],
-		"artifact_first_turn_actions": [],
-		"artifact_max_counter_actions": [],
-		"artifact_name": "Artifact Make Attack Card Innate",
-		"artifact_rarity": 1,
-		"artifact_remove_actions": [],
-		"artifact_right_click_actions": [],
-		"artifact_right_click_validators": [
-			{
-				"res://scripts/validators/ValidatorPlayerTurn.gd": {
-
-				}
-			}
-		],
-		"artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
-		"artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
-		"artifact_turn_end_actions": [],
-		"artifact_turn_start_actions": [],
-		"object_id": "artifact_top_deck_attack_card",
-		"object_uid": ""
-	}
+    "patch_data": {},
+    "properties": {
+        "artifact_add_actions": [
+            {
+                "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                    "action_data": [
+                        {
+                            "res://scripts/actions/cardset_actions/ActionChangeCardProperties.gd": {
+                                "card_properties": {
+                                    "card_first_shuffle_priority": 1,
+                                    "card_unremovable_from_deck": true,
+                                    "card_untransformable_from_deck": true
+                                },
+                                "change_parent_card": false
+                            }
+                        }
+                    ],
+                    "card_pick_text": "Choose a card to make top deck",
+                    "card_pick_type": 1.0,
+                    "max_card_amount": 1.0,
+                    "min_card_amount": 1.0,
+                    "min_cards_are_required_for_action": true,
+                    "quick_pick": true,
+                    "random_selection": false,
+                    "validator_data": [
+                        {
+                            "res://scripts/validators/card/ValidatorCardType.gd": {
+                                "card_types": [
+                                    0.0
+                                ]
+                            }
+                        },
+                        {
+                            "res://scripts/validators/card/ValidatorCardRarity.gd": {
+                                "card_rarities_exclude": [
+                                    4.0
+                                ]
+                            }
+                        },
+                        {
+                            "res://scripts/validators/card/ValidatorCardProperties.gd": {
+                                "card_property_name": "card_unremovable_from_deck",
+                                "comparison_value": false,
+                                "operator": "=="
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "artifact_appears_in_artifact_packs": true,
+        "artifact_color_id": "color_white",
+        "artifact_counter": 0,
+        "artifact_counter_max": 1,
+        "artifact_counter_reset_on_combat_end": -1,
+        "artifact_counter_reset_on_turn_start": -1,
+        "artifact_counter_wraparound": true,
+        "artifact_description": "Select an attack card to make appear at the top of your deck.",
+        "artifact_end_of_combat_actions": [],
+        "artifact_first_turn_actions": [],
+        "artifact_max_counter_actions": [],
+        "artifact_name": "Artifact Make Attack Card Innate",
+        "artifact_rarity": 1,
+        "artifact_remove_actions": [],
+        "artifact_right_click_actions": [],
+        "artifact_right_click_validators": [
+            {
+                "res://scripts/validators/ValidatorPlayerTurn.gd": {}
+            }
+        ],
+        "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
+        "artifact_turn_end_actions": [],
+        "artifact_turn_start_actions": [],
+        "object_id": "artifact_top_deck_attack_card",
+        "object_uid": ""
+    }
 }

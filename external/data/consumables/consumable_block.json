@@ -1,21 +1,19 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"consumable_actions": [
-			{
-				"res://scripts/actions/ActionBlock.gd": {
-					"block": 10.0,
-					"target_override": 2.0
-				}
-			}
-		],
-		"consumable_description": "Adds 10 block",
-		"consumable_name": "Block Item",
-		"consumable_rarity": 0,
-		"consumable_requires_target": false,
-		"consumable_texture_path": "res://icon.svg",
-		"object_id": "consumable_block"
-	}
+    "patch_data": {},
+    "properties": {
+        "consumable_actions": [
+            {
+                "res://scripts/actions/ActionBlock.gd": {
+                    "block": 10.0,
+                    "target_override": 2
+                }
+            }
+        ],
+        "consumable_description": "Adds 10 block",
+        "consumable_name": "Block Item",
+        "consumable_rarity": 0,
+        "consumable_requires_target": false,
+        "consumable_texture_path": "res://icon.svg",
+        "object_id": "consumable_block"
+    }
 }

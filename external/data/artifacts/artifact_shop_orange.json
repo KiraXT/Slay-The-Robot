@@ -1,36 +1,32 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"artifact_add_actions": [],
-		"artifact_appears_in_artifact_packs": true,
-		"artifact_color_id": "color_orange",
-		"artifact_counter": 0,
-		"artifact_counter_max": 1,
-		"artifact_counter_reset_on_combat_end": -1,
-		"artifact_counter_reset_on_turn_start": -1,
-		"artifact_counter_wraparound": true,
-		"artifact_description": "Test Orange Shop Artifact.",
-		"artifact_end_of_combat_actions": [],
-		"artifact_first_turn_actions": [],
-		"artifact_max_counter_actions": [],
-		"artifact_name": "Artifact Orange Shop",
-		"artifact_rarity": 5,
-		"artifact_remove_actions": [],
-		"artifact_right_click_actions": [],
-		"artifact_right_click_validators": [
-			{
-				"res://scripts/validators/ValidatorPlayerTurn.gd": {
-
-				}
-			}
-		],
-		"artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
-		"artifact_texture_path": "external/sprites/artifacts/artifact_orange.png",
-		"artifact_turn_end_actions": [],
-		"artifact_turn_start_actions": [],
-		"object_id": "artifact_shop_orange",
-		"object_uid": ""
-	}
+    "patch_data": {},
+    "properties": {
+        "artifact_add_actions": [],
+        "artifact_appears_in_artifact_packs": true,
+        "artifact_color_id": "color_orange",
+        "artifact_counter": 0,
+        "artifact_counter_max": 1,
+        "artifact_counter_reset_on_combat_end": -1,
+        "artifact_counter_reset_on_turn_start": -1,
+        "artifact_counter_wraparound": true,
+        "artifact_description": "Test Orange Shop Artifact.",
+        "artifact_end_of_combat_actions": [],
+        "artifact_first_turn_actions": [],
+        "artifact_max_counter_actions": [],
+        "artifact_name": "Artifact Orange Shop",
+        "artifact_rarity": 5,
+        "artifact_remove_actions": [],
+        "artifact_right_click_actions": [],
+        "artifact_right_click_validators": [
+            {
+                "res://scripts/validators/ValidatorPlayerTurn.gd": {}
+            }
+        ],
+        "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_orange.png",
+        "artifact_turn_end_actions": [],
+        "artifact_turn_start_actions": [],
+        "object_id": "artifact_shop_orange",
+        "object_uid": ""
+    }
 }

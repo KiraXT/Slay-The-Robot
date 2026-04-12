@@ -1,20 +1,18 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"consumable_actions": [
-			{
-				"res://scripts/actions/ActionHealPercent.gd": {
-					"percentage_heal_amount": 0.2
-				}
-			}
-		],
-		"consumable_description": "Heals 20%",
-		"consumable_name": "Heal Item",
-		"consumable_rarity": 0,
-		"consumable_requires_target": false,
-		"consumable_texture_path": "res://icon.svg",
-		"object_id": "consumable_heal"
-	}
+    "patch_data": {},
+    "properties": {
+        "consumable_actions": [
+            {
+                "res://scripts/actions/ActionHealPercent.gd": {
+                    "percentage_heal_amount": 0.2
+                }
+            }
+        ],
+        "consumable_description": "Heals 20%",
+        "consumable_name": "Heal Item",
+        "consumable_rarity": 0,
+        "consumable_requires_target": false,
+        "consumable_texture_path": "res://icon.svg",
+        "object_id": "consumable_heal"
+    }
 }

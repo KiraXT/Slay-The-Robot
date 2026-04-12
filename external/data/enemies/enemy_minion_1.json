@@ -1,59 +1,55 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"enemy_actions_on_death": [],
-		"enemy_attack_states": {
-			"1": {
-				"attack_damage": 5.0,
-				"block": 5.0,
-				"custom_actions": [],
-				"next_attack_weights": {
-					"1": 1.0,
-					"2": 1.0
-				},
-				"number_of_attacks": 1.0
-			},
-			"2": {
-				"attack_damage": 3.0,
-				"block": 7.0,
-				"custom_actions": [],
-				"next_attack_weights": {
-					"1": 1.0,
-					"2": 1.0
-				},
-				"number_of_attacks": 2.0
-			},
-			"initial": {
-				"attack_damage": 0.0,
-				"block": 0.0,
-				"custom_actions": [],
-				"next_attack_weights": {
-					"1": 1.0,
-					"2": 1.0
-				},
-				"number_of_attacks": 0.0
-			}
-		},
-		"enemy_block": 0,
-		"enemy_difficulty_to_enemy_modfiers": {
-			"1": {
-				"enemy_health": 5.0,
-				"enemy_health_max": 5.0
-			}
-		},
-		"enemy_health": 4,
-		"enemy_health_max": 4,
-		"enemy_initial_status_effects": {
-
-		},
-		"enemy_is_minion": true,
-		"enemy_name": "Minion 1",
-		"enemy_object_id": "",
-		"enemy_texture_path": "external/sprites/enemies/enemy_purple_small.png",
-		"enemy_type": 0,
-		"object_id": "enemy_minion_1",
-		"object_uid": ""
-	}
+    "patch_data": {},
+    "properties": {
+        "enemy_actions_on_death": [],
+        "enemy_attack_states": {
+            "1": {
+                "attack_damage": 5.0,
+                "block": 5.0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0,
+                    "2": 1.0
+                },
+                "number_of_attacks": 1.0
+            },
+            "2": {
+                "attack_damage": 3.0,
+                "block": 7.0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0,
+                    "2": 1.0
+                },
+                "number_of_attacks": 2.0
+            },
+            "initial": {
+                "attack_damage": 0.0,
+                "block": 0.0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0,
+                    "2": 1.0
+                },
+                "number_of_attacks": 0.0
+            }
+        },
+        "enemy_block": 0,
+        "enemy_difficulty_to_enemy_modfiers": {
+            "1": {
+                "enemy_health": 5.0,
+                "enemy_health_max": 5.0
+            }
+        },
+        "enemy_health": 4,
+        "enemy_health_max": 4,
+        "enemy_initial_status_effects": {},
+        "enemy_is_minion": true,
+        "enemy_name": "Minion 1",
+        "enemy_object_id": "",
+        "enemy_texture_path": "external/sprites/enemies/enemy_purple_small.png",
+        "enemy_type": 0,
+        "object_id": "enemy_minion_1",
+        "object_uid": ""
+    }
 }

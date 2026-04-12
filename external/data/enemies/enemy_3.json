@@ -1,68 +1,66 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"enemy_actions_on_death": [
-			{
-				"res://scripts/actions/status_actions/ActionApplyStatus.gd": {
-					"status_charge_amount": 5.0,
-					"status_effect_object_id": "status_effect_corrosion",
-					"target_override": 3.0,
-					"time_delay": 0.5
-				}
-			}
-		],
-		"enemy_attack_states": {
-			"1": {
-				"attack_damage": 5.0,
-				"block": 5.0,
-				"custom_actions": [],
-				"next_attack_weights": {
-					"1": 1.0,
-					"2": 1.0
-				},
-				"number_of_attacks": 1.0
-			},
-			"2": {
-				"attack_damage": 3.0,
-				"block": 7.0,
-				"custom_actions": [],
-				"next_attack_weights": {
-					"1": 1.0,
-					"2": 1.0
-				},
-				"number_of_attacks": 2.0
-			},
-			"initial": {
-				"attack_damage": 0.0,
-				"block": 0.0,
-				"custom_actions": [],
-				"next_attack_weights": {
-					"1": 1.0,
-					"2": 1.0
-				},
-				"number_of_attacks": 0.0
-			}
-		},
-		"enemy_block": 0,
-		"enemy_difficulty_to_enemy_modfiers": {
-			"1": {
-				"enemy_health": 30.0,
-				"enemy_health_max": 30.0
-			}
-		},
-		"enemy_health": 25,
-		"enemy_health_max": 25,
-		"enemy_initial_status_effects": {
-			"status_effect_negate_debuff": 1
-		},
-		"enemy_is_minion": false,
-		"enemy_name": "Green Enemy",
-		"enemy_object_id": "",
-		"enemy_texture_path": "external/sprites/enemies/enemy_green_small.png",
-		"enemy_type": 0,
-		"object_id": "enemy_3",
-		"object_uid": ""
-	}
+    "patch_data": {},
+    "properties": {
+        "enemy_actions_on_death": [
+            {
+                "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                    "status_charge_amount": 5.0,
+                    "status_effect_object_id": "status_effect_corrosion",
+                    "target_override": 3,
+                    "time_delay": 0.5
+                }
+            }
+        ],
+        "enemy_attack_states": {
+            "1": {
+                "attack_damage": 5.0,
+                "block": 5.0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0,
+                    "2": 1.0
+                },
+                "number_of_attacks": 1.0
+            },
+            "2": {
+                "attack_damage": 3.0,
+                "block": 7.0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0,
+                    "2": 1.0
+                },
+                "number_of_attacks": 2.0
+            },
+            "initial": {
+                "attack_damage": 0.0,
+                "block": 0.0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0,
+                    "2": 1.0
+                },
+                "number_of_attacks": 0.0
+            }
+        },
+        "enemy_block": 0,
+        "enemy_difficulty_to_enemy_modfiers": {
+            "1": {
+                "enemy_health": 30.0,
+                "enemy_health_max": 30.0
+            }
+        },
+        "enemy_health": 25,
+        "enemy_health_max": 25,
+        "enemy_initial_status_effects": {
+            "status_effect_negate_debuff": 1
+        },
+        "enemy_is_minion": false,
+        "enemy_name": "Green Enemy",
+        "enemy_object_id": "",
+        "enemy_texture_path": "external/sprites/enemies/enemy_green_small.png",
+        "enemy_type": 0,
+        "object_id": "enemy_3",
+        "object_uid": ""
+    }
 }

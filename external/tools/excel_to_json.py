@@ -15,9 +15,10 @@ from dataclasses import dataclass
 from enum import IntEnum
 
 # Configuration
-EXCEL_FILE = Path("external/config/cards.xlsx")
-OUTPUT_DIR = Path("external/data/cards")
-SCHEMA_FILE = Path("external/tools/card_schema.json")
+SCRIPT_DIR = Path(__file__).parent
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+EXCEL_FILE = PROJECT_ROOT / "external/config/cards.xlsx"
+OUTPUT_DIR = PROJECT_ROOT / "external/data/cards"
 
 # Card Type Enum (matches CardData.CARD_TYPES)
 class CardType(IntEnum):
@@ -358,9 +359,16 @@ class CardConverter:
         # Validate and convert each card
         success_count = 0
         self.all_errors = []
+        skipped_rows = 0
 
         for idx, row in df.iterrows():
-            card_id = str(row.get('object_id', f'ROW_{idx}'))
+            card_id = str(row.get('object_id', f'ROW_{idx}')).strip()
+
+            # 跳过说明行（以#开头、空值、或包含"说明"/"注释"关键字）
+            if not card_id or card_id.startswith('#') or card_id in ['说明', '注释', 'COMMENT', '备注', 'NOTE']:
+                skipped_rows += 1
+                continue
+
             print(f"\n[{idx+1}/{len(df)}] Processing: {card_id}")
 
             # Validate
@@ -369,13 +377,13 @@ class CardConverter:
 
             if errors:
                 for err in errors:
-                    prefix = "⚠️  WARN" if err.severity == "WARNING" else "❌ ERROR"
+                    prefix = "[WARN]" if err.severity == "WARNING" else "[ERROR]"
                     print(f"  {prefix}: [{err.field}] {err.message}")
 
             # Skip cards with critical errors
             critical_errors = [e for e in errors if e.severity == "ERROR"]
             if critical_errors:
-                print(f"  ⏭️  Skipped due to {len(critical_errors)} error(s)")
+                print(f"  [SKIP] Skipped due to {len(critical_errors)} error(s)")
                 continue
 
             # Convert to JSON
@@ -386,11 +394,11 @@ class CardConverter:
                 with open(output_path, 'w', encoding='utf-8') as f:
                     json.dump(card_json, f, indent=4, ensure_ascii=False)
 
-                print(f"  ✅ Generated: {output_path}")
+                print(f"  [OK] Generated: {output_path}")
                 success_count += 1
 
             except Exception as e:
-                print(f"  ❌ Conversion failed: {e}")
+                print(f"  [FAIL] Conversion failed: {e}")
                 self.all_errors.append(ValidationError(
                     card_id=card_id,
                     field="CONVERSION",
@@ -399,11 +407,14 @@ class CardConverter:
                 ))
 
         # Summary
+        actual_cards = len(df) - skipped_rows
         print("\n" + "=" * 60)
-        print(f"Conversion complete!")
-        print(f"  Success: {success_count}/{len(df)} cards")
-        print(f"  Errors: {len([e for e in self.all_errors if e.severity == 'ERROR'])}")
-        print(f"  Warnings: {len([e for e in self.all_errors if e.severity == 'WARNING'])}")
+        print(f"转换完成!")
+        print(f"  成功: {success_count}/{actual_cards} 卡牌")
+        if skipped_rows > 0:
+            print(f"  跳过: {skipped_rows} 说明行")
+        print(f"  错误: {len([e for e in self.all_errors if e.severity == 'ERROR'])}")
+        print(f"  警告: {len([e for e in self.all_errors if e.severity == 'WARNING'])}")
         print("=" * 60)
 
         return success_count > 0, self.all_errors
@@ -437,6 +448,12 @@ class CardConverter:
                             card_values[field] = int(val)
                         except ValueError:
                             card_values[field] = val
+                elif isinstance(val, (int, float)):
+                    # Convert numbers to int to avoid float in JSON
+                    try:
+                        card_values[field] = int(val)
+                    except (ValueError, TypeError):
+                        card_values[field] = val
                 else:
                     card_values[field] = val
 
@@ -485,14 +502,14 @@ class CardConverter:
                 "card_rarity": int(row.get('card_rarity', 1)),
                 "card_color_id": str(row.get('card_color_id', 'color_white')),
                 "card_energy_cost": int(row.get('card_energy_cost', 1)),
-                "card_energy_cost_is_variable": bool(row.get('card_energy_cost_is_variable', False)),
+                "card_energy_cost_is_variable": self._get_bool_or_default(row, 'card_energy_cost_is_variable', False),
                 "card_energy_cost_variable_upper_bound": self._get_int_or_default(row, 'card_energy_cost_variable_upper_bound', -1),
-                "card_requires_target": bool(row.get('card_requires_target', True)),
-                "card_exhausts": bool(row.get('card_exhausts', False)),
-                "card_is_ethereal": bool(row.get('card_is_ethereal', False)),
-                "card_is_retained": bool(row.get('card_is_retained', False)),
-                "card_appears_in_card_packs": bool(row.get('card_appears_in_card_packs', True)),
-                "card_texture_path": str(row.get('card_texture_path', '')),
+                "card_requires_target": self._get_bool_or_default(row, 'card_requires_target', True),
+                "card_exhausts": self._get_bool_or_default(row, 'card_exhausts', False),
+                "card_is_ethereal": self._get_bool_or_default(row, 'card_is_ethereal', False),
+                "card_is_retained": self._get_bool_or_default(row, 'card_is_retained', False),
+                "card_appears_in_card_packs": self._get_bool_or_default(row, 'card_appears_in_card_packs', True),
+                "card_texture_path": self._get_str_or_default(row, 'card_texture_path'),
                 "card_keyword_object_ids": keywords,
                 "card_values": card_values,
                 "card_play_actions": actions,
@@ -500,7 +517,7 @@ class CardConverter:
                 "card_first_upgrade_property_changes": first_upgrade_changes,
                 "card_upgrade_amount": 0,
                 "card_upgrade_amount_max": int(row.get('card_upgrade_amount_max', 1)),
-                "card_first_shuffle_priority": int(row.get('card_first_shuffle_priority', 0)),
+                "card_first_shuffle_priority": self._get_int_or_default(row, 'card_first_shuffle_priority', 0),
             }
         }
 
@@ -513,6 +530,113 @@ class CardConverter:
             except (ValueError, TypeError):
                 return default
         return default
+
+    def _get_str_or_default(self, row: pd.Series, field: str, default: str = '') -> str:
+        """获取字符串值，处理NaN情况"""
+        if field in row and pd.notna(row[field]):
+            val = str(row[field])
+            # 排除pandas的nan字符串表示
+            if val.lower() == 'nan':
+                return default
+            return val
+        return default
+
+    def _get_bool_or_default(self, row: pd.Series, field: str, default: bool = False) -> bool:
+        """获取布尔值，处理NaN情况"""
+        if field not in row or pd.isna(row[field]):
+            return default
+        val = row[field]
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, str):
+            return val.lower() in ('true', 'yes', '1')
+        # 对于数字，非0为True
+        return bool(val)
+
+    # Action path mappings
+    ACTION_PATHS = {
+        # meta_actions
+        'ActionAttackGenerator': 'meta_actions',
+        'ActionCardPlay': 'meta_actions',
+        'ActionCardPlayEnd': 'meta_actions',
+        'ActionDrawGenerator': 'meta_actions',
+        'ActionEmitCustomSignal': 'meta_actions',
+        'ActionValidator': 'meta_actions',
+        'ActionVariableCardsetModifier': 'meta_actions',
+        'ActionVariableCombatStatsModifier': 'meta_actions',
+        'ActionVariableCostModifier': 'meta_actions',
+        # artifact_actions
+        'ActionIncreaseArtifactCharge': 'artifact_actions',
+        # cardset_actions
+        'ActionAddCardsToDeck': 'cardset_actions',
+        'ActionAddCardsToDraw': 'cardset_actions',
+        'ActionAddCardsToHand': 'cardset_actions',
+        'ActionAttachCardsOntoEnemy': 'cardset_actions',
+        'ActionBanishCards': 'cardset_actions',
+        'ActionAttachCardToSlot': 'cardset_actions',
+        'ActionChangeCardEnergies': 'cardset_actions',
+        'ActionChangeCardProperties': 'cardset_actions',
+        'ActionDiscardCards': 'cardset_actions',
+        'ActionExhaustCards': 'cardset_actions',
+        'ActionImproveCardValues': 'cardset_actions',
+        'ActionMoveCardsToLimbo': 'cardset_actions',
+        'ActionPlayCards': 'cardset_actions',
+        'ActionRandomizeCardEnergies': 'cardset_actions',
+        'ActionRemoveCardsFromDeck': 'cardset_actions',
+        'ActionRetainCards': 'cardset_actions',
+        'ActionTransformCards': 'cardset_actions',
+        'ActionUpgradeCards': 'cardset_actions',
+        # custom_ui_actions
+        'ActionCustomUI': 'custom_ui_actions',
+        # debug_actions
+        'ActionDebugLog': 'debug_actions',
+        # enemy_actions
+        'ActionCycleEnemyIntent': 'enemy_actions',
+        # pick_card_actions
+        'ActionBasePickCards': 'pick_card_actions',
+        'ActionCreateCards': 'pick_card_actions',
+        'ActionPickCards': 'pick_card_actions',
+        'ActionPickDuplicateCards': 'pick_card_actions',
+        'ActionPickUpgradeCards': 'pick_card_actions',
+        # player_actions
+        'ActionAddArtifact': 'player_actions',
+        'ActionAddConsumable': 'player_actions',
+        'ActionAddMoney': 'player_actions',
+        'ActionSwapBossArtifact': 'player_actions',
+        'ActionUpdateCardDrafts': 'player_actions',
+        'ActionUpdateRestActions': 'player_actions',
+        'ActionUseConsumable': 'player_actions',
+        # status_actions
+        'ActionApplyStatus': 'status_actions',
+        'ActionCorrosion': 'status_actions',
+        'ActionDecayStatus': 'status_actions',
+        # world_interaction_actions
+        'ActionOpenChest': 'world_interaction_actions',
+        'ActionStartCombat': 'world_interaction_actions',
+        'ActionVisitLocation': 'world_interaction_actions',
+        # generated_actions
+        'ActionAttack': 'generated_actions',
+        'ActionDraw': 'generated_actions',
+        # rewards
+        'ActionClearRewards': 'rewards',
+        'ActionGrantRewards': 'rewards',
+        # shop_actions
+        'ActionShopPopulateItems': 'shop_actions',
+        'ActionShopPurchaseItems': 'shop_actions',
+        # world_generation_actions
+        'ActionGenerateAct': 'world_generation_actions',
+    }
+
+    def _get_action_path(self, action_type: str) -> str:
+        """Get the correct path for an action type"""
+        if not action_type.startswith("Action"):
+            return f"res://scripts/actions/{action_type}.gd"
+
+        subdir = self.ACTION_PATHS.get(action_type, '')
+        if subdir:
+            return f"res://scripts/actions/{subdir}/{action_type}.gd"
+        else:
+            return f"res://scripts/actions/{action_type}.gd"
 
     def _parse_actions(self, row: pd.Series) -> List[Dict]:
         """Parse action configuration from row"""
@@ -533,18 +657,48 @@ class CardConverter:
             params['time_delay'] = float(row['action_time_delay'])
 
         if 'action_target_override' in row and pd.notna(row['action_target_override']):
-            params['target_override'] = str(row['action_target_override'])
+            to_val = row['action_target_override']
+            # Handle enum string values
+            if isinstance(to_val, str):
+                if to_val.startswith('BaseAction.TARGET_OVERRIDES.'):
+                    # Map enum names to integer values
+                    target_overrides_map = {
+                        'SELECTED_TARGETS': 0,
+                        'PARENT': 1,
+                        'PLAYER': 2,
+                        'ALL_COMBATANTS': 3,
+                        'ALL_ENEMIES': 4,
+                        'LEFTMOST_ENEMY': 5,
+                        'ENEMY_ID': 6,
+                        'RANDOM_ENEMY': 7,
+                    }
+                    enum_name = to_val.replace('BaseAction.TARGET_OVERRIDES.', '')
+                    if enum_name in target_overrides_map:
+                        params['target_override'] = target_overrides_map[enum_name]
+                    else:
+                        params['target_override'] = to_val
+                else:
+                    # Try to convert to int if it's a number string
+                    try:
+                        params['target_override'] = int(to_val)
+                    except ValueError:
+                        params['target_override'] = to_val
+            elif isinstance(to_val, (int, float)):
+                params['target_override'] = int(to_val)
+            else:
+                params['target_override'] = to_val
 
         # Action-specific parameters
-        if action_type == "ActionAttackGenerator":
+        # Handle on-lethal actions for any action type
+        if 'action_on_lethal' in row and pd.notna(row['action_on_lethal']):
+            lethal_action = str(row['action_on_lethal']).strip()
+            if lethal_action and lethal_action != 'nan':
+                lethal_action_path = self._get_action_path(lethal_action)
+                params['actions_on_lethal'] = [{lethal_action_path: {}}]
+        else:
             params['actions_on_lethal'] = []
-            # Check for on-lethal actions
-            if 'action_on_lethal' in row and pd.notna(row['action_on_lethal']):
-                lethal_action = str(row['action_on_lethal'])
-                if lethal_action == "ActionAddMoney":
-                    params['actions_on_lethal'] = [{"res://scripts/actions/ActionAddMoney.gd": {}}]
 
-        elif action_type == "ActionApplyStatus":
+        if action_type == "ActionApplyStatus":
             pass  # Uses card_values for status info
 
         elif action_type == "ActionValidator":
@@ -557,8 +711,8 @@ class CardConverter:
                 params['passed_action_data'] = []
                 params['failed_action_data'] = []
 
-        # Build final action
-        action_path = f"res://scripts/actions/{action_type}.gd"
+        # Build final action with correct path
+        action_path = self._get_action_path(action_type)
         if action_type.startswith("Action"):
             actions.append({action_path: params})
 
@@ -567,7 +721,8 @@ class CardConverter:
 
 def create_sample_excel():
     """Create a sample Excel file with proper structure"""
-    print("\nCreating sample Excel file...")
+    print("\n创建示例Excel文件...")
+    print(f"输出位置: {EXCEL_FILE}")
 
     # Define columns
     columns = [
@@ -606,8 +761,13 @@ def create_sample_excel():
         'card_first_shuffle_priority',
     ]
 
-    # Sample data based on existing cards
+    # Sample data - 第1行为说明行（会被跳过）
     sample_data = [
+        {
+            'object_id': '# 说明行（此行会被自动跳过）',
+            'card_name': '在下方添加你的卡牌数据',
+            'card_description': 'card_type: 0=攻击,1=技能,2=能力,3=状态,4=诅咒 | card_rarity: 0=基础,1=普通,2=稀有,3=罕见,4=生成',
+        },
         {
             'object_id': 'card_attack_basic',
             'card_name': 'Basic Attack',
@@ -696,11 +856,12 @@ def create_sample_excel():
             adjusted_width = min(max_length + 2, 50)
             worksheet.column_dimensions[column_letter].width = adjusted_width
 
-    print(f"✅ Sample Excel created: {EXCEL_FILE}")
-    print(f"   Contains {len(sample_data)} example cards")
-    print("\nNext steps:")
-    print("  1. Edit the Excel file to add your cards")
-    print("  2. Run: python external/tools/excel_to_json.py")
+    print(f"[OK] 示例Excel已创建: {EXCEL_FILE}")
+    print(f"     包含 {len(sample_data)-1} 张示例卡牌 (第1行为说明行)")
+    print("\n下一步:")
+    print("  1. 使用Excel编辑卡牌配置")
+    print("  2. 运行: python external/tools/convert.py")
+    print("  或双击: external/tools/convert.bat")
 
 
 def main():

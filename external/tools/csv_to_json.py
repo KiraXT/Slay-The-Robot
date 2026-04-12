@@ -324,6 +324,91 @@ class CardConverter:
 
         return json_data
 
+    # Action path mappings - same as excel_to_json.py
+    ACTION_PATHS = {
+        # meta_actions
+        'ActionAttackGenerator': 'meta_actions',
+        'ActionCardPlay': 'meta_actions',
+        'ActionCardPlayEnd': 'meta_actions',
+        'ActionDrawGenerator': 'meta_actions',
+        'ActionEmitCustomSignal': 'meta_actions',
+        'ActionValidator': 'meta_actions',
+        'ActionVariableCardsetModifier': 'meta_actions',
+        'ActionVariableCombatStatsModifier': 'meta_actions',
+        'ActionVariableCostModifier': 'meta_actions',
+        # artifact_actions
+        'ActionIncreaseArtifactCharge': 'artifact_actions',
+        # cardset_actions
+        'ActionAddCardsToDeck': 'cardset_actions',
+        'ActionAddCardsToDraw': 'cardset_actions',
+        'ActionAddCardsToHand': 'cardset_actions',
+        'ActionAttachCardsOntoEnemy': 'cardset_actions',
+        'ActionBanishCards': 'cardset_actions',
+        'ActionAttachCardToSlot': 'cardset_actions',
+        'ActionChangeCardEnergies': 'cardset_actions',
+        'ActionChangeCardProperties': 'cardset_actions',
+        'ActionDiscardCards': 'cardset_actions',
+        'ActionExhaustCards': 'cardset_actions',
+        'ActionImproveCardValues': 'cardset_actions',
+        'ActionMoveCardsToLimbo': 'cardset_actions',
+        'ActionPlayCards': 'cardset_actions',
+        'ActionRandomizeCardEnergies': 'cardset_actions',
+        'ActionRemoveCardsFromDeck': 'cardset_actions',
+        'ActionRetainCards': 'cardset_actions',
+        'ActionTransformCards': 'cardset_actions',
+        'ActionUpgradeCards': 'cardset_actions',
+        # custom_ui_actions
+        'ActionCustomUI': 'custom_ui_actions',
+        # debug_actions
+        'ActionDebugLog': 'debug_actions',
+        # enemy_actions
+        'ActionCycleEnemyIntent': 'enemy_actions',
+        # pick_card_actions
+        'ActionBasePickCards': 'pick_card_actions',
+        'ActionCreateCards': 'pick_card_actions',
+        'ActionPickCards': 'pick_card_actions',
+        'ActionPickDuplicateCards': 'pick_card_actions',
+        'ActionPickUpgradeCards': 'pick_card_actions',
+        # player_actions
+        'ActionAddArtifact': 'player_actions',
+        'ActionAddConsumable': 'player_actions',
+        'ActionAddMoney': 'player_actions',
+        'ActionSwapBossArtifact': 'player_actions',
+        'ActionUpdateCardDrafts': 'player_actions',
+        'ActionUpdateRestActions': 'player_actions',
+        'ActionUseConsumable': 'player_actions',
+        # status_actions
+        'ActionApplyStatus': 'status_actions',
+        'ActionCorrosion': 'status_actions',
+        'ActionDecayStatus': 'status_actions',
+        # world_interaction_actions
+        'ActionOpenChest': 'world_interaction_actions',
+        'ActionStartCombat': 'world_interaction_actions',
+        'ActionVisitLocation': 'world_interaction_actions',
+        # generated_actions
+        'ActionAttack': 'generated_actions',
+        'ActionDraw': 'generated_actions',
+        # rewards
+        'ActionClearRewards': 'rewards',
+        'ActionGrantRewards': 'rewards',
+        # shop_actions
+        'ActionShopPopulateItems': 'shop_actions',
+        'ActionShopPurchaseItems': 'shop_actions',
+        # world_generation_actions
+        'ActionGenerateAct': 'world_generation_actions',
+    }
+
+    def _get_action_path(self, action_type: str) -> str:
+        """Get the correct path for an action type"""
+        if not action_type.startswith("Action"):
+            return f"res://scripts/actions/{action_type}.gd"
+
+        subdir = self.ACTION_PATHS.get(action_type, '')
+        if subdir:
+            return f"res://scripts/actions/{subdir}/{action_type}.gd"
+        else:
+            return f"res://scripts/actions/{action_type}.gd"
+
     def _parse_actions(self, card: Dict) -> List[Dict]:
         """Parse action configuration"""
         actions = []
@@ -332,8 +417,8 @@ class CardConverter:
         if not action_type or action_type.strip() == '':
             return actions
 
-        # Build action path
-        action_path = f"res://scripts/actions/{action_type}.gd"
+        # Build action path with correct subdirectory
+        action_path = self._get_action_path(action_type)
         params = {}
 
         # Add parameters
@@ -346,12 +431,35 @@ class CardConverter:
 
         target_override = card.get('action_target_override', '')
         if target_override and target_override.strip() != '':
-            params['target_override'] = target_override
+            # Handle enum string values
+            if target_override.startswith('BaseAction.TARGET_OVERRIDES.'):
+                # Map enum names to integer values
+                target_overrides_map = {
+                    'SELECTED_TARGETS': 0,
+                    'PARENT': 1,
+                    'PLAYER': 2,
+                    'ALL_COMBATANTS': 3,
+                    'ALL_ENEMIES': 4,
+                    'LEFTMOST_ENEMY': 5,
+                    'ENEMY_ID': 6,
+                    'RANDOM_ENEMY': 7,
+                }
+                enum_name = target_override.replace('BaseAction.TARGET_OVERRIDES.', '')
+                if enum_name in target_overrides_map:
+                    params['target_override'] = target_overrides_map[enum_name]
+                else:
+                    params['target_override'] = target_override
+            else:
+                # Try to convert to int if it's a number string
+                try:
+                    params['target_override'] = int(target_override)
+                except ValueError:
+                    params['target_override'] = target_override
 
         # On lethal actions
         on_lethal = card.get('action_on_lethal', '')
         if on_lethal and on_lethal.strip() != '':
-            lethal_action_path = f"res://scripts/actions/{on_lethal}.gd"
+            lethal_action_path = self._get_action_path(on_lethal)
             params['actions_on_lethal'] = [{lethal_action_path: {}}]
         else:
             params['actions_on_lethal'] = []
