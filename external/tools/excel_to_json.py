@@ -316,12 +316,16 @@ class CardValidator:
         # Check target requirements
         requires_target = row.get('card_requires_target', True)
         damage = row.get('damage', 0)
-        if not requires_target and pd.notna(damage) and int(damage) > 0:
+        target_override = row.get('action_target_override', '')
+        # AoE actions (target_override=4/ALL_ENEMIES) don't require manual target selection
+        aoe_overrides = {4, '4', 'BaseAction.TARGET_OVERRIDES.ALL_ENEMIES'}
+        is_aoe = target_override in aoe_overrides
+        if not requires_target and pd.notna(damage) and int(damage) > 0 and not is_aoe:
             self.errors.append(ValidationError(
                 card_id=card_id,
                 field='card_requires_target',
-                message="Card has damage but requires_target is False",
-                severity="ERROR"
+                message="Card has damage but requires_target is False (ignore if AoE via target_override)",
+                severity="WARNING"
             ))
 
 
