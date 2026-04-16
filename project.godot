@@ -27,6 +27,7 @@ ActionHandler="*res://autoload/ActionHandler.gd"
 ActionGenerator="*res://autoload/ActionGenerator.gd"
 DebugLogger="*res://autoload/DebugLogger.gd"
 UIDGenerator="*res://autoload/UIDGenerator.gd"
+ResolutionManager="*res://autoload/ResolutionManager.gd"
 
 [debug]
 
@@ -37,7 +38,10 @@ gdscript/warnings/integer_division=0
 
 window/size/viewport_width=1200
 window/size/viewport_height=700
-window/size/resizable=false
+window/size/window_width_override=1920
+window/size/window_height_override=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [input]
 
@@ -55,7 +59,3 @@ right_click={
 [network]
 
 limits/debugger/max_chars_per_second=131072
-
-[rendering]
-
-renderer/rendering_method="gl_compatibility"

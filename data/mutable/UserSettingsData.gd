@@ -9,7 +9,7 @@ class_name UserSettingsData
 @export var settings_language: String = "en"
 
 ## Resolution
-@export var settings_window_size: Vector2 = Vector2(1200, 700)
+@export var settings_window_size: Vector2 = Vector2(1920, 1080)
 
 ## Volume
 @export var settings_audio_master_volume: int = 10

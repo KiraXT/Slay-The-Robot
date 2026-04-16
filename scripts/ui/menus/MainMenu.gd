@@ -15,8 +15,9 @@ func _ready():
 	forfeit_run_button.button_up.connect(_on_forfeit_run_button_up)
 	new_run_button.button_up.connect(_on_new_run_button_up)
 	codex_button.button_up.connect(_on_codex_button_up)
+	settings_button.button_up.connect(_on_settings_button_up)
 	exit_button.button_up.connect(_on_exit_button_up)
-	
+
 	Signals.run_ended.connect(_on_run_ended)
 	
 	update_continue_button_visibility()
@@ -33,6 +34,9 @@ func _on_new_run_button_up():
 
 func _on_codex_button_up():
 	title_screen.show_codex_menu()
+
+func _on_settings_button_up():
+	title_screen.show_settings_menu()
 
 func _on_exit_button_up():
 	get_tree().quit()
