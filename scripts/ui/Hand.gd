@@ -34,6 +34,17 @@ var CARD_NO_ENERGY_COST: int = -1
 var hand_disabled: bool = false	# the player cannot play additional cards manually
 var performing_card_right_click: bool = false	# flag used to lock card plays while a right click action happens
 
+### Drag-to-Play
+var drag_line: Line2D
+var is_dragging: bool = false
+var dragged_card: Card = null
+var drag_start_pivot_position: Vector2 = Vector2.ZERO
+var drag_original_scale: Vector2 = Vector2.ONE
+const DRAG_TWEEN_TIME: float = 0.1
+const CANCEL_TWEEN_TIME: float = 0.2
+
+var _target_borders: Dictionary = {}   # BaseCombatant -> Panel
+
 ### Retain
 var cards_retained_this_turn: Array[CardData] = []
 
@@ -108,7 +119,16 @@ func _ready():
 	confirm_pick_button.button_up.connect(_on_confirm_pick_button_up)
 	
 	background_button.button_up.connect(_on_background_button_up)
-	
+
+	drag_line = Line2D.new()
+	drag_line.name = "DragLine"
+	drag_line.visible = false
+	drag_line.width = 3.0
+	drag_line.default_color = Color(0.5, 0.5, 0.5, 0.7)
+	drag_line.z_index = 100
+	drag_line.top_level = true
+	add_child(drag_line)
+
 ## Recalculates the transforms of Card objects in hand and tweens them to their new positions.
 func tween_hand():
 	var cards_in_hand: Array[Card] = get_player_hand_cards()
@@ -595,18 +615,21 @@ func draw_cards(card_number: int, hand_card_count_max: int = PlayerData.PLAYER_D
 		card.card_unhovered.connect(_on_card_unhovered)
 		card.card_selected.connect(_on_card_selected)
 		card.card_right_clicked.connect(_on_card_right_clicked)
-		
+		card.card_drag_started.connect(_on_card_drag_started)
+		card.card_drag_ended.connect(_on_card_drag_ended)
+		card.card_drag_cancelled.connect(_on_card_drag_cancelled)
+
 		# generate fake card request
 		var card_play_request: CardPlayRequest = CardPlayRequest.new()	# generate fake request
 		card_play_request.card_data = card_data
 		card_play_request.selected_target = null
-		
+
 		# perform draw actions
 		var card_play_actions: Array[BaseAction] = ActionGenerator.create_actions(player, card_play_request, [], card_data.card_draw_actions, null)
 		ActionHandler.add_actions(card_play_actions)
-		
+
 		Signals.card_drawn.emit(card_data)
-		
+
 	# rerender hand
 	tween_hand()
 
@@ -665,6 +688,9 @@ func add_cards_to_hand(cards: Array[CardData], hand_card_count_max: int = Player
 				card.card_unhovered.connect(_on_card_unhovered)
 				card.card_selected.connect(_on_card_selected)
 				card.card_right_clicked.connect(_on_card_right_clicked)
+				card.card_drag_started.connect(_on_card_drag_started)
+				card.card_drag_ended.connect(_on_card_drag_ended)
+				card.card_drag_cancelled.connect(_on_card_drag_cancelled)
 			else:
 				discarded_cards.append(card_data)
 	
