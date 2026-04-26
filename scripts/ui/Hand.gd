@@ -946,6 +946,8 @@ func shuffle_draw(shuffle_discard_into_draw: bool = true, is_reshuffle: bool = t
 func reset_deck() -> void:
 	# resets the deck to be used for the start of combat
 	for child in get_children():
+		if child == drag_line:
+			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
 	
@@ -1057,6 +1059,8 @@ func _on_combat_ended():
 
 	# remove cards in hand
 	for child in get_children():
+		if child == drag_line:
+			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
 
@@ -1069,6 +1073,8 @@ func _on_run_ended():
 
 	# remove cards in hand
 	for child in get_children():
+		if child == drag_line:
+			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
 
