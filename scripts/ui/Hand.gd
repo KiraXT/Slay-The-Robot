@@ -293,6 +293,30 @@ func _get_drag_hover_target(mouse_pos: Vector2) -> BaseCombatant:
 		return player
 	return null
 
+func _update_drag_target_highlight(target: BaseCombatant):
+	# clear old borders
+	for combatant in _target_borders.keys():
+		var panel = _target_borders[combatant]
+		if is_instance_valid(panel):
+			panel.queue_free()
+	_target_borders.clear()
+
+	if target != null:
+		var border = Panel.new()
+		border.name = "TargetBorder"
+		border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var style = StyleBoxFlat.new()
+		style.border_color = Color.YELLOW
+		style.border_width_left = 3
+		style.border_width_top = 3
+		style.border_width_right = 3
+		style.border_width_bottom = 3
+		style.bg_color = Color.TRANSPARENT
+		border.add_theme_stylebox_override("panel", style)
+		border.set_anchors_preset(Control.PRESET_FULL_RECT)
+		target.add_child(border)
+		_target_borders[target] = border
+
 func _on_card_selected(card: Card):
 	# card clicked, attempt to do something with it
 	# check if playing or picking cards
