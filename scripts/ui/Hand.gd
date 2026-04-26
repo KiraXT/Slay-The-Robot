@@ -350,7 +350,7 @@ func _process(_delta: float):
 
 func _get_drag_hover_target(mouse_pos: Vector2) -> BaseCombatant:
 	# check enemies
-	for enemy in combat.enemies:
+	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if enemy.is_alive() and enemy.selection_button.get_global_rect().has_point(mouse_pos):
 			return enemy
 	# check player
