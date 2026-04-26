@@ -221,6 +221,8 @@ func _on_card_unhovered(_card: Card):
 		child.z_index = 0
 
 func _on_card_drag_started(card: Card):
+	if is_dragging:
+		return
 	if current_card_pick_action != null:
 		return
 	if hand_disabled:
