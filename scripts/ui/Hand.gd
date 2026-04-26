@@ -42,6 +42,7 @@ var drag_original_scale: Vector2 = Vector2.ONE
 
 var _target_borders: Dictionary = {}   # BaseCombatant -> Panel
 var _last_drag_hover_target: BaseCombatant = null
+var _cards_in_play_animation: Array[Card] = []   # cards currently in play-release animation
 
 ### Retain
 var cards_retained_this_turn: Array[CardData] = []
@@ -156,6 +157,8 @@ func tween_hand():
 	for card in cards_in_hand:
 		if card == dragged_card:
 			continue
+		if card in _cards_in_play_animation:
+			continue
 		# values of rotation and position after calculations
 		var new_position: Vector2 = Vector2()
 		var new_rot: float = 0.0
@@ -244,11 +247,15 @@ func _on_card_drag_started(card: Card):
 	# bring to front
 	card.z_index = 100
 
-	# show trail line
-	drag_line.visible = true
-	drag_line.clear_points()
-	drag_line.add_point(card.pivot.global_position)
-	drag_line.add_point(card.pivot.global_position)
+	# scale up card slightly during drag
+	card.pivot.scale = Vector2.ONE * 1.15
+
+	# show trail line only for target-requiring cards
+	if card.card_data.card_requires_target:
+		drag_line.visible = true
+		drag_line.clear_points()
+		drag_line.add_point(card.pivot.global_position)
+		drag_line.add_point(card.pivot.global_position)
 
 func _on_card_drag_ended(card: Card):
 	if not is_dragging or dragged_card != card:
@@ -272,12 +279,34 @@ func _on_card_drag_ended(card: Card):
 
 func _execute_card_play(card: Card, target: BaseCombatant):
 	_unprompt_target()
-	var card_play_request = CardPlayRequest.new()
-	card_play_request.card_data = card.card_data
-	card_play_request.selected_target = target
-	card_play_request.card_values = card.card_data.card_values.duplicate(true)
-	add_card_to_play_queue(card_play_request, true, false)
-	_cleanup_drag_state()
+
+	_cards_in_play_animation.append(card)
+	card.card_button.disabled = true
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+
+	if target != null:
+		var target_rect = target.selection_button.get_global_rect()
+		var target_center = target_rect.position + target_rect.size * 0.5
+		tween.tween_property(card.pivot, "global_position", target_center, 0.15)
+	else:
+		tween.tween_property(card.pivot, "global_position", card.pivot.global_position + Vector2(0, -50), 0.15)
+
+	tween.tween_property(card.pivot, "scale", Vector2.ZERO, 0.15)
+	tween.tween_property(card, "modulate", Color.TRANSPARENT, 0.15)
+
+	_cleanup_drag_state(false)
+	tween_hand()
+
+	tween.finished.connect(func():
+		_cards_in_play_animation.erase(card)
+		var card_play_request = CardPlayRequest.new()
+		card_play_request.card_data = card.card_data
+		card_play_request.selected_target = target
+		card_play_request.card_values = card.card_data.card_values.duplicate(true)
+		add_card_to_play_queue(card_play_request, true, false)
+	)
 
 func _cancel_drag():
 	if dragged_card == null:
@@ -289,11 +318,12 @@ func _on_card_drag_cancelled(card: Card):
 	if is_dragging and dragged_card == card:
 		_cancel_drag()
 
-func _cleanup_drag_state():
-	if dragged_card != null:
-		dragged_card.z_index = 0
-		dragged_card.pivot.scale = drag_original_scale
-		dragged_card.position = Vector2.ZERO
+func _cleanup_drag_state(reset_card_visuals: bool = true):
+	if dragged_card != null and is_instance_valid(dragged_card):
+		if reset_card_visuals:
+			dragged_card.z_index = 0
+			dragged_card.pivot.scale = drag_original_scale
+			dragged_card.position = Vector2.ZERO
 	is_dragging = false
 	dragged_card = null
 	drag_line.visible = false
@@ -301,6 +331,21 @@ func _cleanup_drag_state():
 	_unprompt_target()
 	_update_drag_target_highlight(null)
 	_last_drag_hover_target = null
+
+func _update_drag_line(p0: Vector2, p2: Vector2) -> void:
+	var mid = (p0 + p2) * 0.5
+	var dist = p0.distance_to(p2)
+	var p1 = mid + Vector2(0, -dist * 0.3)
+
+	var points: PackedVector2Array = PackedVector2Array()
+	const SEGMENTS: int = 20
+	for i in range(SEGMENTS + 1):
+		var t = float(i) / SEGMENTS
+		var q0 = p0.lerp(p1, t)
+		var q1 = p1.lerp(p2, t)
+		points.append(q0.lerp(q1, t))
+
+	drag_line.points = points
 
 func _process(_delta: float):
 	if not is_dragging or dragged_card == null or not is_instance_valid(dragged_card):
@@ -313,9 +358,9 @@ func _process(_delta: float):
 
 	var mouse_pos = get_global_mouse_position()
 
-	# update trail line: from card position to mouse
-	drag_line.set_point_position(0, dragged_card.pivot.global_position)
-	drag_line.set_point_position(1, mouse_pos)
+	# update trail line: curved from card position to mouse
+	if dragged_card.card_data.card_requires_target:
+		_update_drag_line(dragged_card.pivot.global_position, mouse_pos)
 
 	# target detection
 	var hover_target = _get_drag_hover_target(mouse_pos)
@@ -926,6 +971,11 @@ func shuffle_draw(shuffle_discard_into_draw: bool = true, is_reshuffle: bool = t
 
 func reset_deck() -> void:
 	# resets the deck to be used for the start of combat
+	for anim_card in _cards_in_play_animation:
+		if is_instance_valid(anim_card):
+			anim_card.queue_free()
+	_cards_in_play_animation.clear()
+
 	for child in get_children():
 		if child == drag_line:
 			continue
@@ -1038,6 +1088,12 @@ func _on_combat_ended():
 
 	_unprompt_target()
 
+	# free any cards in play animation
+	for anim_card in _cards_in_play_animation:
+		if is_instance_valid(anim_card):
+			anim_card.queue_free()
+	_cards_in_play_animation.clear()
+
 	# remove cards in hand
 	for child in get_children():
 		if child == drag_line:
@@ -1051,6 +1107,14 @@ func _on_run_ended():
 	cards_retained_this_turn.clear()
 	cards_with_modified_turn_energy.clear()
 	clear_card_queue()
+
+	_unprompt_target()
+
+	# free any cards in play animation
+	for anim_card in _cards_in_play_animation:
+		if is_instance_valid(anim_card):
+			anim_card.queue_free()
+	_cards_in_play_animation.clear()
 
 	# remove cards in hand
 	for child in get_children():
