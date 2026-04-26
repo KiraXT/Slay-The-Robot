@@ -9,7 +9,7 @@
 
 - 玩家左键按住卡牌并拖动到目标上方松开，即可完成释放
 - 拖拽过程中显示轨迹线（从卡牌原始位置到鼠标位置）
-- 拖拽时卡牌放大（1.2x），脱离手牌排列，跟随鼠标移动
+- 拖拽时卡牌动态放大（基础 1.0x，最大 1.4x，根据到目标的距离等比放缩）
 - 支持四种释放目标：敌人、自己（玩家）、无需目标区域、取消
 - 拖拽中按右键可立即取消，卡牌弹回手牌
 
@@ -96,9 +96,10 @@ var is_dragging: bool = false
 var dragged_card: Card = null
 var drag_start_position: Vector2 = Vector2.ZERO    # 卡牌拖拽开始时的原始位置
 var drag_original_scale: Vector2 = Vector2.ONE
-const DRAG_SCALE: Vector2 = Vector2(1.2, 1.2)
 const DRAG_TWEEN_TIME: float = 0.1
 const CANCEL_TWEEN_TIME: float = 0.2
+
+var _target_borders: Dictionary[BaseCombatant, Panel] = {}   # 目标高亮边框缓存
 ```
 
 ### 5.2 信号连接
@@ -123,10 +124,6 @@ func _on_card_drag_started(card: Card):
     drag_start_position = card.pivot.global_position
     drag_original_scale = card.pivot.scale
 
-    # 放大卡牌
-    var tween = create_tween()
-    tween.tween_property(card.pivot, "scale", DRAG_SCALE, DRAG_TWEEN_TIME)
-
     # 提升层级，确保卡牌显示在最上层
     card.z_index = 100
 
@@ -149,7 +146,7 @@ func _process(_delta: float):
     var mouse_pos = get_global_mouse_position()
 
     # 更新卡牌位置到鼠标位置（居中）
-    dragged_card.pivot.global_position = mouse_pos - (dragged_card.size * DRAG_SCALE * 0.5)
+    dragged_card.pivot.global_position = mouse_pos - (dragged_card.size * dragged_card.pivot.scale * 0.5)
 
     # 更新轨迹线终点
     drag_line.set_point_position(1, mouse_pos)
@@ -157,6 +154,14 @@ func _process(_delta: float):
     # 目标检测与高亮
     var hover_target = _get_drag_hover_target(mouse_pos)
     _update_drag_target_highlight(hover_target)
+
+    # 动态放大：根据到目标的距离等比放缩
+    var dist: float = drag_start_position.distance_to(mouse_pos)
+    if hover_target != null:
+        dist = dragged_card.pivot.global_position.distance_to(hover_target.global_position)
+    var scale_factor: float = clampf(dist / 400.0, 0.0, 1.0)
+    var new_scale: float = 1.0 + scale_factor * 0.4
+    dragged_card.pivot.scale = Vector2(new_scale, new_scale)
 
     # 更新卡牌描述预览（复用现有逻辑）
     if hover_target is Enemy:
@@ -190,16 +195,36 @@ func _update_drag_target_highlight(target: BaseCombatant):
         target.set_highlight(true)
 ```
 
-**具体实现**: 现有代码中敌人/玩家没有 `set_highlight` 方法。通过修改 `modulate` 实现：
+**具体实现**: 现有代码中敌人/玩家没有高亮方法。采用动态添加 `Panel` + `StyleBoxFlat` 边框实现边沿描边：
+
 ```gdscript
+var _target_borders: Dictionary[BaseCombatant, Panel] = {}
+
 func _update_drag_target_highlight(target: BaseCombatant):
-    for enemy in combat.enemies:
-        enemy.visible_sprite.modulate = Color.WHITE
-    player.visible_sprite.modulate = Color.WHITE
+    # 清除所有旧边框
+    for combatant in _target_borders.keys():
+        if is_instance_valid(_target_borders[combatant]):
+            _target_borders[combatant].queue_free()
+    _target_borders.clear()
+
     if target != null:
-        target.visible_sprite.modulate = Color(1.3, 1.3, 1.3)   # 变亮 30%
+        var border = Panel.new()
+        border.name = "TargetBorder"
+        border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+        var style = StyleBoxFlat.new()
+        style.border_color = Color.YELLOW
+        style.border_width_left = 3
+        style.border_width_top = 3
+        style.border_width_right = 3
+        style.border_width_bottom = 3
+        style.bg_color = Color.TRANSPARENT
+        border.add_theme_stylebox_override("panel", style)
+        border.set_anchors_preset(Control.PRESET_FULL_RECT)
+        target.add_child(border)
+        _target_borders[target] = border
 ```
-若目标节点结构不同（如 `Sprite2D` 层级较深），需调整具体路径，但原理一致。
+
+边框颜色使用 `Color.YELLOW`（黄色），宽度 `3px`，背景透明。拖拽结束后自动清理。
 
 ### 5.7 拖拽结束（左键松开）
 
@@ -294,10 +319,12 @@ func tween_hand():
 
 | 参数 | 值 | 说明 |
 |------|-----|------|
-| 拖拽放大比例 | `1.2x` | 卡牌在手中看起来更大，突出选中状态 |
-| 放大动画时间 | `0.1s` | 快速响应，手感跟手 |
+| 基础放大比例 | `1.0x` | 拖拽开始时无额外放大 |
+| 最大放大比例 | `1.4x` | 靠近目标时的最大放大 |
+| 放大计算方式 | 动态 | `scale = 1.0 + min(dist / 400, 1.0) * 0.4`，dist 为卡牌到目标的距离（像素） |
+| 放大更新频率 | 每帧 | 在 `_process` 中根据实时距离重新计算 |
 | 取消弹回时间 | `0.2s` | 与手牌排列动画一致 |
-| 轨迹线颜色 | `Color(1, 1, 1, 0.6)` | 白色半透明 |
+| 轨迹线颜色 | `Color(0.5, 0.5, 0.5, 0.7)` | 灰色半透明 |
 | 轨迹线宽度 | `3.0` | 足够明显但不抢眼 |
 | 卡牌拖拽层级 | `z_index = 100` | 确保卡牌显示在所有 UI 元素之上 |
 
