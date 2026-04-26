@@ -35,6 +35,10 @@ signal card_right_clicked(Card)
 signal card_hovered(Card)
 signal card_unhovered(Card)
 
+signal card_drag_started(Card)
+signal card_drag_ended(Card)
+signal card_drag_cancelled(Card)
+
 func init(_card_data: CardData, angular_offset: float, connect_combat_signals: bool = false, connect_ui_signals: bool = true):
 	card_data = _card_data
 	pivot.rotation_degrees = angular_offset
@@ -54,6 +58,8 @@ func init(_card_data: CardData, angular_offset: float, connect_combat_signals: b
 	# flag to disable cards so they're not interactable by player
 	if connect_ui_signals:
 		card_button.gui_input.connect(_on_button_gui_input)
+		card_button.button_down.connect(_on_button_down)
+		card_button.button_up.connect(_on_button_up)
 		card_button.mouse_entered.connect(_on_mouse_entered)
 		card_button.mouse_exited.connect(_on_mouse_exited)
 		keyword_timer.timeout.connect(_on_keyword_timeout)
@@ -212,9 +218,8 @@ func _attempt_hand_glow() -> void:
 		set_card_glow(_glow_validation())
 
 func _on_button_gui_input(event: InputEvent):
-	if event.is_action_pressed("left_click"):
-		card_selected.emit(self)
 	if event.is_action_pressed("right_click"):
+		card_drag_cancelled.emit(self)
 		card_right_clicked.emit(self)
 
 func _on_mouse_entered():
@@ -284,3 +289,10 @@ func _on_card_added_to_draw(_card_data: CardData):
 func disconnect_non_ui_signals() -> void:
 	# disconnects everything except internal clicking signals
 	pass
+
+func _on_button_down():
+	card_drag_started.emit(self)
+	card_selected.emit(self)  # backward compat for overlays
+
+func _on_button_up():
+	card_drag_ended.emit(self)
