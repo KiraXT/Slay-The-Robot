@@ -77,6 +77,8 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	if CARDS_RERENDER_LAZILY:
 		_card_is_rerendering = true
 		await get_tree().process_frame
+		if not is_instance_valid(self):
+			return
 		_card_is_rerendering = false
 	
 	# update visuals

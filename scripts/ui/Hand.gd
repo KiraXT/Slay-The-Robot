@@ -44,6 +44,7 @@ const DRAG_TWEEN_TIME: float = 0.1
 const CANCEL_TWEEN_TIME: float = 0.2
 
 var _target_borders: Dictionary = {}   # BaseCombatant -> Panel
+var _last_drag_hover_target: BaseCombatant = null
 
 ### Retain
 var cards_retained_this_turn: Array[CardData] = []
@@ -309,9 +310,10 @@ func _cleanup_drag_state():
 	drag_line.clear_points()
 	_unprompt_target()
 	_update_drag_target_highlight(null)
+	_last_drag_hover_target = null
 
 func _process(_delta: float):
-	if not is_dragging or dragged_card == null:
+	if not is_dragging or dragged_card == null or not is_instance_valid(dragged_card):
 		return
 
 	var mouse_pos = get_global_mouse_position()
@@ -338,9 +340,13 @@ func _process(_delta: float):
 		var scale_factor: float = clampf(dist / 400.0, 0.0, 1.0)
 		dragged_card.pivot.scale = Vector2.ONE * (1.0 + scale_factor * 0.4)
 
-	# update description preview when hovering an enemy
-	if hover_target is Enemy:
-		dragged_card.update_card_display(hover_target)
+	# update description preview only when hover target changes
+	if hover_target != _last_drag_hover_target:
+		_last_drag_hover_target = hover_target
+		if hover_target is Enemy:
+			dragged_card.update_card_display(hover_target)
+		else:
+			dragged_card.update_card_display()
 
 func _get_drag_hover_target(mouse_pos: Vector2) -> BaseCombatant:
 	# check enemies
