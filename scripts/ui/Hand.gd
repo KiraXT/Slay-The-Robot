@@ -251,6 +251,63 @@ func _on_card_drag_started(card: Card):
 	drag_line.add_point(card.pivot.global_position)
 	drag_line.add_point(card.pivot.global_position)
 
+func _on_card_drag_ended(card: Card):
+	if not is_dragging or dragged_card != card:
+		return
+
+	var mouse_pos = get_global_mouse_position()
+	var target = _get_drag_hover_target(mouse_pos)
+
+	# A: hover enemy + requires target -> attack
+	if target is Enemy and card.card_data.card_requires_target:
+		_execute_card_play(card, target)
+	# B: hover player + requires target -> self-cast
+	elif target == player and card.card_data.card_requires_target:
+		_execute_card_play(card, target)
+	# D: no target required -> play anywhere
+	elif not card.card_data.card_requires_target:
+		_execute_card_play(card, null)
+	# C: invalid target -> cancel
+	else:
+		_cancel_drag()
+
+func _execute_card_play(card: Card, target: BaseCombatant):
+	_unprompt_target()
+	var card_play_request = CardPlayRequest.new()
+	card_play_request.card_data = card.card_data
+	card_play_request.selected_target = target
+	card_play_request.card_values = card.card_data.card_values.duplicate(true)
+	add_card_to_play_queue(card_play_request, true, false)
+	_cleanup_drag_state()
+
+func _cancel_drag():
+	if dragged_card == null:
+		return
+
+	var tween = create_tween()
+	tween.tween_property(dragged_card.pivot, "position", drag_start_pivot_position, CANCEL_TWEEN_TIME)
+	tween.parallel().tween_property(dragged_card.pivot, "scale", drag_original_scale, CANCEL_TWEEN_TIME)
+
+	await tween.finished
+	_cleanup_drag_state()
+	tween_hand()
+
+func _on_card_drag_cancelled(card: Card):
+	if is_dragging and dragged_card == card:
+		_cancel_drag()
+
+func _cleanup_drag_state():
+	if dragged_card != null:
+		dragged_card.z_index = 0
+		dragged_card.pivot.scale = drag_original_scale
+		dragged_card.position = Vector2.ZERO
+	is_dragging = false
+	dragged_card = null
+	drag_line.visible = false
+	drag_line.clear_points()
+	_unprompt_target()
+	_update_drag_target_highlight(null)
+
 func _process(_delta: float):
 	if not is_dragging or dragged_card == null:
 		return
@@ -318,43 +375,13 @@ func _update_drag_target_highlight(target: BaseCombatant):
 		_target_borders[target] = border
 
 func _on_card_selected(card: Card):
-	# card clicked, attempt to do something with it
-	# check if playing or picking cards
-	if current_card_pick_action == null:
-		### playing
-		# cannot play cards with a disabled hand
-		if hand_disabled:
-			return
-		# cannot play while right click actions happening
-		if performing_card_right_click:
-			return
-		# check if card is generally playable
-		if not card.can_play_card():
-			return
-		# cannot play cards already queued
-		for card_play_request in card_play_queue:
-			if card_play_request.card_data == card.card_data:
-				return
-		
-		# check if autoplaying card based on targeting type
-		if card.card_data.card_requires_target:
-			current_selected_card = card
-			_prompt_target(card)
-		else:
-			# generate the card play request and enqueue it
-			var card_play_request: CardPlayRequest = CardPlayRequest.new()
-			card_play_request.card_data = card.card_data
-			card_play_request.selected_target = null
-			card_play_request.card_values = card.card_data.card_values.duplicate(true)	# copy the card's values into the card play request
-	
-			add_card_to_play_queue(card_play_request, true, false)
-			current_selected_card = null
-			_unprompt_target()
-	else:
-		### picking
+	# Drag system handles normal card plays; this path is only for card picking UI
+	if current_card_pick_action != null:
 		attempt_pick_card(card)
 		
 func _on_card_right_clicked(card: Card):
+	if is_dragging and dragged_card == card:
+		return
 	current_selected_card = null
 	_unprompt_target()
 	if ActionHandler.actions_being_performed:
@@ -926,6 +953,8 @@ func reset_deck() -> void:
 func _on_disable_hand_requested(_disabled: bool = true):
 	hand_disabled = _disabled
 	if hand_disabled:
+		if is_dragging:
+			_cancel_drag()
 		current_selected_card = null
 		_unprompt_target()
 
@@ -1010,22 +1039,26 @@ func _on_combat_started(_event_id: String):
 	reset_deck()
 	
 func _on_combat_ended():
+	if is_dragging:
+		_cleanup_drag_state()
 	cards_retained_this_turn.clear()
 	cards_with_modified_turn_energy.clear()
 	clear_card_queue()
-	
+
 	_unprompt_target()
-	
+
 	# remove cards in hand
 	for child in get_children():
 		child.queue_free()
 	card_data_to_hand_card.clear()
 
 func _on_run_ended():
+	if is_dragging:
+		_cleanup_drag_state()
 	cards_retained_this_turn.clear()
 	cards_with_modified_turn_energy.clear()
 	clear_card_queue()
-	
+
 	# remove cards in hand
 	for child in get_children():
 		child.queue_free()
