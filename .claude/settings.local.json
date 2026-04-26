@@ -48,7 +48,22 @@
       "Bash(grep -r \"target_override\" external/data/artifacts/*.json)",
       "Bash(grep -r \"target_override\" external/data/events/*.json)",
       "Bash(grep -v \"target_override\":\\\\s*[0-9]\\\\+)",
-      "Bash(python external/tools/fix_float_numbers.py)"
+      "Bash(python external/tools/fix_float_numbers.py)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Read(//c/Users/admin/.claude/plugins/cache/claude-plugins-official/**)",
+      "Read(//c/Users/admin/.claude/plugins/**)",
+      "Read(//c/Users/admin/.claude/**)",
+      "Bash(python -c ' *)",
+      "Bash(python external/tools/json_to_excel.py)",
+      "Bash(python external/tools/convert.py --cards)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "Bash(where godot *)",
+      "Read(//c//**)",
+      "Bash(\"/d/Program Files/Godot_v4.4-stable_win64/Godot_v4.4-stable_win64_console.exe\" --path \"e:/Program/Slay The Robot_test/Slay-The-Robot\" --headless --quit)",
+      "Read(//d//**)"
     ],
     "additionalDirectories": [
       "e:\\Program\\Slay The Robot_test\\Slay-The-Robot\\.claude"
