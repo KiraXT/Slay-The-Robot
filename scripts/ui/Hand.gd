@@ -38,10 +38,7 @@ var performing_card_right_click: bool = false	# flag used to lock card plays whi
 var drag_line: Line2D
 var is_dragging: bool = false
 var dragged_card: Card = null
-var drag_start_pivot_position: Vector2 = Vector2.ZERO
 var drag_original_scale: Vector2 = Vector2.ONE
-const DRAG_TWEEN_TIME: float = 0.1
-const CANCEL_TWEEN_TIME: float = 0.2
 
 var _target_borders: Dictionary = {}   # BaseCombatant -> Panel
 var _last_drag_hover_target: BaseCombatant = null
@@ -239,7 +236,6 @@ func _on_card_drag_started(card: Card):
 
 	is_dragging = true
 	dragged_card = card
-	drag_start_pivot_position = card.pivot.position
 	drag_original_scale = card.pivot.scale
 
 	# reset hover offset so the card doesn't float above the mouse
@@ -286,12 +282,6 @@ func _execute_card_play(card: Card, target: BaseCombatant):
 func _cancel_drag():
 	if dragged_card == null:
 		return
-
-	var tween = create_tween()
-	tween.tween_property(dragged_card.pivot, "position", drag_start_pivot_position, CANCEL_TWEEN_TIME)
-	tween.parallel().tween_property(dragged_card.pivot, "scale", drag_original_scale, CANCEL_TWEEN_TIME)
-
-	await tween.finished
 	_cleanup_drag_state()
 	tween_hand()
 
@@ -316,29 +306,20 @@ func _process(_delta: float):
 	if not is_dragging or dragged_card == null or not is_instance_valid(dragged_card):
 		return
 
+	# global right-click cancel
+	if Input.is_action_just_pressed("right_click"):
+		_cancel_drag()
+		return
+
 	var mouse_pos = get_global_mouse_position()
 
-	# center card on mouse (pivot origin is roughly visual center)
-	dragged_card.pivot.global_position = mouse_pos
-
-	# update trail line
+	# update trail line: from card position to mouse
+	drag_line.set_point_position(0, dragged_card.pivot.global_position)
 	drag_line.set_point_position(1, mouse_pos)
 
 	# target detection
 	var hover_target = _get_drag_hover_target(mouse_pos)
 	_update_drag_target_highlight(hover_target)
-
-	# dynamic scale: closer to target / further from hand = bigger
-	var dist: float = drag_start_pivot_position.distance_to(dragged_card.pivot.position)
-	if hover_target != null:
-		dist = dragged_card.pivot.global_position.distance_to(hover_target.global_position)
-		# invert: closer to target = larger
-		var scale_factor: float = 1.0 - clampf(dist / 400.0, 0.0, 1.0)
-		dragged_card.pivot.scale = Vector2.ONE * (1.0 + scale_factor * 0.4)
-	else:
-		# further from hand = larger
-		var scale_factor: float = clampf(dist / 400.0, 0.0, 1.0)
-		dragged_card.pivot.scale = Vector2.ONE * (1.0 + scale_factor * 0.4)
 
 	# update description preview only when hover target changes
 	if hover_target != _last_drag_hover_target:
