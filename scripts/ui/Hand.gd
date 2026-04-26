@@ -156,6 +156,8 @@ func tween_hand():
 	var pick_index: int = 0 # counter for number of cards picked
 	
 	for card in cards_in_hand:
+		if card == dragged_card:
+			continue
 		# values of rotation and position after calculations
 		var new_position: Vector2 = Vector2()
 		var new_rot: float = 0.0
@@ -202,6 +204,8 @@ func tween_hand():
 
 func _on_card_hovered(card: Card):
 	for child in get_children():
+		if child == dragged_card:
+			continue
 		if card == child:
 			child.position.y = CARD_HOVERED_HEIGHT
 			child.z_index = 1
@@ -211,8 +215,83 @@ func _on_card_hovered(card: Card):
 
 func _on_card_unhovered(_card: Card):
 	for child in get_children():
+		if child == dragged_card:
+			continue
 		child.position.y = CARD_UNHOVERED_HEIGHT
 		child.z_index = 0
+
+func _on_card_drag_started(card: Card):
+	if current_card_pick_action != null:
+		return
+	if hand_disabled:
+		return
+	if performing_card_right_click:
+		return
+	if not card.can_play_card():
+		return
+	# cannot drag cards already queued
+	for card_play_request in card_play_queue:
+		if card_play_request.card_data == card.card_data:
+			return
+
+	is_dragging = true
+	dragged_card = card
+	drag_start_pivot_position = card.pivot.position
+	drag_original_scale = card.pivot.scale
+
+	# reset hover offset so the card doesn't float above the mouse
+	card.position = Vector2.ZERO
+
+	# bring to front
+	card.z_index = 100
+
+	# show trail line
+	drag_line.visible = true
+	drag_line.clear_points()
+	drag_line.add_point(card.pivot.global_position)
+	drag_line.add_point(card.pivot.global_position)
+
+func _process(_delta: float):
+	if not is_dragging or dragged_card == null:
+		return
+
+	var mouse_pos = get_global_mouse_position()
+
+	# center card on mouse (pivot origin is roughly visual center)
+	dragged_card.pivot.global_position = mouse_pos
+
+	# update trail line
+	drag_line.set_point_position(1, mouse_pos)
+
+	# target detection
+	var hover_target = _get_drag_hover_target(mouse_pos)
+	_update_drag_target_highlight(hover_target)
+
+	# dynamic scale: closer to target / further from hand = bigger
+	var dist: float = drag_start_pivot_position.distance_to(dragged_card.pivot.position)
+	if hover_target != null:
+		dist = dragged_card.pivot.global_position.distance_to(hover_target.global_position)
+		# invert: closer to target = larger
+		var scale_factor: float = 1.0 - clampf(dist / 400.0, 0.0, 1.0)
+		dragged_card.pivot.scale = Vector2.ONE * (1.0 + scale_factor * 0.4)
+	else:
+		# further from hand = larger
+		var scale_factor: float = clampf(dist / 400.0, 0.0, 1.0)
+		dragged_card.pivot.scale = Vector2.ONE * (1.0 + scale_factor * 0.4)
+
+	# update description preview when hovering an enemy
+	if hover_target is Enemy:
+		dragged_card.update_card_display(hover_target)
+
+func _get_drag_hover_target(mouse_pos: Vector2) -> BaseCombatant:
+	# check enemies
+	for enemy in combat.enemies:
+		if enemy.is_alive() and enemy.selection_button.get_global_rect().has_point(mouse_pos):
+			return enemy
+	# check player
+	if player.selection_button.get_global_rect().has_point(mouse_pos):
+		return player
+	return null
 
 func _on_card_selected(card: Card):
 	# card clicked, attempt to do something with it
