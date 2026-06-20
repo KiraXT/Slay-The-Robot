@@ -12,8 +12,18 @@ Use one section per review pass:
 
 ## Pass 2
 
-- Character:
-- Enemies:
-- Cards:
-- Event:
-- Icons:
+- Character: verified in New Run and combat UI. `character_red_combat`, `character_red_icon`, and `character_red_energy_icon` remain readable at gameplay size, and the approved red-player silhouette now fits the existing UI shell without needing layout changes.
+- Enemies: verified in combat. `enemy_1_combat` and `enemy_act_1_boss_1_combat` now separate cleanly from the player by silhouette and value grouping. The boss summon pose reads correctly inside the current encounter composition.
+- Cards: verified in hand view after the dedicated card font path fixes. All six pilot card illustrations survive the current crop and rotation treatment. `card_attack_big_art` still has the highest crop pressure, but not enough to block the pack.
+- Event: verified in the live event panel. `event_pick_something_illustration` leaves enough quiet space for the prompt and option stack, and the focal machine shape remains clear after scaling.
+- Icons: verified across artifact, status, consumable, and inline energy usages. All selected icons read at gameplay size and are stronger than the legacy placeholder look, especially the artifact and status-effect set.
+
+### Acceptance Checklist
+
+- readable at gameplay size: pass
+- silhouette distinct from nearby assets: pass
+- palette matches approved style: pass
+- no fake glyphs or broken anatomy: pass after routing all player-facing text through the Chinese-capable font setup
+- card crop survives current card UI: pass
+- event art does not crowd prompt text: pass
+- icon reads at 32px and 64px: pass
