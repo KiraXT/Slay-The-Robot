@@ -1,0 +1,20 @@
+asset_id,asset_type,source_object_id,display_name,runtime_output_path,source_of_truth,format,target_px,notes
+character_red_combat,character,character_red,红色角色战斗立绘,external/sprites/characters/character_red/character_red.png,json,png,512,3/4 view combat pose
+character_red_icon,character_icon,character_red,红色角色头像,external/sprites/characters/character_red/character_red_icon.png,json,png,256,head and shoulders
+enemy_1_combat,enemy,enemy_1,红色敌人,external/sprites/enemies/enemy_1.png,json,png,512,small normal enemy
+enemy_act_1_boss_1_combat,enemy,enemy_act_1_boss_1,第一幕Boss,external/sprites/enemies/enemy_act_1_boss_1.png,json,png,512,large boss silhouette
+card_attack_basic_art,card,card_attack_basic,基础攻击,external/sprites/cards/card_attack_basic.png,excel,png,512,basic attack read
+card_block_basic_art,card,card_block_basic,基础格挡,external/sprites/cards/card_block_basic.png,excel,png,512,basic defense read
+card_attack_big_art,card,card_attack_big,强力攻击,external/sprites/cards/card_attack_big.png,excel,png,512,big hit plus money reward read
+card_weaken_enemies_art,card,card_weaken_enemies,施加虚弱,external/sprites/cards/card_weaken_enemies.png,excel,png,512,debuff read
+card_grant_energy_art,card,card_grant_energy,能量牌,external/sprites/cards/card_grant_energy.png,excel,png,512,energy gain read
+card_draft_random_attack_art,card,card_draft_random_attack,抽取攻击牌,external/sprites/cards/card_draft_random_attack.png,excel,png,512,draft or discover read
+event_pick_something_illustration,event,event_pick_something,测试事件,external/sprites/events/event_pick_something.png,excel,png,768,single focal event illustration
+artifact_block_on_attacks_icon,artifact,artifact_block_on_attacks,攻击格挡,external/sprites/artifacts/artifact_block_on_attacks.png,excel,png,128,reward icon
+artifact_add_money_icon,artifact,artifact_add_money,获得金币,external/sprites/artifacts/artifact_add_money.png,excel,png,128,reward icon
+artifact_right_click_shuffle_deck_icon,artifact,artifact_right_click_shuffle_deck,洗牌重置,external/sprites/artifacts/artifact_right_click_shuffle_deck.png,excel,png,128,utility icon
+status_effect_weaken_icon,status_effect,status_effect_weaken,虚弱,external/sprites/status_effects/status_effect_weaken.png,json,png,128,debuff icon
+status_effect_vulnerable_icon,status_effect,status_effect_vulnerable,易伤,external/sprites/status_effects/status_effect_vulnerable.png,json,png,128,debuff icon
+consumable_heal_icon,consumable,consumable_heal,治疗药剂,external/sprites/consumables/consumable_heal.png,json,png,128,potion icon
+consumable_damaging_icon,consumable,consumable_damaging,伤害药剂,external/sprites/consumables/consumable_damaging.png,json,png,128,potion icon
+character_red_energy_icon,ui_content_icon,character_red,红色能量图标,external/sprites/characters/character_red/character_red_text_energy.png,json,png,128,inline energy symbol
