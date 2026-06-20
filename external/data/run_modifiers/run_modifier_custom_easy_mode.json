@@ -1,14 +1,12 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"object_id": "run_modifier_custom_easy_mode",
-		"run_modifier_description": "All enemies are set to 1HP",
-		"run_modifier_exclusive_to_modifier_ids": [],
-		"run_modifier_interceptor_script_paths": [],
-		"run_modifier_is_custom": true,
-		"run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustomEasyMode.gd",
-		"run_modifier_name": "Easy Mode"
-	}
+    "patch_data": {},
+    "properties": {
+        "object_id": "run_modifier_custom_easy_mode",
+        "run_modifier_description": "所有敌人的生命设为1",
+        "run_modifier_exclusive_to_modifier_ids": [],
+        "run_modifier_interceptor_script_paths": [],
+        "run_modifier_is_custom": true,
+        "run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustomEasyMode.gd",
+        "run_modifier_name": "简易模式"
+    }
 }

@@ -1,5 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://yp2thojcml5h"]
+[gd_scene load_steps=7 format=3 uid="uid://yp2thojcml5h"]
 
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://c2ftr3dvpi75p" path="res://scripts/combatants/BaseCombatant.gd" id="1_fjkbl"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_nc4eu"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_bf3nk"]
@@ -31,6 +32,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 200.0
 offset_bottom = 144.0
+theme = ExtResource("1_1k9pz")
 script = ExtResource("1_fjkbl")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -79,6 +81,7 @@ offset_left = 104.0
 offset_top = 16.0
 offset_right = 144.0
 offset_bottom = 39.0
+theme = ExtResource("1_1k9pz")
 text = "15"
 
 [node name="FadeContainer" type="Node2D" parent="Visible"]
@@ -97,6 +100,7 @@ offset_left = -64.0
 offset_top = -64.0
 offset_right = 64.0
 offset_bottom = 64.0
+theme = ExtResource("1_1k9pz")
 theme_override_font_sizes/font_size = 48
 text = "999"
 horizontal_alignment = 1

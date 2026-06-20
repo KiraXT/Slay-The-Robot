@@ -25,7 +25,7 @@
         "status_effect_healthbar_reserve_type": 1,
         "status_effect_interceptor_ids": [],
         "status_effect_is_visible": true,
-        "status_effect_name": "Corrosion",
+        "status_effect_name": "腐蚀",
         "status_effect_negative_charges_texture_path": "",
         "status_effect_player_actions": [
             {

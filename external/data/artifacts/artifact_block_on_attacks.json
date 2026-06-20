@@ -3,8 +3,8 @@
     "properties": {
         "object_id": "artifact_block_on_attacks",
         "object_uid": "",
-        "artifact_name": "Block on Attacks",
-        "artifact_description": "Grants 5 block every 3 attacks",
+        "artifact_name": "攻击格挡",
+        "artifact_description": "每进行3次攻击获得5点格挡",
         "artifact_rarity": 1,
         "artifact_color_id": "color_red",
         "artifact_texture_path": "external/sprites/artifacts/artifact_red.png",
@@ -24,7 +24,7 @@
         "artifact_max_counter_actions": [
             {
                 "res://scripts/actions/ActionBlock.gd": {
-                    "block": 5
+                    "block": 5.0
                 }
             }
         ],

@@ -1,14 +1,12 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"object_id": "run_modifier_endless_mode",
-		"run_modifier_description": "Run will only end when the player dies",
-		"run_modifier_exclusive_to_modifier_ids": [],
-		"run_modifier_interceptor_script_paths": [],
-		"run_modifier_is_custom": true,
-		"run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustomEndlessMode.gd",
-		"run_modifier_name": "Endless Mode"
-	}
+    "patch_data": {},
+    "properties": {
+        "object_id": "run_modifier_endless_mode",
+        "run_modifier_description": "只有玩家死亡时才结束本局",
+        "run_modifier_exclusive_to_modifier_ids": [],
+        "run_modifier_interceptor_script_paths": [],
+        "run_modifier_is_custom": true,
+        "run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustomEndlessMode.gd",
+        "run_modifier_name": "无尽模式"
+    }
 }

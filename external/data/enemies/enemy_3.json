@@ -56,7 +56,7 @@
             "status_effect_negate_debuff": 1
         },
         "enemy_is_minion": false,
-        "enemy_name": "Green Enemy",
+        "enemy_name": "绿色敌人",
         "enemy_object_id": "",
         "enemy_texture_path": "external/sprites/enemies/enemy_green_small.png",
         "enemy_type": 0,

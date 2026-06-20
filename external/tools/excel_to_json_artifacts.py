@@ -412,6 +412,12 @@ class ArtifactConverter:
             except (ValueError, TypeError):
                 pass
 
+        card_pick_text_col = f"{action_prefix}_card_pick_text"
+        if card_pick_text_col in row and pd.notna(row[card_pick_text_col]):
+            card_pick_text = str(row[card_pick_text_col]).strip()
+            if card_pick_text and card_pick_text.lower() != 'nan':
+                params['card_pick_text'] = card_pick_text
+
         # Build final action with correct path
         action_path = self._get_action_path(action_type)
         if action_type.startswith(("Action", "Artifact")):
@@ -469,7 +475,7 @@ def create_sample_excel():
         'artifact_counter_wraparound', 'artifact_appears_in_artifact_packs',
 
         # Actions - Add
-        'artifact_add_action_type', 'artifact_add_action_money_amount',
+        'artifact_add_action_type', 'artifact_add_action_money_amount', 'artifact_add_action_card_pick_text',
 
         # Actions - Turn Start
         'artifact_turn_start_action_type', 'artifact_turn_start_action_block',
@@ -504,6 +510,7 @@ def create_sample_excel():
             'artifact_appears_in_artifact_packs': True,
             'artifact_add_action_type': 'ActionAddMoney',
             'artifact_add_action_money_amount': 200,
+            'artifact_add_action_card_pick_text': '',
         },
         {
             'object_id': 'artifact_block_on_attacks',
@@ -521,6 +528,23 @@ def create_sample_excel():
             'artifact_appears_in_artifact_packs': True,
             'artifact_max_counter_action_type': 'ActionBlock',
             'artifact_max_counter_action_block': 5,
+        },
+        {
+            'object_id': 'artifact_top_deck_attack_card',
+            'artifact_name': 'Artifact Make Attack Card Innate',
+            'artifact_description': 'Select an attack card to make appear at the top of your deck.',
+            'artifact_rarity': 1,  # COMMON
+            'artifact_color_id': 'color_white',
+            'artifact_texture_path': 'external/sprites/artifacts/artifact_white.png',
+            'artifact_script_path': 'res://scripts/artifacts/BaseArtifact.gd',
+            'artifact_counter': 0,
+            'artifact_counter_max': 1,
+            'artifact_counter_reset_on_combat_end': -1,
+            'artifact_counter_reset_on_turn_start': -1,
+            'artifact_counter_wraparound': True,
+            'artifact_appears_in_artifact_packs': True,
+            'artifact_add_action_type': 'ActionPickCards',
+            'artifact_add_action_card_pick_text': 'Choose a card to make top deck',
         },
     ]
 

@@ -1,10 +1,8 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"keyword_child_keyword_object_ids": [],
-		"keyword_text_bb_code": "[color=orange]Block[/color]\nPrevents Damage",
-		"object_id": "keyword_block"
-	}
+    "patch_data": {},
+    "properties": {
+        "keyword_child_keyword_object_ids": [],
+        "keyword_text_bb_code": "[color=orange]格挡[/color]\n防止伤害",
+        "object_id": "keyword_block"
+    }
 }

@@ -1,5 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://byvjxydfrccd2"]
+[gd_scene load_steps=6 format=3 uid="uid://byvjxydfrccd2"]
 
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://dd3ox284x54mg" path="res://scripts/combatants/fades/TextFade.gd" id="1_lxaif"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_4a8or"]
@@ -43,6 +44,7 @@ script = ExtResource("1_lxaif")
 offset_left = -128.0
 offset_right = 128.0
 offset_bottom = 40.0
+theme = ExtResource("1_1k9pz")
 text = "Test"
 label_settings = SubResource("LabelSettings_4a8or")
 horizontal_alignment = 1

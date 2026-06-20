@@ -1,10 +1,8 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"keyword_child_keyword_object_ids": [],
-		"keyword_text_bb_code": "[color=orange]Retain[/color]\nNot discarded at end of turn",
-		"object_id": "keyword_retain"
-	}
+    "patch_data": {},
+    "properties": {
+        "keyword_child_keyword_object_ids": [],
+        "keyword_text_bb_code": "[color=orange]保留[/color]\n回合结束时不会弃置",
+        "object_id": "keyword_retain"
+    }
 }

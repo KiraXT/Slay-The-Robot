@@ -3,8 +3,8 @@
     "properties": {
         "object_id": "artifact_add_money",
         "object_uid": "",
-        "artifact_name": "Add Money",
-        "artifact_description": "Adds money when obtained",
+        "artifact_name": "获得金币",
+        "artifact_description": "获得时提供金币",
         "artifact_rarity": 1,
         "artifact_color_id": "color_white",
         "artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
@@ -18,7 +18,7 @@
         "artifact_add_actions": [
             {
                 "res://scripts/actions/player_actions/ActionAddMoney.gd": {
-                    "money_amount": 200
+                    "money_amount": 200.0
                 }
             }
         ],

@@ -17,7 +17,7 @@
             "interceptor_negate_damage"
         ],
         "status_effect_is_visible": true,
-        "status_effect_name": "Negate Damage",
+        "status_effect_name": "免伤",
         "status_effect_negative_charges_texture_path": "",
         "status_effect_player_actions": [],
         "status_effect_priority": 0,

@@ -1,8 +1,10 @@
 {
     "patch_data": {},
     "properties": {
+        "object_id": "event_act_1_miniboss_3",
         "event_background_texture_path": "",
         "event_dialogue_object_id": "",
+        "event_dialogue_data": null,
         "event_enemy_placement_is_automatic": true,
         "event_enemy_placement_positions": [
             [
@@ -21,7 +23,6 @@
                 "enemy_act_1_miniboss_1": 1.0
             }
         ],
-        "location_event_pool_validator_failed_strategy": 1,
-        "object_id": "event_act_1_miniboss_3"
+        "location_event_pool_validator_failed_strategy": 1
     }
 }

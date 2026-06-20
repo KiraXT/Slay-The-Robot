@@ -57,6 +57,17 @@ enum FailedEventPoolStrategies {
 ## Corresponds to a DialogueData for this event. Only matters if the LocationData's location_type
 ## is EVENT. See: DialogueOverlay
 @export var event_dialogue_object_id: String = ""
+## Embedded dialogue data for the event. This allows event text to live directly inside the event payload
+## rather than in a separate DialogueData file.
+@export var event_dialogue_data: DialogueData = null
+
+## Returns the embedded dialogue data when present, otherwise falls back to the legacy DialogueData lookup.
+func get_dialogue_data() -> DialogueData:
+	if event_dialogue_data != null:
+		return event_dialogue_data
+	if event_dialogue_object_id != "":
+		return Global.get_dialogue_data(event_dialogue_object_id)
+	return null
 
 
 ## Checks if event passes all validators to be eligable for use for an event pool

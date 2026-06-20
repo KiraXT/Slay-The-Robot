@@ -1,16 +1,14 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"object_id": "run_modifier_custom_1",
-		"run_modifier_description": "Dummy modifier. Mutually exclusive with Custom 2",
-		"run_modifier_exclusive_to_modifier_ids": [
-			"run_modifier_custom_2"
-		],
-		"run_modifier_interceptor_script_paths": [],
-		"run_modifier_is_custom": true,
-		"run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustom1.gd",
-		"run_modifier_name": "Custom 1"
-	}
+    "patch_data": {},
+    "properties": {
+        "object_id": "run_modifier_custom_1",
+        "run_modifier_description": "占位修饰符。与自定义2互斥",
+        "run_modifier_exclusive_to_modifier_ids": [
+            "run_modifier_custom_2"
+        ],
+        "run_modifier_interceptor_script_paths": [],
+        "run_modifier_is_custom": true,
+        "run_modifier_modifier_script_path": "res://scripts/run_modifiers/custom/RunModifierCustom1.gd",
+        "run_modifier_name": "自定义1"
+    }
 }

@@ -10,8 +10,8 @@
                 }
             }
         ],
-        "consumable_description": "Damages a target for 10",
-        "consumable_name": "Damage Item",
+        "consumable_description": "对一个目标造成10点伤害",
+        "consumable_name": "伤害药剂",
         "consumable_rarity": 0,
         "consumable_requires_target": true,
         "consumable_texture_path": "res://icon.svg",

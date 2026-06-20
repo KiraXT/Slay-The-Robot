@@ -57,17 +57,23 @@ func _get_action_interceptors_modifying_pair(action: BaseAction, parent_combatan
 		return []
 	
 	# InterceptorData IDs for specific interceptors to not use for this action.
-	var ignored_interceptor_ids: Array[String] = []
-	ignored_interceptor_ids.assign(get_shadowed_action_values("ignored_interceptor_ids", []))
+	var ignored_interceptor_ids: Array[String] = _coerce_string_array(
+		get_shadowed_action_values("ignored_interceptor_ids", []),
+		"ignored_interceptor_ids"
+	)
 	
 	# InterceptorData IDs for specific interceptors to always use for this action.
-	var forced_interceptor_ids: Array[String] = []
-	forced_interceptor_ids.assign(get_shadowed_action_values("forced_interceptor_ids", []))
+	var forced_interceptor_ids: Array[String] = _coerce_string_array(
+		get_shadowed_action_values("forced_interceptor_ids", []),
+		"forced_interceptor_ids"
+	)
 	
 	### Parent Interceptors
 	# get ids of all interceptors the parent has
-	var parent_action_interceptor_object_ids: Array[String] = []
-	parent_action_interceptor_object_ids.assign(ActionHandler._registered_action_interceptor_object_ids.get(parent_combatant, []))
+	var parent_action_interceptor_object_ids: Array[String] = _coerce_string_array(
+		ActionHandler._registered_action_interceptor_object_ids.get(parent_combatant, []),
+		"parent_action_interceptor_object_ids"
+	)
 	
 	# get data objects of all corresponding interceptors affecting the parent
 	for action_interceptor_object_id in parent_action_interceptor_object_ids:
@@ -85,8 +91,10 @@ func _get_action_interceptors_modifying_pair(action: BaseAction, parent_combatan
 	
 	### Target Interceptors
 	# get ids of all interceptors the target has
-	var target_action_interceptor_object_ids: Array[String] = []
-	target_action_interceptor_object_ids.assign(ActionHandler._registered_action_interceptor_object_ids.get(target_combatant, []))
+	var target_action_interceptor_object_ids: Array[String] = _coerce_string_array(
+		ActionHandler._registered_action_interceptor_object_ids.get(target_combatant, []),
+		"target_action_interceptor_object_ids"
+	)
 	
 	# get data objects of all corresponding affecting the target
 	for action_interceptor_object_id in target_action_interceptor_object_ids:
@@ -132,3 +140,30 @@ func _sort_action_interceptor_priorities(action_interceptor_data_1: ActionInterc
 		return action_interceptor_data_1.object_id > action_interceptor_data_2.object_id
 	else:
 		return action_interceptor_data_1.action_interceptor_priority > action_interceptor_data_2.action_interceptor_priority
+
+func _coerce_string_array(value: Variant, context: String) -> Array[String]:
+	var returned: Array[String] = []
+	if value is Array:
+		for item in value:
+			returned.append(str(item))
+		return returned
+	if value is PackedStringArray:
+		for item in value:
+			returned.append(item)
+		return returned
+	if value is String:
+		var string_value: String = value.strip_edges()
+		if string_value == "":
+			return returned
+		var parsed_value: Variant = JSON.parse_string(string_value.replace("'", "\""))
+		if parsed_value is Array:
+			for item in parsed_value:
+				returned.append(str(item))
+			return returned
+		push_warning("Expected array for %s, got string: %s" % [context, string_value])
+		returned.append(string_value)
+		return returned
+	if value != null:
+		push_warning("Expected array for %s, got %s" % [context, typeof(value)])
+		returned.append(str(value))
+	return returned

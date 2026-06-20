@@ -1,10 +1,8 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"keyword_child_keyword_object_ids": [],
-		"keyword_text_bb_code": "[color=orange]Bomb[/color]\nDeals damage to all enemies when timer runs out ",
-		"object_id": "keyword_bomb"
-	}
+    "patch_data": {},
+    "properties": {
+        "keyword_child_keyword_object_ids": [],
+        "keyword_text_bb_code": "[color=orange]炸弹[/color]\n计时结束时对所有敌人造成伤害",
+        "object_id": "keyword_bomb"
+    }
 }

@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://528isoebkdpv"]
+[gd_scene load_steps=8 format=3 uid="uid://528isoebkdpv"]
 
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://d4l5y1jvle1mq" path="res://scripts/combatants/Enemy.gd" id="1_10iyf"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_x4bdi"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_nimvv"]
@@ -98,6 +99,7 @@ anchors_preset = 0
 offset_right = 200.0
 offset_bottom = 192.0
 mouse_filter = 2
+theme = ExtResource("1_1k9pz")
 script = ExtResource("1_10iyf")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -122,6 +124,7 @@ offset_left = -75.0
 offset_top = 48.0
 offset_right = 77.0
 offset_bottom = 71.0
+theme = ExtResource("1_1k9pz")
 theme_override_font_sizes/font_size = 15
 text = "Name"
 horizontal_alignment = 1
@@ -159,6 +162,7 @@ offset_left = 104.0
 offset_top = 8.0
 offset_right = 144.0
 offset_bottom = 31.0
+theme = ExtResource("1_1k9pz")
 text = "15"
 
 [node name="FadeContainer" type="Node2D" parent="Visible"]
@@ -177,6 +181,7 @@ offset_left = -64.0
 offset_top = -64.0
 offset_right = 64.0
 offset_bottom = 64.0
+theme = ExtResource("1_1k9pz")
 theme_override_font_sizes/font_size = 48
 text = "999"
 horizontal_alignment = 1

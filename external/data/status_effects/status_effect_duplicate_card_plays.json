@@ -17,7 +17,7 @@
             "interceptor_duplicate_card_plays"
         ],
         "status_effect_is_visible": true,
-        "status_effect_name": "Duplicate Play",
+        "status_effect_name": "复制出牌",
         "status_effect_negative_charges_texture_path": "",
         "status_effect_player_actions": [],
         "status_effect_priority": 0,

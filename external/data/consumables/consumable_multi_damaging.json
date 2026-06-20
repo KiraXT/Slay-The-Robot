@@ -10,8 +10,8 @@
                 }
             }
         ],
-        "consumable_description": "Damages all enemies for 10",
-        "consumable_name": "Multiple Damage Item",
+        "consumable_description": "对所有敌人造成10点伤害",
+        "consumable_name": "群体伤害药剂",
         "consumable_rarity": 0,
         "consumable_requires_target": false,
         "consumable_texture_path": "res://icon.svg",

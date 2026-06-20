@@ -8,8 +8,8 @@
                 }
             }
         ],
-        "consumable_description": "Heals 20%",
-        "consumable_name": "Heal Item",
+        "consumable_description": "恢复20%生命",
+        "consumable_name": "治疗药剂",
         "consumable_rarity": 0,
         "consumable_requires_target": false,
         "consumable_texture_path": "res://icon.svg",

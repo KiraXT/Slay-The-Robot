@@ -16,7 +16,10 @@ from dataclasses import dataclass
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 EXCEL_FILE = PROJECT_ROOT / "external/config/events.xlsx"
+CSV_FILE = PROJECT_ROOT / "external/config/events.csv"
 OUTPUT_DIR = PROJECT_ROOT / "external/data/events"
+
+DIALOGUE_OPTION_COUNT = 2
 
 # Valid strategies for validator failed
 VALID_FAILED_STRATEGIES = {
@@ -173,10 +176,10 @@ class EventConverter:
         print("Excel to JSON Event Converter")
         print("=" * 60)
 
-        # Check Excel file exists
-        if not EXCEL_FILE.exists():
-            print(f"ERROR: Excel file not found: {EXCEL_FILE}")
-            print("Please create the Excel file first.")
+        source_file = self._detect_source_file()
+        if source_file is None:
+            print(f"ERROR: Event config file not found: {EXCEL_FILE}")
+            print(f"Please create the Excel file first, or a CSV fallback at: {CSV_FILE}")
             return False, []
 
         # Create output directory
@@ -184,8 +187,11 @@ class EventConverter:
 
         # Read Excel
         try:
-            print(f"\nReading Excel: {EXCEL_FILE}")
-            df = pd.read_excel(EXCEL_FILE, sheet_name="Events")
+            print(f"\nReading source: {source_file}")
+            if source_file.suffix.lower() == ".csv":
+                df = pd.read_csv(source_file)
+            else:
+                df = pd.read_excel(source_file, sheet_name="Events")
             print(f"Found {len(df)} events")
         except Exception as e:
             print(f"ERROR reading Excel: {e}")
@@ -266,6 +272,9 @@ class EventConverter:
         # Parse weighted enemy object IDs
         weighted_enemies = self._parse_weighted_enemies(row)
 
+        # Parse embedded dialogue payload
+        event_dialogue_data = self._build_event_dialogue_data(row)
+
         # Build the final JSON
         json_data = {
             "patch_data": {},
@@ -273,6 +282,7 @@ class EventConverter:
                 "object_id": event_id,
                 "event_background_texture_path": self._get_str(row, 'event_background_texture_path', ''),
                 "event_dialogue_object_id": self._get_str(row, 'event_dialogue_object_id', ''),
+                "event_dialogue_data": event_dialogue_data,
                 "event_enemy_placement_is_automatic": self._get_bool(row, 'event_enemy_placement_is_automatic', True),
                 "event_enemy_placement_positions": positions,
                 "event_initial_combat_actions": [],  # Complex structure, skip for now
@@ -285,6 +295,92 @@ class EventConverter:
         }
 
         return json_data
+
+    def _detect_source_file(self) -> Path | None:
+        if EXCEL_FILE.exists():
+            return EXCEL_FILE
+        if CSV_FILE.exists():
+            return CSV_FILE
+        return None
+
+    def _build_event_dialogue_data(self, row: pd.Series) -> Dict[str, Any] | None:
+        dialogue_object_id = self._get_str(row, "event_dialogue_object_id", "")
+        initial_state_object_id = self._get_str(row, "event_dialogue_initial_dialogue_state_object_id", "")
+        prompt_bbcode = self._get_str(row, "event_dialogue_state_prompt_bbcode", "")
+        dialogue_texture_path = self._get_str(row, "event_dialogue_state_dialogue_texture_path", "")
+
+        dialogue_options: Dict[str, Any] = {}
+        dialogue_state_option_ids: List[str] = []
+
+        for option_index in range(1, DIALOGUE_OPTION_COUNT + 1):
+            option_data = self._build_event_dialogue_option(row, option_index, dialogue_object_id)
+            if option_data is None:
+                continue
+            dialogue_options[option_data["object_id"]] = option_data
+            dialogue_state_option_ids.append(option_data["object_id"])
+
+        has_dialogue_content = any([
+            dialogue_object_id,
+            initial_state_object_id,
+            prompt_bbcode,
+            dialogue_texture_path,
+            len(dialogue_options) > 0,
+        ])
+        if not has_dialogue_content:
+            return None
+
+        if dialogue_object_id == "":
+            dialogue_object_id = f"dialogue_{self._get_str(row, 'object_id', 'event')}"
+        if initial_state_object_id == "":
+            initial_state_object_id = f"{dialogue_object_id}_initial"
+
+        return {
+            "object_id": dialogue_object_id,
+            "dialogue_initial_dialogue_state_object_id": initial_state_object_id,
+            "dialogue_option_id_to_dialogue_options": dialogue_options,
+            "dialogue_state_id_to_dialogue_states": {
+                initial_state_object_id: {
+                    "object_id": initial_state_object_id,
+                    "dialogue_state_dialogue_texture_path": dialogue_texture_path,
+                    "dialogue_state_dialogue_option_object_ids": dialogue_state_option_ids,
+                    "dialogue_state_prompt_bbcode": prompt_bbcode,
+                }
+            },
+        }
+
+    def _build_event_dialogue_option(self, row: pd.Series, option_index: int, dialogue_object_id: str) -> Dict[str, Any] | None:
+        option_prefix = f"event_dialogue_option_{option_index}"
+        option_object_id = self._get_str(row, f"{option_prefix}_object_id", "")
+        option_bbcode = self._get_str(row, f"{option_prefix}_bbcode", "")
+        failed_bbcode = self._get_str(row, f"{option_prefix}_failed_validator_bbcode", "")
+        next_state_id = self._get_str(row, f"{option_prefix}_next_dialogue_state_id", "")
+        visible_on_failed = self._get_bool(row, f"{option_prefix}_visible_on_failed_validation", True)
+        actions_json = self._parse_json_array(row, f"{option_prefix}_actions_json", [])
+        validators_json = self._parse_json_array(row, f"{option_prefix}_validators_json", [])
+
+        has_option_content = any([
+            option_object_id,
+            option_bbcode,
+            failed_bbcode,
+            next_state_id,
+            len(actions_json) > 0,
+            len(validators_json) > 0,
+        ])
+        if not has_option_content:
+            return None
+
+        if option_object_id == "":
+            option_object_id = f"{dialogue_object_id}_option_{option_index}" if dialogue_object_id != "" else f"dialogue_option_{option_index}"
+
+        return {
+            "object_id": option_object_id,
+            "dialogue_option_bbcode": option_bbcode,
+            "dialogue_option_failed_validator_bbcode": failed_bbcode,
+            "dialogue_option_next_dialogue_state_id": next_state_id,
+            "dialogue_option_actions": actions_json,
+            "dialogue_option_validators": validators_json,
+            "dialogue_option_visible_on_failed_validation": visible_on_failed,
+        }
 
     def _get_str(self, row: pd.Series, field: str, default: str = '') -> str:
         """Get string value with NaN handling"""
@@ -314,6 +410,18 @@ class EventConverter:
         if isinstance(val, str):
             return val.lower() in ('true', 'yes', '1', 'automatic')
         return bool(val)
+
+    def _parse_json_array(self, row: pd.Series, field: str, default: List[Any]) -> List[Any]:
+        raw_value = self._get_str(row, field, "")
+        if raw_value == "":
+            return default
+        try:
+            parsed = json.loads(raw_value)
+            if isinstance(parsed, list):
+                return parsed
+        except json.JSONDecodeError:
+            pass
+        return default
 
     def _parse_positions(self, row: pd.Series) -> List[List[float]]:
         """Parse enemy placement positions"""
@@ -391,6 +499,25 @@ def create_sample_excel():
 
         # Strategy
         'location_event_pool_validator_failed_strategy',
+
+        # Embedded Dialogue
+        'event_dialogue_initial_dialogue_state_object_id',
+        'event_dialogue_state_dialogue_texture_path',
+        'event_dialogue_state_prompt_bbcode',
+        'event_dialogue_option_1_object_id',
+        'event_dialogue_option_1_bbcode',
+        'event_dialogue_option_1_failed_validator_bbcode',
+        'event_dialogue_option_1_next_dialogue_state_id',
+        'event_dialogue_option_1_visible_on_failed_validation',
+        'event_dialogue_option_1_actions_json',
+        'event_dialogue_option_1_validators_json',
+        'event_dialogue_option_2_object_id',
+        'event_dialogue_option_2_bbcode',
+        'event_dialogue_option_2_failed_validator_bbcode',
+        'event_dialogue_option_2_next_dialogue_state_id',
+        'event_dialogue_option_2_visible_on_failed_validation',
+        'event_dialogue_option_2_actions_json',
+        'event_dialogue_option_2_validators_json',
     ]
 
     # Sample data
@@ -426,6 +553,54 @@ def create_sample_excel():
             'event_enemy_placement_positions': '0,-40|0,40',
             'event_weighted_enemy_object_ids': 'enemy_1:1,enemy_2:1|enemy_2:1',
             'location_event_pool_validator_failed_strategy': 1,
+            'event_dialogue_initial_dialogue_state_object_id': 'dialogue_state_pick_something_initial',
+            'event_dialogue_state_dialogue_texture_path': 'external/sprites/events/event_pick_something.png',
+            'event_dialogue_state_prompt_bbcode': 'Test Event. Select an option...',
+            'event_dialogue_option_1_object_id': 'dialogue_pick_something_option_1',
+            'event_dialogue_option_1_bbcode': '[color=red]Lose 10 HP[/color] and [color=green]Gain 100 Money[/color]',
+            'event_dialogue_option_1_failed_validator_bbcode': '[color=grey][Locked]: Insufficient Health[/color]',
+            'event_dialogue_option_1_next_dialogue_state_id': '',
+            'event_dialogue_option_1_visible_on_failed_validation': True,
+            'event_dialogue_option_1_actions_json': json.dumps([
+                {"res://scripts/actions/ActionAddHealth.gd": {"health_amount": -10}},
+                {"res://scripts/actions/player_actions/ActionAddMoney.gd": {"money_amount": 100}},
+            ], ensure_ascii=False),
+            'event_dialogue_option_1_validators_json': json.dumps([
+                {"res://scripts/validators/ValidatorPlayerHealth.gd": {"health_amount": 11}},
+            ], ensure_ascii=False),
+            'event_dialogue_option_2_object_id': 'dialogue_pick_something_option_2',
+            'event_dialogue_option_2_bbcode': '[color=red]Lose 50 Money[/color] and [color=green]Gain Random Rare Card[/color]',
+            'event_dialogue_option_2_failed_validator_bbcode': '[color=grey][Locked]: Insufficient Money[/color]',
+            'event_dialogue_option_2_next_dialogue_state_id': '',
+            'event_dialogue_option_2_visible_on_failed_validation': True,
+            'event_dialogue_option_2_actions_json': json.dumps([
+                {
+                    "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                        "action_data": [
+                            {"res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {}}
+                        ],
+                        "card_pick_type": 8,
+                        "draft_from_card_pool": True,
+                        "draft_is_weighted": False,
+                        "draft_max_card_amount": 1,
+                        "draft_use_pity_system": False,
+                        "draft_use_player_draft": False,
+                        "max_card_amount": 1,
+                        "min_card_amount": 1,
+                        "pick_draft_cards": False,
+                        "random_selection": True,
+                        "rng_name": "rng_events",
+                        "validator_data": [
+                            {"res://scripts/validators/card/ValidatorCardRarity.gd": {"card_rarities": [3]}},
+                            {"res://scripts/validators/card/ValidatorCardDraftable.gd": {}},
+                        ],
+                    }
+                },
+                {"res://scripts/actions/player_actions/ActionAddMoney.gd": {"money_amount": -50}},
+            ], ensure_ascii=False),
+            'event_dialogue_option_2_validators_json': json.dumps([
+                {"res://scripts/validators/ValidatorMoney.gd": {"money_amount": 50}},
+            ], ensure_ascii=False),
         },
     ]
 

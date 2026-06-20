@@ -4,6 +4,7 @@
         "object_id": "event_act_1_boss_1",
         "event_background_texture_path": "",
         "event_dialogue_object_id": "",
+        "event_dialogue_data": null,
         "event_enemy_placement_is_automatic": false,
         "event_enemy_placement_positions": [
             [

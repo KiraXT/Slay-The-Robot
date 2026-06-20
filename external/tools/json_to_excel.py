@@ -107,6 +107,7 @@ def parse_artifact_actions(actions: List[Dict], prefix: str) -> Dict[str, Any]:
         f"{prefix}_type": "",
         f"{prefix}_block": "",
         f"{prefix}_money_amount": "",
+        f"{prefix}_card_pick_text": "",
     }
     if not actions or not isinstance(actions, list):
         return result
@@ -122,6 +123,8 @@ def parse_artifact_actions(actions: List[Dict], prefix: str) -> Dict[str, Any]:
                 result[f"{prefix}_block"] = params["block"]
             if "money_amount" in params:
                 result[f"{prefix}_money_amount"] = params["money_amount"]
+            if "card_pick_text" in params:
+                result[f"{prefix}_card_pick_text"] = params["card_pick_text"]
         break
 
     return result
@@ -143,6 +146,63 @@ def format_weighted_enemies(enemies: List[Dict[str, float]]) -> str:
         items = [f"{k}:{v}" for k, v in group.items()]
         groups.append(",".join(items))
     return "|".join(groups)
+
+
+def _extract_dialogue_option_field(option_data: Dict[str, Any], field_name: str, default: Any = "") -> Any:
+    return option_data.get(field_name, default) if isinstance(option_data, dict) else default
+
+
+def format_dialogue_action_payload(payload: Any) -> str:
+    if not payload:
+        return ""
+    try:
+        return json.dumps(payload, ensure_ascii=False)
+    except TypeError:
+        return ""
+
+
+def flatten_event_dialogue(event: Dict[str, Any], row: Dict[str, Any]) -> None:
+    dialogue = event.get("event_dialogue_data", {})
+    if not isinstance(dialogue, dict):
+        return
+
+    row["event_dialogue_object_id"] = dialogue.get("object_id", "")
+    row["event_dialogue_initial_dialogue_state_object_id"] = dialogue.get("dialogue_initial_dialogue_state_object_id", "")
+
+    states = dialogue.get("dialogue_state_id_to_dialogue_states", {})
+    if not isinstance(states, dict) or len(states) == 0:
+        return
+
+    initial_state_id = row["event_dialogue_initial_dialogue_state_object_id"]
+    initial_state = states.get(initial_state_id, {})
+    if not isinstance(initial_state, dict):
+        initial_state = {}
+
+    row["event_dialogue_state_dialogue_texture_path"] = initial_state.get("dialogue_state_dialogue_texture_path", "")
+    row["event_dialogue_state_prompt_bbcode"] = initial_state.get("dialogue_state_prompt_bbcode", "")
+
+    option_ids = initial_state.get("dialogue_state_dialogue_option_object_ids", [])
+    if not isinstance(option_ids, list):
+        option_ids = []
+
+    options = dialogue.get("dialogue_option_id_to_dialogue_options", {})
+    if not isinstance(options, dict):
+        options = {}
+
+    for index in range(1, 3):
+        option_key_prefix = f"event_dialogue_option_{index}"
+        option_id = option_ids[index - 1] if len(option_ids) >= index else ""
+        option_data = options.get(option_id, {}) if option_id else {}
+        if not isinstance(option_data, dict):
+            option_data = {}
+
+        row[f"{option_key_prefix}_object_id"] = option_data.get("object_id", option_id)
+        row[f"{option_key_prefix}_bbcode"] = option_data.get("dialogue_option_bbcode", "")
+        row[f"{option_key_prefix}_failed_validator_bbcode"] = option_data.get("dialogue_option_failed_validator_bbcode", "")
+        row[f"{option_key_prefix}_next_dialogue_state_id"] = option_data.get("dialogue_option_next_dialogue_state_id", "")
+        row[f"{option_key_prefix}_visible_on_failed_validation"] = option_data.get("dialogue_option_visible_on_failed_validation", True)
+        row[f"{option_key_prefix}_actions_json"] = format_dialogue_action_payload(option_data.get("dialogue_option_actions", []))
+        row[f"{option_key_prefix}_validators_json"] = format_dialogue_action_payload(option_data.get("dialogue_option_validators", []))
 
 
 def convert_cards() -> None:
@@ -254,6 +314,7 @@ def convert_artifacts() -> None:
         'artifact_counter_reset_on_combat_end', 'artifact_counter_reset_on_turn_start',
         'artifact_counter_wraparound', 'artifact_appears_in_artifact_packs',
         'artifact_add_action_type', 'artifact_add_action_money_amount',
+        'artifact_add_action_card_pick_text',
         'artifact_remove_action_type', 'artifact_remove_action_money_amount',
         'artifact_turn_start_action_type', 'artifact_turn_start_action_block',
         'artifact_turn_end_action_type', 'artifact_turn_end_action_block',
@@ -330,6 +391,23 @@ def convert_events() -> None:
         'event_enemy_placement_is_automatic', 'event_enemy_placement_positions',
         'event_weighted_enemy_object_ids',
         'location_event_pool_validator_failed_strategy',
+        'event_dialogue_initial_dialogue_state_object_id',
+        'event_dialogue_state_dialogue_texture_path',
+        'event_dialogue_state_prompt_bbcode',
+        'event_dialogue_option_1_object_id',
+        'event_dialogue_option_1_bbcode',
+        'event_dialogue_option_1_failed_validator_bbcode',
+        'event_dialogue_option_1_next_dialogue_state_id',
+        'event_dialogue_option_1_visible_on_failed_validation',
+        'event_dialogue_option_1_actions_json',
+        'event_dialogue_option_1_validators_json',
+        'event_dialogue_option_2_object_id',
+        'event_dialogue_option_2_bbcode',
+        'event_dialogue_option_2_failed_validator_bbcode',
+        'event_dialogue_option_2_next_dialogue_state_id',
+        'event_dialogue_option_2_visible_on_failed_validation',
+        'event_dialogue_option_2_actions_json',
+        'event_dialogue_option_2_validators_json',
     ]
 
     rows = [{
@@ -350,6 +428,7 @@ def convert_events() -> None:
         row['event_enemy_placement_positions'] = format_positions(event.get('event_enemy_placement_positions', []))
         row['event_weighted_enemy_object_ids'] = format_weighted_enemies(event.get('event_weighted_enemy_object_ids', []))
         row['location_event_pool_validator_failed_strategy'] = event.get('location_event_pool_validator_failed_strategy', 1)
+        flatten_event_dialogue(event, row)
 
         rows.append(row)
 

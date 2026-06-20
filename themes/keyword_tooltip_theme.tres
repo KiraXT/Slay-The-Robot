@@ -1,5 +1,6 @@
-[gd_resource type="Theme" load_steps=3 format=3 uid="uid://2714jm71pkv4"]
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://2714jm71pkv4"]
 
+[ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="1_5v7qk"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_1h3vb"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_klxee"]
@@ -10,5 +11,6 @@ texture_margin_right = 10.0
 texture_margin_bottom = 10.0
 
 [resource]
+default_font = ExtResource("1_5v7qk")
 PanelContainer/styles/panel = SubResource("StyleBoxTexture_klxee")
 RichTextLabel/font_sizes/normal_font_size = 12

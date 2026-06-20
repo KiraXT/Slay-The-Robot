@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://c6o8lietp25a7"]
+[gd_scene load_steps=4 format=3 uid="uid://c6o8lietp25a7"]
 
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_n7s1f"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_8q1fk"]
 [ext_resource type="Script" uid="uid://cdbs7aby3q3x8" path="res://scripts/ui/rewards/BaseRewardButton.gd" id="2_fjsnl"]
 
 [node name="BaseRewardButton" type="Button"]
 offset_right = 112.0
 offset_bottom = 31.0
+theme = ExtResource("1_n7s1f")
 text = "Reward 1"
 icon = ExtResource("1_8q1fk")
 expand_icon = true

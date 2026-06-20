@@ -52,7 +52,7 @@ func init(_parent_combatant: BaseCombatant = null, _card_play_request: CardPlayR
 	targets = _targets
 	values = _values
 	time_delay = get_action_value("time_delay", 0.0)
-	action_tags.assign(get_action_value("action_tags", []))
+	action_tags = _coerce_string_array(get_action_value("action_tags", []), "action_tags")
 	parent_action = _parent_action
 
 ### Override
@@ -168,6 +168,33 @@ func get_action_value(key: String, default_value: Variant) -> Variant:
 	if Global.player_data.player_values.has(key_name):
 		return Global.player_data.player_values.get(key_name, default_value)
 	return default_value
+
+func _coerce_string_array(value: Variant, context: String) -> Array[String]:
+	var returned: Array[String] = []
+	if value is Array:
+		for item in value:
+			returned.append(str(item))
+		return returned
+	if value is PackedStringArray:
+		for item in value:
+			returned.append(item)
+		return returned
+	if value is String:
+		var string_value: String = value.strip_edges()
+		if string_value == "":
+			return returned
+		var parsed_value: Variant = JSON.parse_string(string_value.replace("'", "\""))
+		if parsed_value is Array:
+			for item in parsed_value:
+				returned.append(str(item))
+			return returned
+		push_warning("Expected array for %s, got string: %s" % [context, string_value])
+		returned.append(string_value)
+		return returned
+	if value != null:
+		push_warning("Expected array for %s, got %s" % [context, typeof(value)])
+		returned.append(str(value))
+	return returned
 
 ## This method is used during perform_action() or perform_async_action() to gather the combination
 ## of this action and its targets, parents, and interceptors

@@ -1,5 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://cc02ta53bypgm"]
+[gd_scene load_steps=5 format=3 uid="uid://cc02ta53bypgm"]
 
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_0cyym"]
 [ext_resource type="Script" uid="uid://dyk3dehb3twof" path="res://scripts/combatants/StatusEffect.gd" id="2_kfjjq"]
 
@@ -10,6 +11,7 @@ font_size = 12
 custom_minimum_size = Vector2(24, 24)
 texture = ExtResource("1_0cyym")
 expand_mode = 1
+theme = ExtResource("1_1k9pz")
 script = ExtResource("2_kfjjq")
 
 [node name="StatusChargeLabel" type="Label" parent="."]
@@ -19,6 +21,7 @@ offset_left = 12.0
 offset_top = 14.0
 offset_right = 33.0
 offset_bottom = 31.0
+theme = ExtResource("1_1k9pz")
 theme_override_font_sizes/font_size = 12
 text = "999"
 label_settings = SubResource("LabelSettings_006od")
@@ -31,6 +34,7 @@ offset_left = 12.0
 offset_top = -1.0
 offset_right = 33.0
 offset_bottom = 16.0
+theme = ExtResource("1_1k9pz")
 theme_override_font_sizes/font_size = 12
 label_settings = SubResource("LabelSettings_006od")
 horizontal_alignment = 1

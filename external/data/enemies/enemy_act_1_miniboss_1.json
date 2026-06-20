@@ -45,7 +45,7 @@
         "enemy_health_max": 100,
         "enemy_initial_status_effects": {},
         "enemy_is_minion": false,
-        "enemy_name": "Act 1 Miniboss",
+        "enemy_name": "第一幕小Boss",
         "enemy_object_id": "",
         "enemy_texture_path": "external/sprites/enemies/enemy_green_medium.png",
         "enemy_type": 1,

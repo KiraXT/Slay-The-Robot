@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://btxmfagad05n5"]
+[gd_scene load_steps=10 format=3 uid="uid://btxmfagad05n5"]
 
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_7f6u3"]
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_n7s1f"]
 [ext_resource type="Script" uid="uid://k4n0whn5t0m" path="res://scripts/ui/Card.gd" id="1_u8ksl"]
 [ext_resource type="PackedScene" uid="uid://daimkj082tvn0" path="res://scenes/ui/general/KeywordContainer.tscn" id="3_6p3td"]
 [ext_resource type="Script" uid="uid://c5i0sjwlko88l" path="res://addons/label_font_auto_sizer/rich_label_auto_sizer.gd" id="3_8gkbw"]
@@ -65,6 +66,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 144.0
 offset_bottom = 184.0
+theme = ExtResource("1_n7s1f")
 script = ExtResource("1_u8ksl")
 
 [node name="Pivot" type="Node2D" parent="."]
@@ -84,6 +86,7 @@ offset_left = -72.0
 offset_top = -90.0
 offset_right = 72.0
 offset_bottom = 94.0
+theme = ExtResource("1_n7s1f")
 
 [node name="CardGlow" type="ColorRect" parent="Pivot/CardVisual"]
 unique_name_in_owner = true

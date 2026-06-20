@@ -17,7 +17,7 @@
             "interceptor_vulnerable"
         ],
         "status_effect_is_visible": true,
-        "status_effect_name": "vulnerable",
+        "status_effect_name": "易伤",
         "status_effect_negative_charges_texture_path": "",
         "status_effect_player_actions": [],
         "status_effect_priority": 0,

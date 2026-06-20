@@ -15,7 +15,7 @@
         "status_effect_healthbar_reserve_type": 0,
         "status_effect_interceptor_ids": [],
         "status_effect_is_visible": true,
-        "status_effect_name": "Attached Card",
+        "status_effect_name": "附着卡牌",
         "status_effect_negative_charges_texture_path": "",
         "status_effect_player_actions": [],
         "status_effect_priority": 0,

@@ -17,7 +17,7 @@
             "interceptor_duplicate_attacks"
         ],
         "status_effect_is_visible": true,
-        "status_effect_name": "Block on Special Discard",
+        "status_effect_name": "特殊弃置格挡",
         "status_effect_negative_charges_texture_path": "",
         "status_effect_player_actions": [],
         "status_effect_priority": 0,

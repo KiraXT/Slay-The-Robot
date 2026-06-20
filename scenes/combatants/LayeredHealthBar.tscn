@@ -1,5 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b0qk0vn81d0kp"]
+[gd_scene load_steps=4 format=3 uid="uid://b0qk0vn81d0kp"]
 
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://lltsdli24v32" path="res://scripts/combatants/LayeredHealthBar.gd" id="1_smklb"]
 [ext_resource type="Texture2D" uid="uid://bnukx08xo2hps" path="res://sprites/health_bar_frame.PNG" id="3_0ueoi"]
 
@@ -11,6 +12,7 @@ offset_left = -80.0
 offset_top = 72.0
 offset_right = 80.0
 offset_bottom = 88.0
+theme = ExtResource("1_1k9pz")
 script = ExtResource("1_smklb")
 metadata/_edit_group_ = true
 
@@ -64,6 +66,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_1k9pz")
 theme_override_font_sizes/font_size = 11
 text = "100/100"
 horizontal_alignment = 1

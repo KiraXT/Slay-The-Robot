@@ -45,7 +45,7 @@
         "enemy_health_max": 5,
         "enemy_initial_status_effects": {},
         "enemy_is_minion": false,
-        "enemy_name": "Blue Enemy",
+        "enemy_name": "蓝色敌人",
         "enemy_object_id": "",
         "enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
         "enemy_type": 0,

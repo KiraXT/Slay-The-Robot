@@ -1,10 +1,8 @@
 {
-	"patch_data": {
-
-	},
-	"properties": {
-		"keyword_child_keyword_object_ids": [],
-		"keyword_text_bb_code": "[color=orange]Discard[/color]\nPlaced in discard pile",
-		"object_id": "keyword_discard"
-	}
+    "patch_data": {},
+    "properties": {
+        "keyword_child_keyword_object_ids": [],
+        "keyword_text_bb_code": "[color=orange]弃牌[/color]\n置入弃牌堆",
+        "object_id": "keyword_discard"
+    }
 }

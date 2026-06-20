@@ -44,6 +44,7 @@ CONVERTERS = {
     'events': {
         'name': '事件',
         'excel_file': PROJECT_ROOT / "external/config/events.xlsx",
+        'csv_file': PROJECT_ROOT / "external/config/events.csv",
         'output_dir': PROJECT_ROOT / "external/data/events",
         'excel_module': 'excel_to_json_events',
         'converter_class': 'EventConverter',
@@ -109,7 +110,15 @@ def run_converter(converter_type: str, validate_only: bool = False) -> Tuple[boo
         error_count = len([e for e in errors if getattr(e, 'severity', 'ERROR') == 'ERROR'])
         return error_count == 0 and success, 0, 0, error_count
 
-    else:  # CSV模式 (仅卡牌支持)
+    else:  # CSV模式 (卡牌支持csv专用转换器，其它类型沿用各自转换器的csv读取逻辑)
+        if converter_type != 'cards':
+            module = __import__(config['excel_module'])
+            converter_class = getattr(module, config['converter_class'])
+            converter = converter_class()
+            success, errors = converter.convert()
+            error_count = len([e for e in errors if getattr(e, 'severity', 'ERROR') == 'ERROR'])
+            return error_count == 0 and success, 0, 0, error_count
+
         from csv_to_json import CardConverter
         converter = CardConverter()
         success, errors = converter.convert()

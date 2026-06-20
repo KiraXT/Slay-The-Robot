@@ -9,8 +9,8 @@
                 }
             }
         ],
-        "consumable_description": "Adds 10 block",
-        "consumable_name": "Block Item",
+        "consumable_description": "获得10点格挡",
+        "consumable_name": "格挡药剂",
         "consumable_rarity": 0,
         "consumable_requires_target": false,
         "consumable_texture_path": "res://icon.svg",
