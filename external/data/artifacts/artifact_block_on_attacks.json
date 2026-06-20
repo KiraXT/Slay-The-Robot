@@ -7,7 +7,7 @@
         "artifact_description": "每进行3次攻击获得5点格挡",
         "artifact_rarity": 1,
         "artifact_color_id": "color_red",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_red.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_block_on_attacks.png",
         "artifact_script_path": "res://scripts/artifacts/ArtifactBlockOnAttacks.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 3,

@@ -7,7 +7,7 @@
         "artifact_description": "右键将弃牌堆洗回抽牌堆。",
         "artifact_rarity": 1,
         "artifact_color_id": "color_green",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_green.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_right_click_shuffle_deck.png",
         "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

@@ -23,7 +23,7 @@
         "status_effect_priority": 0,
         "status_effect_script_path": "res://scripts/status_effects/BaseStatusEffect.gd",
         "status_effect_stacks": true,
-        "status_effect_texture_path": "",
+        "status_effect_texture_path": "external/sprites/status_effects/status_effect_weaken.png",
         "status_effect_type": 1
     }
 }
