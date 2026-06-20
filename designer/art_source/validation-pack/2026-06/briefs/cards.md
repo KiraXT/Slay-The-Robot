@@ -10,6 +10,7 @@ All card images in this phase are stand-alone square illustrations for the curre
 - palette accent: white-neutral base with combat red accent
 - mood: straightforward and immediate
 - gameplay read: basic attack
+- background handling: single large subject with minimal impact backdrop only, no scenic environment, safe margins, readable when reduced to the current card art window
 
 ## card_block_basic_art
 
@@ -19,6 +20,7 @@ All card images in this phase are stand-alone square illustrations for the curre
 - palette accent: white-neutral base with cool steel accent
 - mood: sturdy and reliable
 - gameplay read: basic block
+- background handling: single large subject with minimal backdrop and small impact cues, no scenic environment, safe margins, readable when reduced to the current card art window
 
 ## card_attack_big_art
 
@@ -28,6 +30,7 @@ All card images in this phase are stand-alone square illustrations for the curre
 - palette accent: orange accent with reward-gold secondary accent
 - mood: explosive, greedy, high impact
 - gameplay read: expensive strong attack with kill reward
+- background handling: single large subject with minimal burst backdrop and coin fragments, no scenic environment, safe margins, readable when reduced to the current card art window
 
 ## card_weaken_enemies_art
 
@@ -37,6 +40,7 @@ All card images in this phase are stand-alone square illustrations for the curre
 - palette accent: red base with sickly debuff accent
 - mood: tactical pressure
 - gameplay read: weaken or debuff
+- background handling: single large subject with minimal glitch pulse backdrop, no scenic environment, safe margins, readable when reduced to the current card art window
 
 ## card_grant_energy_art
 
@@ -46,6 +50,7 @@ All card images in this phase are stand-alone square illustrations for the curre
 - palette accent: red base with bright energy highlight
 - mood: efficient and empowering
 - gameplay read: gain energy
+- background handling: single large subject with minimal energy glow only, no scenic environment, safe margins, readable when reduced to the current card art window
 
 ## card_draft_random_attack_art
 
@@ -55,3 +60,4 @@ All card images in this phase are stand-alone square illustrations for the curre
 - palette accent: green base with bright selection accent
 - mood: clever and opportunistic
 - gameplay read: draft or discover an attack
+- background handling: single large subject with minimal selection flare and schematic fragments, no scenic environment, safe margins, readable when reduced to the current card art window

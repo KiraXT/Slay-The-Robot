@@ -8,6 +8,10 @@ hand-drawn adventure cartoon illustration, post-apocalyptic robot world, bold un
 
 no text, no letters, no numbers, no watermark, no card frame, no UI elements, single focal point, safe margins, clean readable silhouette
 
+## Icon-specific guidance
+
+centered composition, one dominant shape, high-contrast silhouette, transparent background, readable at 24-40px
+
 ## Per-asset fill-in fields
 
 - subject
