@@ -338,6 +338,43 @@ func set_health(health_amount: int, health_amount_max: int = player_health_max) 
 
 ### Deck
 
+func refresh_loaded_cards_from_prototypes() -> void:
+	for pile_name in ["player_deck", "player_draw", "player_discard", "player_exhaust", "player_hand"]:
+		var pile: Array[CardData] = get(pile_name)
+		for card_data in pile:
+			_refresh_loaded_card_from_prototype(card_data)
+
+func _refresh_loaded_card_from_prototype(card_data: CardData) -> void:
+	if card_data == null:
+		return
+
+	var prototype_card: CardData = Global.get_card_data_from_prototype(card_data.object_id)
+	if prototype_card == null:
+		return
+
+	var preserved_uid: String = card_data.object_uid
+	var preserved_parent_card: CardData = card_data.parent_card
+	var preserved_upgrade_amount: int = card_data.card_upgrade_amount
+	var preserved_energy_cost_until_played: int = card_data.card_energy_cost_until_played
+	var preserved_energy_cost_until_turn: int = card_data.card_energy_cost_until_turn
+	var preserved_energy_cost_until_combat: int = card_data.card_energy_cost_until_combat
+	var preserved_card_tags: Array[String] = card_data.card_tags.duplicate(true)
+
+	for property_name: String in prototype_card.get_serializable_properties().keys():
+		card_data.set(property_name, prototype_card.get(property_name))
+
+	card_data.object_uid = preserved_uid
+	card_data.parent_card = preserved_parent_card
+	card_data.card_tags = preserved_card_tags
+	card_data.card_upgrade_amount = 0
+
+	for _upgrade_index in preserved_upgrade_amount:
+		card_data.upgrade_card()
+
+	card_data.card_energy_cost_until_played = preserved_energy_cost_until_played
+	card_data.card_energy_cost_until_turn = preserved_energy_cost_until_turn
+	card_data.card_energy_cost_until_combat = preserved_energy_cost_until_combat
+
 func get_pile(card_pick_type: int) -> Array[CardData]:
 	match card_pick_type:
 		ActionBasePickCards.CARD_PICK_TYPES.HAND:

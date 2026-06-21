@@ -369,6 +369,7 @@ func load_game(file_dir: String = SAVE_DIR_PATH, file_name: String = SAVE_FILE_N
 		var player_data: PlayerData = PlayerData.new()
 		var player_dict: Dictionary = load_json(file_dir, file_name)
 		player_data.set_serializable_properties_from_json_patch(player_dict)
+		player_data.refresh_loaded_cards_from_prototypes()
 		
 		# hook everything back up and regenerate caches
 		Global.player_data = player_data

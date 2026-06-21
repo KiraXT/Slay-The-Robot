@@ -6,6 +6,8 @@ extends Control
 
 @onready var map = $%Map
 
+var suspended_for_card_pick: bool = false
+
 # reward values; These are sorted into mutually exclusive groups
 # they can be added to via ActionGrantRewards to allow things to affect them
 # call populate_rewards() to actually generate RewardButtons UI elements
@@ -28,6 +30,8 @@ func _ready():
 	
 	Signals.reward_grant_requested.connect(_on_reward_grant_requested)
 	Signals.reward_clear_requested.connect(_on_reward_clear_requested)
+	Signals.card_pick_requested.connect(_on_card_pick_requested)
+	Signals.card_pick_confirmed.connect(_on_card_pick_confirmed)
 	
 	continue_button.button_up.connect(_on_continue_button_up)
 
@@ -215,3 +219,18 @@ func _on_continue_button_up():
 
 func _on_map_location_selected(_location_data: LocationData):
 	visible = false
+
+func _on_card_pick_requested(card_pick_action: ActionBasePickCards):
+	if not visible:
+		return
+	if card_pick_action == null:
+		return
+	suspended_for_card_pick = true
+	visible = false
+
+func _on_card_pick_confirmed():
+	if not suspended_for_card_pick:
+		return
+	suspended_for_card_pick = false
+	if len(reward_container.get_children()) > 0:
+		visible = true

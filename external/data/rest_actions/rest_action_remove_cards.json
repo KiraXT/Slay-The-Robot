@@ -31,9 +31,11 @@
                     ],
                     "card_pick_text": "选择 {0} 张要移除的牌。已选择 {1} 张牌",
                     "card_pick_type": 1.0,
+                    "force_manual_selection": true,
                     "max_card_amount": 2.0,
                     "min_card_amount": 1.0,
                     "min_cards_are_required_for_action": true,
+                    "quick_pick": false,
                     "random_selection": false,
                     "use_parent_card": false
                 }

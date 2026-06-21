@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://byvjxydfrccd2"]
+[gd_scene load_steps=7 format=3 uid="uid://byvjxydfrccd2"]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://dd3ox284x54mg" path="res://scripts/combatants/fades/TextFade.gd" id="1_lxaif"]
+[ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="3_t5fkr"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_4a8or"]
+font = ExtResource("3_t5fkr")
 
 [sub_resource type="Animation" id="Animation_ceare"]
 resource_name = "fade"

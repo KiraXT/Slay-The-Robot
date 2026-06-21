@@ -1,7 +1,8 @@
-[gd_scene load_steps=49 format=3 uid="uid://bg7gmq537qyn5"]
+[gd_scene load_steps=50 format=3 uid="uid://bg7gmq537qyn5"]
 
 [ext_resource type="Script" uid="uid://ckfi22o2jit0b" path="res://scripts/Root.gd" id="1_ak6de"]
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="2_bi5lp"]
+[ext_resource type="Theme" path="res://themes/run_screen_theme.tres" id="2_o8g8u"]
 [ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="2_k6r9m"]
 [ext_resource type="Script" uid="uid://dw0xyfu580mkb" path="res://scripts/ui/menus/TitleScreen.gd" id="2_m6atk"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="3_8ax2e"]
@@ -218,6 +219,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 1200.0
 offset_bottom = 700.0
+theme = ExtResource("2_bi5lp")
 script = ExtResource("2_m6atk")
 metadata/_edit_lock_ = true
 
@@ -673,6 +675,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+theme = ExtResource("2_o8g8u")
 script = ExtResource("12_elxq6")
 
 [node name="Combat" type="Control" parent="RunScreen"]
@@ -1285,6 +1288,7 @@ offset_bottom = 392.0
 theme = ExtResource("2_bi5lp")
 theme_override_fonts/normal_font = ExtResource("2_k6r9m")
 theme_override_font_sizes/normal_font_size = 16
+mouse_filter = 2
 bbcode_enabled = true
 text = "[color=green]Dialogue Prompt Rich Text[/color]"
 

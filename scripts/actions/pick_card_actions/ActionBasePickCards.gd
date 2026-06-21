@@ -99,6 +99,7 @@ func perform_action():
 	var min_cards_are_required: bool = get_min_cards_are_required_for_action()
 	var random_selection: bool = get_action_value("random_selection", false) 	# to select the cards randomly without player input
 	var min_card_amount: int = get_card_pick_min_amount()
+	var force_manual_selection: bool = get_action_value("force_manual_selection", false)
 	
 	if len(pickable_cards) < min_card_amount:
 		# not enough cards
@@ -114,11 +115,20 @@ func perform_action():
 			perform_async_action()
 			return
 	elif len(pickable_cards) == min_card_amount:
-		# exactly enough cards; automatically select them
-		picked_cards = pickable_cards
-		await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
-		perform_async_action()
-		return
+		if force_manual_selection and not random_selection:
+			# some screens, like rest-site deck editing, should always let the player confirm manually
+			async_awaiting = true
+			Signals.card_pick_requested.emit(self)
+			await Signals.card_pick_confirmed
+			async_awaiting = false
+			perform_async_action()
+			return
+		else:
+			# exactly enough cards; automatically select them
+			picked_cards = pickable_cards
+			await Global.get_tree().process_frame # add a delay to allow ActionHandler to catch up with async to avoid infinite hang
+			perform_async_action()
+			return
 	else:
 		# more than min cards
 		if random_selection:
@@ -205,7 +215,7 @@ func is_quick_pick() -> bool:
 	return false
 
 func get_card_pick_type() -> int:
-	return get_action_value("card_pick_type", CARD_PICK_TYPES.HAND)
+	return int(get_action_value("card_pick_type", CARD_PICK_TYPES.HAND))
 	
 func get_card_pick_validator_data() -> Array:
 	# returns validators applied to any cards the user can pick
@@ -217,15 +227,15 @@ func get_min_cards_are_required_for_action() -> int:
 
 ## The minimum number of cards required for this card pick to be 
 func get_card_pick_min_amount() -> int:
-	return get_action_value("min_card_amount", 0)
+	return int(get_action_value("min_card_amount", 0))
 
 func get_card_pick_max_amount() -> int:
-	return get_action_value("max_card_amount", PlayerData.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX)
+	return int(get_action_value("max_card_amount", PlayerData.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX))
 
 ## Gets how many cards are available after a card filter is applied. Useful for things like
 ## getting first X cards from top of discard/draw pile
 func get_pickable_cards_max_amount() -> int:
-	return get_action_value("pickable_cards_max_amount", -1)
+	return int(get_action_value("pickable_cards_max_amount", -1))
 
 func get_pickable_cards() -> Array[CardData]:
 	# gets all cards that meet pickable criteria from a given input list of cards

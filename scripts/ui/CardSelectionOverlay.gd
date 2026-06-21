@@ -25,6 +25,8 @@ func _ready():
 func _on_card_pick_requested(card_pick_action: ActionBasePickCards):
 	if card_pick_action != null:
 		if ActionBasePickCards.DECK_PICK_TYPES.has(card_pick_action.get_card_pick_type()):
+			move_to_front()
+			z_index = 100
 			set_card_mode(CARD_MODES.SELECT)
 			current_card_pick_action = card_pick_action
 			card_picking_label.text = current_card_pick_action.get_card_pick_text()

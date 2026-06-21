@@ -9,6 +9,7 @@ import pandas as pd
 import json
 import os
 import sys
+import ast
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
@@ -332,6 +333,62 @@ class CardValidator:
 class CardConverter:
     """Converts Excel data to JSON format"""
 
+    ACTION_PICK_CARD_PRESETS = {
+        "card_draft_random_attack": {
+            "max_card_amount": 1,
+            "min_card_amount": 1,
+            "draft_max_card_amount": 3,
+            "min_cards_are_required_for_action": True,
+            "draft_from_card_pool": True,
+            "random_selection": False,
+            "quick_pick": True,
+            "card_pick_type": 8,
+            "card_pick_text": "Select An Attack Card",
+            "action_data": [
+                ("ActionAddCardsToHand", {}),
+                ("ActionChangeCardEnergies", {"card_energy_cost_until_combat": 0}),
+            ],
+            "validator_data": [
+                ("ValidatorCardType", {"card_types": [0]}),
+                ("ValidatorCardRarity", {"card_rarities_exclude": [4]}),
+            ],
+        },
+        "card_draft_red_card": {
+            "max_card_amount": 1,
+            "min_card_amount": 1,
+            "draft_max_card_amount": 5,
+            "min_cards_are_required_for_action": True,
+            "draft_from_card_pool": True,
+            "random_selection": False,
+            "quick_pick": True,
+            "card_pick_type": 8,
+            "card_pick_text": "Select A Red Card",
+            "draft_card_pack_id": "card_pack_red",
+            "action_data": [
+                ("ActionAddCardsToHand", {}),
+                ("ActionChangeCardEnergies", {"card_energy_cost_until_combat": 0}),
+            ],
+        },
+        "card_draft_random_player_pool": {
+            "max_card_amount": 1,
+            "min_card_amount": 1,
+            "draft_max_card_amount": 1,
+            "min_cards_are_required_for_action": True,
+            "draft_from_card_pool": True,
+            "random_selection": True,
+            "quick_pick": True,
+            "card_pick_type": 8,
+            "card_pick_text": "Select A Card",
+            "draft_use_player_draft": True,
+            "draft_is_weighted": False,
+            "draft_use_pity_system": False,
+            "action_data": [
+                ("ActionAddCardsToHand", {}),
+                ("ActionChangeCardEnergies", {"card_energy_cost_until_combat": 0}),
+            ],
+        },
+    }
+
     def __init__(self):
         self.validator = CardValidator()
         self.all_errors: List[ValidationError] = []
@@ -435,53 +492,35 @@ class CardConverter:
             'money_amount', 'heal_amount', 'damage_random',
             'random_consumable', 'fill_all_slots', 'ignored_interceptor_ids',
             'status_effect_object_id', 'status_force_apply_new_effect',
-            'multiplier_offset'
+            'multiplier_offset', 'min_card_amount', 'max_card_amount',
+            'pickable_cards_max_amount'
         ]
 
         for field in value_fields:
             if field in row and pd.notna(row[field]):
-                val = row[field]
-                # Handle boolean strings
-                if isinstance(val, str):
-                    if val.lower() in ('true', 'yes'):
-                        card_values[field] = True
-                    elif val.lower() in ('false', 'no'):
-                        card_values[field] = False
-                    else:
-                        try:
-                            card_values[field] = int(val)
-                        except ValueError:
-                            card_values[field] = val
-                elif isinstance(val, (int, float)):
-                    # Convert numbers to int to avoid float in JSON
-                    try:
-                        card_values[field] = int(val)
-                    except (ValueError, TypeError):
-                        card_values[field] = val
-                else:
-                    card_values[field] = val
+                val = self._parse_literal(row[field])
+                if isinstance(val, float) and val.is_integer():
+                    val = int(val)
+                card_values[field] = val
 
         # Build card_play_actions
         actions = self._parse_actions(row)
 
         # Build upgrade improvements
         upgrade_improvements = {}
-        if 'upgrade_damage' in row and pd.notna(row['upgrade_damage']):
-            upgrade_improvements['damage'] = int(row['upgrade_damage'])
-        if 'upgrade_block' in row and pd.notna(row['upgrade_block']):
-            upgrade_improvements['block'] = int(row['upgrade_block'])
-        if 'upgrade_number_of_attacks' in row and pd.notna(row['upgrade_number_of_attacks']):
-            upgrade_improvements['number_of_attacks'] = int(row['upgrade_number_of_attacks'])
-        if 'upgrade_draw_count' in row and pd.notna(row['upgrade_draw_count']):
-            upgrade_improvements['draw_count'] = int(row['upgrade_draw_count'])
-        if 'upgrade_status_charge_amount' in row and pd.notna(row['upgrade_status_charge_amount']):
-            upgrade_improvements['status_charge_amount'] = int(row['upgrade_status_charge_amount'])
-        if 'upgrade_status_secondary_charge_amount' in row and pd.notna(row['upgrade_status_secondary_charge_amount']):
-            upgrade_improvements['status_secondary_charge_amount'] = int(row['upgrade_status_secondary_charge_amount'])
-        if 'upgrade_damage_random' in row and pd.notna(row['upgrade_damage_random']):
-            upgrade_improvements['damage_random'] = int(row['upgrade_damage_random'])
-        if 'upgrade_multiplier_offset' in row and pd.notna(row['upgrade_multiplier_offset']):
-            upgrade_improvements['multiplier_offset'] = int(row['upgrade_multiplier_offset'])
+        for field_name in row.index:
+            if not str(field_name).startswith('upgrade_'):
+                continue
+            if field_name == 'upgrade_amount_max':
+                continue
+            if pd.isna(row[field_name]):
+                continue
+
+            improvement_key = str(field_name)[len('upgrade_'):]
+            improvement_value = self._parse_literal(row[field_name])
+            if isinstance(improvement_value, float) and improvement_value.is_integer():
+                improvement_value = int(improvement_value)
+            upgrade_improvements[improvement_key] = improvement_value
 
         # Build first upgrade property changes
         first_upgrade_changes = {}
@@ -642,6 +681,72 @@ class CardConverter:
         else:
             return f"res://scripts/actions/{action_type}.gd"
 
+    def _parse_literal(self, value: Any) -> Any:
+        if pd.isna(value):
+            return None
+        if isinstance(value, (dict, list, int, float, bool)):
+            return value
+        text = str(value).strip()
+        if text == "":
+            return None
+        lowered = text.lower()
+        if lowered == "true":
+            return True
+        if lowered == "false":
+            return False
+        try:
+            return ast.literal_eval(text)
+        except (ValueError, SyntaxError):
+            return text
+
+    def _parse_pick_card_action_data(self, row: pd.Series) -> List[Dict[str, Any]]:
+        action_data: List[Dict[str, Any]] = []
+        child_specs: List[Tuple[str, Dict[str, Any]]] = []
+
+        for index in range(1, 4):
+            action_type_key = f"pick_child_action_{index}_type"
+            action_params_key = f"pick_child_action_{index}_params"
+            action_type = row.get(action_type_key, "")
+            if pd.isna(action_type) or str(action_type).strip() == "":
+                continue
+            action_type = str(action_type).strip()
+            raw_params = self._parse_literal(row.get(action_params_key, {}))
+            params = raw_params if isinstance(raw_params, dict) else {}
+            child_specs.append((action_type, params))
+
+        if len(child_specs) == 0:
+            preset = self.ACTION_PICK_CARD_PRESETS.get(str(row.get("object_id", "")).strip(), {})
+            child_specs = preset.get("action_data", [])
+
+        for action_type, params in child_specs:
+            action_data.append({self._get_action_path(action_type): params})
+
+        return action_data
+
+    def _parse_pick_card_validator_data(self, row: pd.Series) -> List[Dict[str, Any]]:
+        validator_data: List[Dict[str, Any]] = []
+        validator_specs: List[Tuple[str, Dict[str, Any]]] = []
+
+        for index in range(1, 4):
+            validator_type_key = f"pick_validator_{index}_type"
+            validator_params_key = f"pick_validator_{index}_params"
+            validator_type = row.get(validator_type_key, "")
+            if pd.isna(validator_type) or str(validator_type).strip() == "":
+                continue
+            validator_type = str(validator_type).strip()
+            raw_params = self._parse_literal(row.get(validator_params_key, {}))
+            params = raw_params if isinstance(raw_params, dict) else {}
+            validator_specs.append((validator_type, params))
+
+        if len(validator_specs) == 0:
+            preset = self.ACTION_PICK_CARD_PRESETS.get(str(row.get("object_id", "")).strip(), {})
+            validator_specs = preset.get("validator_data", [])
+
+        for validator_type, params in validator_specs:
+            validator_data.append({f"res://scripts/validators/card/{validator_type}.gd": params})
+
+        return validator_data
+
     def _parse_actions(self, row: pd.Series) -> List[Dict]:
         """Parse action configuration from row"""
         actions = []
@@ -715,6 +820,62 @@ class CardConverter:
                 params['passed_action_data'] = []
                 params['failed_action_data'] = []
 
+        elif action_type == "ActionPickCards":
+            card_id = str(row.get('object_id', '')).strip()
+            preset = self.ACTION_PICK_CARD_PRESETS.get(card_id, {})
+
+            field_names = [
+                'min_card_amount',
+                'max_card_amount',
+                'pickable_cards_max_amount',
+                'draft_max_card_amount',
+                'card_pick_type',
+            ]
+            for field_name in field_names:
+                raw_value = row.get(field_name, None)
+                if pd.notna(raw_value):
+                    params[field_name] = int(raw_value)
+                elif field_name in preset:
+                    params[field_name] = preset[field_name]
+
+            bool_field_names = [
+                'min_cards_are_required_for_action',
+                'draft_from_card_pool',
+                'random_selection',
+                'quick_pick',
+                'draft_use_player_draft',
+                'draft_is_weighted',
+                'draft_use_pity_system',
+            ]
+            for field_name in bool_field_names:
+                raw_value = row.get(field_name, None)
+                if pd.notna(raw_value):
+                    parsed = self._parse_literal(raw_value)
+                    params[field_name] = bool(parsed)
+                elif field_name in preset:
+                    params[field_name] = preset[field_name]
+
+            string_field_names = ['card_pick_text', 'draft_card_pack_id']
+            for field_name in string_field_names:
+                raw_value = row.get(field_name, None)
+                if pd.notna(raw_value) and str(raw_value).strip() != '':
+                    params[field_name] = str(raw_value)
+                elif field_name in preset:
+                    params[field_name] = preset[field_name]
+
+            params['action_data'] = self._parse_pick_card_action_data(row)
+            validator_data = self._parse_pick_card_validator_data(row)
+            if len(validator_data) > 0:
+                params['validator_data'] = validator_data
+
+            if len(params.get('action_data', [])) == 0:
+                self.all_errors.append(ValidationError(
+                    card_id=card_id,
+                    field='action_type',
+                    message='ActionPickCards missing action_data; exported card will not perform follow-up actions',
+                    severity='WARNING'
+                ))
+
         # Build final action with correct path
         action_path = self._get_action_path(action_type)
         if action_type.startswith("Action"):
@@ -753,6 +914,17 @@ def create_sample_excel():
         # Actions
         'action_type', 'action_time_delay', 'action_target_override',
         'action_on_lethal', 'validator_type',
+        'min_card_amount', 'max_card_amount', 'pickable_cards_max_amount',
+        'draft_max_card_amount', 'min_cards_are_required_for_action',
+        'draft_from_card_pool', 'random_selection', 'quick_pick',
+        'card_pick_type', 'card_pick_text', 'draft_card_pack_id',
+        'draft_use_player_draft', 'draft_is_weighted', 'draft_use_pity_system',
+        'pick_child_action_1_type', 'pick_child_action_1_params',
+        'pick_child_action_2_type', 'pick_child_action_2_params',
+        'pick_child_action_3_type', 'pick_child_action_3_params',
+        'pick_validator_1_type', 'pick_validator_1_params',
+        'pick_validator_2_type', 'pick_validator_2_params',
+        'pick_validator_3_type', 'pick_validator_3_params',
 
         # Upgrades
         'card_upgrade_amount_max', 'first_upgrade_energy_cost',

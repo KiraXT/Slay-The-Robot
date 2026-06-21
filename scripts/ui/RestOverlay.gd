@@ -6,10 +6,13 @@ extends Control
 
 @onready var map = $%Map
 
+var suspended_for_card_pick: bool = false
+
 func _ready():
 	Signals.combat_started.connect(_on_combat_started)
-
 	Signals.map_location_selected.connect(_on_map_location_selected)
+	Signals.card_pick_requested.connect(_on_card_pick_requested)
+	Signals.card_pick_confirmed.connect(_on_card_pick_confirmed)
 	continue_button.button_up.connect(_on_continue_button_up)
 
 func _on_map_location_selected(_location_data: LocationData):
@@ -74,3 +77,20 @@ func _on_continue_button_up():
 	else:
 		visible = false
 		Signals.run_victory.emit()
+
+func _on_card_pick_requested(card_pick_action: ActionBasePickCards):
+	if not visible:
+		return
+	if card_pick_action == null:
+		return
+	if ActionBasePickCards.DECK_PICK_TYPES.has(card_pick_action.get_card_pick_type()):
+		suspended_for_card_pick = true
+		visible = false
+
+func _on_card_pick_confirmed():
+	if not suspended_for_card_pick:
+		return
+	suspended_for_card_pick = false
+	if Global.get_player_location_data() != null and Global.get_player_location_data().location_type == LocationData.LOCATION_TYPES.REST_SITE:
+		visible = true
+		populate_rest_actions()

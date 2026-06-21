@@ -1,10 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://cc02ta53bypgm"]
+[gd_scene load_steps=6 format=3 uid="uid://cc02ta53bypgm"]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_0cyym"]
 [ext_resource type="Script" uid="uid://dyk3dehb3twof" path="res://scripts/combatants/StatusEffect.gd" id="2_kfjjq"]
+[ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="4_83l73"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_006od"]
+font = ExtResource("4_83l73")
 font_size = 12
 
 [node name="StatusEffect" type="TextureRect"]
