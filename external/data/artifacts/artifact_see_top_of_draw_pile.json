@@ -21,7 +21,10 @@
         "artifact_turn_end_actions": [],
         "artifact_first_turn_actions": [
             {
-                "res://scripts/actions/custom_ui_actions/ActionCustomUI.gd": {}
+                "res://scripts/actions/custom_ui_actions/ActionCustomUI.gd": {
+                    "custom_ui_object_id": "custom_ui_see_top_of_draw_pile",
+                    "enable_custom_ui": true
+                }
             }
         ],
         "artifact_end_of_combat_actions": [],
