@@ -7,7 +7,7 @@
         "artifact_description": "查看抽牌堆顶的牌",
         "artifact_rarity": 1,
         "artifact_color_id": "color_blue",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_blue.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_see_top_of_draw_pile.png",
         "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

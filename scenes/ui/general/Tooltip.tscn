@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://dqpfi1s7dxwe" path="res://scripts/ui/general/Tooltip.gd" id="2_rty5c"]
 
 [node name="Tooltip" type="PanelContainer"]
-self_modulate = Color(0.392157, 0.392157, 0.392157, 1)
+self_modulate = Color(1, 1, 1, 1)
 custom_minimum_size = Vector2(240, 0)
 offset_left = 384.0
 offset_top = 320.0

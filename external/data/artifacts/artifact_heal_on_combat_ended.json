@@ -7,7 +7,7 @@
         "artifact_description": "战斗结束时获得5点生命",
         "artifact_rarity": 1,
         "artifact_color_id": "color_white",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_heal_on_combat_ended.png",
         "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

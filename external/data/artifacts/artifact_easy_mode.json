@@ -7,7 +7,7 @@
         "artifact_description": "将敌人生命设为1",
         "artifact_rarity": 5,
         "artifact_color_id": "color_white",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_easy_mode.png",
         "artifact_script_path": "res://scripts/artifacts/ArtifactEasyMode.gd",
         "artifact_counter": 999,
         "artifact_counter_max": 999,

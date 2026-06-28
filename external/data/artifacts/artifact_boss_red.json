@@ -7,7 +7,7 @@
         "artifact_description": "测试红色Boss遗物。",
         "artifact_rarity": 4,
         "artifact_color_id": "color_red",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_red.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_boss_red.png",
         "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

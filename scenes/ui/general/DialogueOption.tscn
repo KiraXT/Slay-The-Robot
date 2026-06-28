@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://4eigvngvl3f6" path="res://scripts/ui/general/DialogueOption.gd" id="2_8yv2b"]
 
 [node name="DialogueOption" type="PanelContainer"]
-self_modulate = Color(0.392157, 0.392157, 0.392157, 1)
+self_modulate = Color(1, 1, 1, 1)
 custom_minimum_size = Vector2(240, 0)
 offset_left = 384.0
 offset_top = 320.0

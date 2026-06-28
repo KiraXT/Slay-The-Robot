@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cks4rsneoyf8v" path="res://scripts/ui/general/KeywordTooltip.gd" id="2_tcn0y"]
 
 [node name="KeywordTooltip" type="PanelContainer"]
-self_modulate = Color(0.392157, 0.392157, 0.392157, 1)
+self_modulate = Color(1, 1, 1, 1)
 custom_minimum_size = Vector2(240, 0)
 offset_left = 384.0
 offset_top = 320.0

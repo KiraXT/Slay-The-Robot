@@ -7,7 +7,7 @@
         "artifact_description": "在休息点永久提升攻击",
         "artifact_rarity": 1,
         "artifact_color_id": "color_orange",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_orange.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_increase_attack_on_rest.png",
         "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 3,

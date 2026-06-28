@@ -7,7 +7,7 @@
         "artifact_description": "测试绿色商店遗物。",
         "artifact_rarity": 5,
         "artifact_color_id": "color_green",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_green.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_shop_green.png",
         "artifact_script_path": "res://scripts/artifacts/BaseArtifact.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

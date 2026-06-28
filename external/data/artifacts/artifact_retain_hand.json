@@ -7,7 +7,7 @@
         "artifact_description": "回合结束时手牌保留",
         "artifact_rarity": 4,
         "artifact_color_id": "color_white",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_retain_hand.png",
         "artifact_script_path": "res://scripts/artifacts/ArtifactRetainHand.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

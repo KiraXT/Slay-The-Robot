@@ -7,7 +7,7 @@
         "artifact_description": "击杀敌人时抽1张牌",
         "artifact_rarity": 2,
         "artifact_color_id": "color_white",
-        "artifact_texture_path": "external/sprites/artifacts/artifact_white.png",
+        "artifact_texture_path": "external/sprites/artifacts/artifact_draw_on_kill.png",
         "artifact_script_path": "res://scripts/artifacts/ArtifactDrawOnKill.gd",
         "artifact_counter": 0,
         "artifact_counter_max": 1,

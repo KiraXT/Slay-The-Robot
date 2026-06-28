@@ -96,7 +96,7 @@ offset_left = -8.0
 offset_top = -8.0
 offset_right = 152.0
 offset_bottom = 192.0
-color = Color(0.909804, 0.901961, 0.992157, 0.392157)
+color = Color(0.262745, 0.811765, 0.964706, 0.45)
 
 [node name="ColorBackground" type="ColorRect" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
@@ -110,7 +110,7 @@ offset_left = 4.0
 offset_top = 4.0
 offset_right = 140.0
 offset_bottom = 180.0
-color = Color(0.207843, 0.207843, 0.207843, 1)
+color = Color(1, 1, 1, 0.96)
 
 [node name="CardDescription" type="RichTextLabel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
@@ -119,6 +119,7 @@ offset_left = 8.0
 offset_top = 112.0
 offset_right = 136.0
 offset_bottom = 184.0
+theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
 theme_override_font_sizes/normal_font_size = 12
 bbcode_enabled = true
 text = "100/100
@@ -135,7 +136,7 @@ offset_left = -8.0
 offset_top = -8.0
 offset_right = 16.0
 offset_bottom = 16.0
-color = Color(0.0784314, 0.0784314, 0.0784314, 1)
+color = Color(1, 0.686275, 0.141176, 1)
 metadata/_edit_group_ = true
 
 [node name="EnergyCost" type="Label" parent="Pivot/CardVisual/EnergySprite"]
@@ -143,6 +144,7 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_right = 24.0
 offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/line_spacing = -3
 theme_override_font_sizes/font_size = 12
 text = "3"
@@ -166,6 +168,7 @@ offset_left = -16.0
 offset_top = -4.0
 offset_right = 112.0
 offset_bottom = 12.0
+theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
 theme_override_font_sizes/normal_font_size = 11
 bbcode_enabled = true
 text = "Card Name"
@@ -182,6 +185,7 @@ offset_left = 8.0
 offset_top = 95.0
 offset_right = 136.0
 offset_bottom = 112.0
+theme_override_colors/font_color = Color(0.121569, 0.156863, 0.207843, 1)
 theme_override_constants/line_spacing = -3
 theme_override_font_sizes/font_size = 12
 text = "Hit and Run"
