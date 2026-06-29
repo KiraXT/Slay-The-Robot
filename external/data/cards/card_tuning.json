@@ -1,0 +1,57 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "card_tuning",
+        "object_uid": "",
+        "card_name": "调音",
+        "card_description": "选择1张手牌。本场战斗中其伤害和格挡提高 [improve_amount]。放逐。",
+        "card_type": 1,
+        "card_rarity": 2,
+        "card_color_id": "color_green",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": false,
+        "card_exhausts": true,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/green/card_green.png",
+        "card_keyword_object_ids": [],
+        "card_values": {
+            "improve_amount": 2,
+            "min_card_amount": 1,
+            "max_card_amount": 1
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                    "min_card_amount": 1,
+                    "max_card_amount": 1,
+                    "min_cards_are_required_for_action": true,
+                    "card_pick_type": 0,
+                    "card_pick_text": "选择 {0} 张牌调音。已选择 {1} 张牌",
+                    "action_data": [
+                        {
+                            "res://scripts/actions/cardset_actions/ActionImproveCardValues.gd": {
+                                "improve_parent_card": false,
+                                "card_value_improvements": {
+                                    "damage": 2,
+                                    "block": 2
+                                }
+                            }
+                        }
+                    ],
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {
+            "improve_amount": 1
+        },
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}
