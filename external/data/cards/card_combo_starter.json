@@ -44,7 +44,28 @@
         "card_upgrade_value_improvements": {
             "damage": 2
         },
-        "card_first_upgrade_property_changes": {},
+        "card_first_upgrade_property_changes": {
+            "card_play_actions": [
+                {
+                    "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                        "target_override": 2,
+                        "status_effect_object_id": "status_effect_combo_starter",
+                        "status_charge_amount": 1,
+                        "status_custom_values": {
+                            "card_type_filter": [
+                                0
+                            ],
+                            "value_modifiers": {
+                                "damage": 5
+                            },
+                            "consume_charge_on_trigger": true,
+                            "clear_on_player_turn_end": true,
+                            "ignore_duplicate_plays": true
+                        }
+                    }
+                }
+            ]
+        },
         "card_upgrade_amount": 0,
         "card_upgrade_amount_max": 1,
         "card_first_shuffle_priority": 0

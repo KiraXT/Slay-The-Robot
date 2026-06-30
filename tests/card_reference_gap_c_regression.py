@@ -76,6 +76,7 @@ def main() -> None:
     assert combo_status["status_effect_stacks"] is True
     assert combo_status["status_effect_allows_multiples"] is False
     assert combo_status["status_effect_decay_rate"] == 0
+    assert combo_status["status_effect_texture_path"] == ""
 
     combo = load_card("card_combo_starter")
     assert combo["card_name"] == "连段起手"
@@ -100,6 +101,17 @@ def main() -> None:
     assert custom["consume_charge_on_trigger"] is True
     assert custom["clear_on_player_turn_end"] is True
     assert custom["ignore_duplicate_plays"] is True
+
+    upgrade_changes = combo["card_first_upgrade_property_changes"]
+    assert "card_play_actions" in upgrade_changes
+    upgraded_payloads = [
+        child
+        for key, child in walk(upgrade_changes["card_play_actions"])
+        if key == APPLY_STATUS_ACTION
+    ]
+    assert len(upgraded_payloads) == 1
+    upgraded_custom = upgraded_payloads[0]["status_custom_values"]
+    assert upgraded_custom["value_modifiers"] == {"damage": 5}
 
     assert csv_ids().count("card_combo_starter") == 1
 
