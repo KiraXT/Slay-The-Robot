@@ -55,7 +55,8 @@ VALID_ACTIONS = [
     "ActionApplyStatus", "ActionReshuffle", "ActionAddConsumable",
     "ActionAddMoney", "ActionAddHealth", "ActionValidator",
     "ActionAttachCardsOntoEnemy", "ActionImproveCardValues",
-    "ActionVariableCostModifier", "ActionDirectDamage", "ActionEndTurn"
+    "ActionVariableCostModifier", "ActionTargetStatusValueModifier",
+    "ActionDirectDamage", "ActionEndTurn"
 ]
 
 # Valid validators
@@ -333,6 +334,15 @@ class CardValidator:
 class CardConverter:
     """Converts Excel data to JSON format"""
 
+    COMPLEX_JSON_COLUMNS = {
+        "card_values_json": "card_values",
+        "card_play_actions_json": "card_play_actions",
+        "card_draw_actions_json": "card_draw_actions",
+        "card_discard_actions_json": "card_discard_actions",
+        "card_retain_actions_json": "card_retain_actions",
+        "card_listeners_json": "card_listeners",
+    }
+
     ACTION_PICK_CARD_PRESETS = {
         "card_draft_random_attack": {
             "max_card_amount": 1,
@@ -564,7 +574,24 @@ class CardConverter:
             }
         }
 
+        properties = json_data["properties"]
+        for column, property_name in self.COMPLEX_JSON_COLUMNS.items():
+            parsed_value = self._parse_complex_json_column(row, column, card_id)
+            if parsed_value is not None:
+                properties[property_name] = parsed_value
+
         return json_data
+
+    def _parse_complex_json_column(self, row: pd.Series, column: str, card_id: str) -> Optional[Any]:
+        if column not in row or pd.isna(row[column]):
+            return None
+        text = str(row[column]).strip()
+        if text == "" or text.lower() == "nan":
+            return None
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{card_id} {column} contains invalid JSON: {exc}") from exc
 
     def _get_int_or_default(self, row: pd.Series, field: str, default: int) -> int:
         if field in row and pd.notna(row[field]):
@@ -604,6 +631,7 @@ class CardConverter:
         'ActionCardPlayEnd': 'meta_actions',
         'ActionDrawGenerator': 'meta_actions',
         'ActionEmitCustomSignal': 'meta_actions',
+        'ActionTargetStatusValueModifier': 'meta_actions',
         'ActionValidator': 'meta_actions',
         'ActionVariableCardsetModifier': 'meta_actions',
         'ActionVariableCombatStatsModifier': 'meta_actions',

@@ -1,0 +1,45 @@
+# Validator for checking the card played immediately before the current card this turn.
+extends BaseValidator
+
+func _validation(_card_data: CardData, action: BaseAction, values: Dictionary[String, Variant]) -> bool:
+	var card_play_request: CardPlayRequest = null
+	if action != null:
+		card_play_request = action.card_play_request
+	
+	var combat_stats_data: CombatStatsData = Global.get_combat_stats()
+	if combat_stats_data == null:
+		return false != _get_bool(values, "invert", false)
+	
+	var previous_card: CardData = _get_previous_card(combat_stats_data, card_play_request)
+	var must_exist: bool = _get_bool(values, "must_exist", true)
+	if previous_card == null:
+		return (not must_exist) != _get_bool(values, "invert", false)
+	
+	var matches: bool = true
+	if values.has("card_type"):
+		matches = matches and previous_card.card_type == int(values["card_type"])
+	if values.has("card_object_id"):
+		matches = matches and previous_card.object_id == str(values["card_object_id"])
+	if values.has("card_tag"):
+		matches = matches and previous_card.card_tags.has(str(values["card_tag"]))
+	
+	return matches != _get_bool(values, "invert", false)
+
+func _get_previous_card(combat_stats_data: CombatStatsData, current_request: CardPlayRequest) -> CardData:
+	for index in range(combat_stats_data.cards_played_this_turn.size() - 1, -1, -1):
+		var request: CardPlayRequest = combat_stats_data.cards_played_this_turn[index]
+		if request == current_request:
+			continue
+		if request.card_data != null:
+			return request.card_data
+	return null
+
+func _get_bool(values: Dictionary[String, Variant], key: String, default_value: bool) -> bool:
+	if not values.has(key):
+		return default_value
+	var value: Variant = values[key]
+	if value is bool:
+		return value
+	if value is String:
+		return value.to_lower() in ["true", "yes", "1"]
+	return bool(value)
