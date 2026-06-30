@@ -8,6 +8,8 @@ func _connect_signals() -> void:
 func _on_card_play_started(card_play_request: CardPlayRequest) -> void:
 	if parent_combatant == null:
 		return
+	if status_charges <= 0:
+		return
 	if not parent_combatant.is_alive():
 		return
 	if not Global.is_player_turn():
@@ -27,7 +29,9 @@ func _on_card_play_started(card_play_request: CardPlayRequest) -> void:
 func _on_player_turn_ended() -> void:
 	if parent_combatant == null:
 		return
-	if bool(status_custom_values.get("clear_on_player_turn_end", true)) and status_charges != 0:
+	if status_charges <= 0:
+		return
+	if bool(status_custom_values.get("clear_on_player_turn_end", true)):
 		parent_combatant.add_status_effect_charges(status_effect_data.object_id, -status_charges)
 
 func _matches_card(card_data: CardData) -> bool:
@@ -36,18 +40,24 @@ func _matches_card(card_data: CardData) -> bool:
 	if status_custom_values.has("card_object_id_filter"):
 		var filter_value: Variant = status_custom_values["card_object_id_filter"]
 		if filter_value is Array:
-			var accepted_ids: Array[String] = []
-			accepted_ids.assign(filter_value)
-			if not accepted_ids.has(card_data.object_id):
+			var matches_object_id: bool = false
+			for accepted_id in filter_value:
+				if str(accepted_id) == card_data.object_id:
+					matches_object_id = true
+					break
+			if not matches_object_id:
 				return false
 		elif card_data.object_id != str(filter_value):
 			return false
 	if status_custom_values.has("card_type_filter"):
 		var type_filter: Variant = status_custom_values["card_type_filter"]
 		if type_filter is Array:
-			var accepted_types: Array[int] = []
-			accepted_types.assign(type_filter)
-			if not accepted_types.has(card_data.card_type):
+			var matches_card_type: bool = false
+			for accepted_type in type_filter:
+				if int(accepted_type) == card_data.card_type:
+					matches_card_type = true
+					break
+			if not matches_card_type:
 				return false
 		elif card_data.card_type != int(type_filter):
 			return false
