@@ -44,6 +44,7 @@ const ACTION_VARIABLE_COST_MODIFIER: String = "res://scripts/actions/meta_action
 const ACTION_VARIABLE_CARDSET_MODIFIER: String = "res://scripts/actions/meta_actions/ActionVariableCardsetModifier.gd"
 const ACTION_VARIABLE_COMBAT_STATS_MODIFIER: String = "res://scripts/actions/meta_actions/ActionVariableCombatStatsModifier.gd"
 const ACTION_TARGET_STATUS_VALUE_MODIFIER: String = "res://scripts/actions/meta_actions/ActionTargetStatusValueModifier.gd"
+const ACTION_MODIFY_CURRENT_CARD_PLAY_VALUES: String = "res://scripts/actions/meta_actions/ActionModifyCurrentCardPlayValues.gd"
 const ACTION_VALIDATOR: String = "res://scripts/actions/meta_actions/ActionValidator.gd"
 
 # generated actions; use their corresponding generator to make these

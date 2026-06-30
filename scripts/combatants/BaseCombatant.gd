@@ -176,16 +176,13 @@ func add_new_status_effect(status_effect_object_id: String, charge_amount: int, 
 	elif status_effect_data.status_effect_can_be_negative and charge_amount < 0:
 		return
 	
-	var status_effect: StatusEffect = _create_status_effect(status_effect_object_id)
+	var status_effect: StatusEffect = _create_status_effect(status_effect_object_id, custom_values)
 	if status_effect != null:
 		var status_effect_script: BaseStatusEffect = status_effect.status_effect_script
 		
 		# apply charges and secondary charges
 		status_effect_script.add_status_charges(charge_amount)
 		status_effect_script.status_secondary_charges += secondary_charge_amount
-		
-		# apply unique values beyond charges
-		status_effect_script.status_custom_values = custom_values
 		
 		# delete the effect if zero charges
 		if (status_effect_script.status_charges == 0):
@@ -260,7 +257,7 @@ func _remove_status_effect(status_effect: StatusEffect) -> void:
 	
 	status_effect.queue_free()
 
-func _create_status_effect(status_effect_object_id: String) -> StatusEffect:
+func _create_status_effect(status_effect_object_id: String, custom_values: Dictionary = {}) -> StatusEffect:
 	# creates a status on the combatant and creates bindings and back references for it
 	# does not allow duplicate statuses that do not allow multiples
 	var status_effect_data: StatusEffectData = Global.get_status_effect_data(status_effect_object_id)
@@ -281,6 +278,7 @@ func _create_status_effect(status_effect_object_id: String) -> StatusEffect:
 		
 		# initialize status effect
 		status_effect.status_effect_script = status_effect_script
+		status_effect_script.status_custom_values = custom_values
 		status_container.add_child(status_effect)
 		# initialize status effect script
 		status_effect_script.init(status_effect_data, self)

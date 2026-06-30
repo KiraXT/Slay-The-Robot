@@ -56,7 +56,7 @@ VALID_ACTIONS = [
     "ActionAddMoney", "ActionAddHealth", "ActionValidator",
     "ActionAttachCardsOntoEnemy", "ActionImproveCardValues",
     "ActionVariableCostModifier", "ActionTargetStatusValueModifier",
-    "ActionDirectDamage", "ActionEndTurn"
+    "ActionModifyCurrentCardPlayValues", "ActionDirectDamage", "ActionEndTurn"
 ]
 
 # Valid validators
@@ -631,6 +631,7 @@ class CardConverter:
         'ActionCardPlayEnd': 'meta_actions',
         'ActionDrawGenerator': 'meta_actions',
         'ActionEmitCustomSignal': 'meta_actions',
+        'ActionModifyCurrentCardPlayValues': 'meta_actions',
         'ActionTargetStatusValueModifier': 'meta_actions',
         'ActionValidator': 'meta_actions',
         'ActionVariableCardsetModifier': 'meta_actions',

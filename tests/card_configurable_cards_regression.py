@@ -29,6 +29,9 @@ EXPECTED = {
     "card_pursuit": "color_red",
     "card_echo_shield": "color_green",
     "card_finale_burst": "color_green",
+    "card_metronome": "color_green",
+    "card_travel_light": "color_orange",
+    "card_last_item": "color_orange",
 }
 
 REQUIRED_ACTIONS = {
@@ -39,6 +42,9 @@ REQUIRED_ACTIONS = {
     "card_pursuit": ["card_play_actions"],
     "card_echo_shield": ["card_play_actions"],
     "card_finale_burst": ["card_play_actions"],
+    "card_metronome": ["card_play_actions"],
+    "card_travel_light": ["card_play_actions"],
+    "card_last_item": ["card_play_actions"],
 }
 
 ALLOWED_SCRIPT_PREFIXES = (
