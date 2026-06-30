@@ -233,6 +233,8 @@ def convert_cards() -> None:
         'upgrade_draw_count', 'upgrade_status_charge_amount',
         'upgrade_status_secondary_charge_amount', 'upgrade_damage_random',
         'upgrade_multiplier_offset', 'card_first_shuffle_priority',
+        'card_values_json', 'card_play_actions_json', 'card_draw_actions_json',
+        'card_discard_actions_json', 'card_retain_actions_json', 'card_listeners_json',
     ]
 
     # Instruction row
@@ -264,6 +266,12 @@ def convert_cards() -> None:
         row['card_texture_path'] = card.get('card_texture_path', '')
         row['card_first_shuffle_priority'] = card.get('card_first_shuffle_priority', 0)
         row['card_upgrade_amount_max'] = card.get('card_upgrade_amount_max', 1)
+        row['card_values_json'] = format_dialogue_action_payload(card.get('card_values', {}))
+        row['card_play_actions_json'] = format_dialogue_action_payload(card.get('card_play_actions', []))
+        row['card_draw_actions_json'] = format_dialogue_action_payload(card.get('card_draw_actions', []))
+        row['card_discard_actions_json'] = format_dialogue_action_payload(card.get('card_discard_actions', []))
+        row['card_retain_actions_json'] = format_dialogue_action_payload(card.get('card_retain_actions', []))
+        row['card_listeners_json'] = format_dialogue_action_payload(card.get('card_listeners', []))
 
         keywords = card.get('card_keyword_object_ids', [])
         row['card_keyword_object_ids'] = ",".join(keywords) if keywords else ""
