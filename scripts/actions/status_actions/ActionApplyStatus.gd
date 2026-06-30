@@ -17,7 +17,7 @@ func perform_action():
 		if status_force_apply_new_effect:
 			target.add_new_status_effect(status_effect_object_id, status_charge_amount, status_secondary_charge_amount, status_custom_values)
 		else:
-			target.add_status_effect_charges(status_effect_object_id, status_charge_amount, status_secondary_charge_amount)
+			target.add_status_effect_charges(status_effect_object_id, status_charge_amount, status_secondary_charge_amount, status_custom_values)
 
 func is_action_short_circuited() -> bool:
 	return get_action_value("action_short_circuits", true)

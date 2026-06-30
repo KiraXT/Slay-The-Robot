@@ -120,7 +120,7 @@ func create_damage_text(damage_amount: int) -> void:
 
 #region Statuses
 
-func add_status_effect_charges(status_effect_object_id: String, charge_amount: int, secondary_charge_amount: int = 0) -> void:
+func add_status_effect_charges(status_effect_object_id: String, charge_amount: int, secondary_charge_amount: int = 0, custom_values: Dictionary = {}) -> void:
 	# general method for adding status effects and charge amounts
 	# adds charges and secondary charges to ALL instances of a given status
 	# if no status exists, create one and apply charges
@@ -143,7 +143,7 @@ func add_status_effect_charges(status_effect_object_id: String, charge_amount: i
 	
 	# create a new status if none exists
 	if len(status_effects) == 0:
-		var _status_effect: StatusEffect = _create_status_effect(status_effect_object_id)
+		var _status_effect: StatusEffect = _create_status_effect(status_effect_object_id, custom_values)
 		status_effects = status_id_to_status_effects[status_effect_object_id]
 	
 	# iterate over all statuses and apply charges
