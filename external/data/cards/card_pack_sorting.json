@@ -1,0 +1,78 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "card_pack_sorting",
+        "object_uid": "",
+        "card_name": "背包整理",
+        "card_description": "选择1张手牌放到抽牌堆顶。下次抽到那张牌时，获得 [energy_amount] 点能量。",
+        "card_type": 1,
+        "card_rarity": 2,
+        "card_color_id": "color_orange",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": false,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/orange/card_orange.png",
+        "card_keyword_object_ids": [
+            "keyword_top_deck"
+        ],
+        "card_values": {
+            "energy_amount": 1
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                    "card_pick_type": 0,
+                    "min_card_amount": 1,
+                    "max_card_amount": 1,
+                    "card_pick_text": "选择1张牌放到抽牌堆顶。{1}/{0}",
+                    "action_data": [
+                        {
+                            "res://scripts/actions/cardset_actions/ActionModifyCardTags.gd": {
+                                "add_tags": [
+                                    "temporary_pack_sorting_energy"
+                                ]
+                            }
+                        },
+                        {
+                            "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                                "target_override": 2,
+                                "status_effect_object_id": "status_effect_pack_sorting",
+                                "status_charge_amount": 1,
+                                "status_custom_values": {
+                                    "trigger_signal": "card_drawn",
+                                    "card_tag_filter": "temporary_pack_sorting_energy",
+                                    "remove_tag_on_trigger": true,
+                                    "consume_charge_on_trigger": true,
+                                    "action_data": [
+                                        {
+                                            "res://scripts/actions/ActionAddEnergy.gd": {
+                                                "energy_amount": 1
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "res://scripts/actions/cardset_actions/ActionAddCardsToDraw.gd": {
+                                "card_destination": 4
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {
+            "energy_amount": 1
+        },
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

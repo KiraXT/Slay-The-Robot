@@ -33,6 +33,10 @@ EXPECTED = {
     "card_metronome": "color_green",
     "card_travel_light": "color_orange",
     "card_last_item": "color_orange",
+    "card_chorus": "color_green",
+    "card_bookmark_clip": "color_orange",
+    "card_pack_sorting": "color_orange",
+    "card_ready_stance": "color_orange",
 }
 
 REQUIRED_ACTIONS = {
@@ -47,6 +51,10 @@ REQUIRED_ACTIONS = {
     "card_metronome": ["card_play_actions"],
     "card_travel_light": ["card_play_actions"],
     "card_last_item": ["card_play_actions"],
+    "card_chorus": ["card_play_actions"],
+    "card_bookmark_clip": ["card_play_actions"],
+    "card_pack_sorting": ["card_play_actions"],
+    "card_ready_stance": ["card_play_actions"],
 }
 
 ALLOWED_SCRIPT_PREFIXES = (

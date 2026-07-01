@@ -87,6 +87,18 @@ func _matches_card(card_data: CardData) -> bool:
 				return false
 		elif card_data.card_type != int(type_filter):
 			return false
+	if status_custom_values.has("card_tag_filter"):
+		var tag_filter: Variant = status_custom_values["card_tag_filter"]
+		if tag_filter is Array:
+			var matches_card_tag: bool = false
+			for accepted_tag in tag_filter:
+				if card_data.card_tags.has(str(accepted_tag)):
+					matches_card_tag = true
+					break
+			if not matches_card_tag:
+				return false
+		elif not card_data.card_tags.has(str(tag_filter)):
+			return false
 	return true
 
 func _apply_value_modifiers(card_play_request: CardPlayRequest, value_modifiers: Dictionary) -> void:
