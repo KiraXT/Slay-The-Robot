@@ -20,6 +20,18 @@ func init(_status_effect_data, _parent_combatant: BaseCombatant):
 func _connect_signals() -> void:
 	pass
 
+## Optional override for statuses that connect to long-lived signals.
+func _disconnect_signals() -> void:
+	pass
+
+## Optional override for statuses that need to clean up runtime state before removal.
+func on_status_removed() -> void:
+	_disconnect_signals()
+
+## Optional override for statuses that need per-application custom data when charges are added to an existing instance.
+func on_status_reapplied(_charge_amount: int, _secondary_charge_amount: int, _custom_values: Dictionary) -> void:
+	pass
+
 ## Status action logic
 ## Override for custom logic or conditionals
 ## Called from BaseCombatant.perform_status_effect_actions()

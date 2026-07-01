@@ -140,6 +140,7 @@ func add_status_effect_charges(status_effect_object_id: String, charge_amount: i
 	var status_effects: Array[StatusEffect] = []
 	if status_id_to_status_effects.has(status_effect_object_id):
 		status_effects = status_id_to_status_effects[status_effect_object_id]
+	var is_reapplying_existing_status: bool = len(status_effects) > 0
 	
 	# create a new status if none exists
 	if len(status_effects) == 0:
@@ -150,6 +151,9 @@ func add_status_effect_charges(status_effect_object_id: String, charge_amount: i
 	for status_effect in status_effects.duplicate():
 		var status_effect_script: BaseStatusEffect = status_effect.status_effect_script
 		
+		if is_reapplying_existing_status:
+			status_effect_script.on_status_reapplied(charge_amount, secondary_charge_amount, custom_values)
+
 		# apply charges and secondary charges
 		status_effect_script.add_status_charges(charge_amount)
 		status_effect_script.status_secondary_charges += secondary_charge_amount
@@ -242,6 +246,7 @@ func get_status_charges(status_effect_object_id: String) -> int:
 func _remove_status_effect(status_effect: StatusEffect) -> void:
 	var status_effect_data: StatusEffectData = status_effect.status_effect_script.status_effect_data
 	var status_effect_object_id: String = status_effect_data.object_id
+	status_effect.status_effect_script.on_status_removed()
 	
 	# get status list
 	var status_effects: Array[StatusEffect] = status_id_to_status_effects[status_effect_object_id]

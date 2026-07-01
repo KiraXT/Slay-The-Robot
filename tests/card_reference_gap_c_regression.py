@@ -11,6 +11,7 @@ CSV_PATH = ROOT / "external" / "config" / "cards.csv"
 STATUS_SCRIPT = "res://scripts/status_effects/StatusEffectNextMatchingCardModifier.gd"
 APPLY_STATUS_ACTION = "res://scripts/actions/status_actions/ActionApplyStatus.gd"
 BASE_COMBATANT = ROOT / "scripts" / "combatants" / "BaseCombatant.gd"
+BASE_STATUS_EFFECT = ROOT / "scripts" / "status_effects" / "BaseStatusEffect.gd"
 
 
 def load_json(path: Path) -> dict:
@@ -61,6 +62,9 @@ def main() -> None:
         "consume_charge_on_trigger",
         "clear_on_player_turn_end",
         "ignore_duplicate_plays",
+        "_disconnect_signals",
+        "value_modifier_queue",
+        "on_status_reapplied",
     ):
         assert expected in status_script_text
 
@@ -70,6 +74,12 @@ def main() -> None:
     base_combatant_text = BASE_COMBATANT.read_text(encoding="utf-8")
     assert "func add_status_effect_charges(status_effect_object_id: String, charge_amount: int, secondary_charge_amount: int = 0, custom_values: Dictionary = {})" in base_combatant_text
     assert "_create_status_effect(status_effect_object_id, custom_values)" in base_combatant_text
+    assert "status_effect_script.on_status_reapplied(charge_amount, secondary_charge_amount, custom_values)" in base_combatant_text
+    assert "status_effect.status_effect_script.on_status_removed()" in base_combatant_text
+
+    base_status_effect_text = BASE_STATUS_EFFECT.read_text(encoding="utf-8")
+    assert "func on_status_removed() -> void:" in base_status_effect_text
+    assert "func on_status_reapplied(_charge_amount: int, _secondary_charge_amount: int, _custom_values: Dictionary) -> void:" in base_status_effect_text
 
     combo_status = load_status("status_effect_combo_starter")
     assert combo_status["status_effect_script_path"] == STATUS_SCRIPT
