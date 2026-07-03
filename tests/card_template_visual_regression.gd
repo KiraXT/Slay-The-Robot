@@ -28,6 +28,7 @@ func _init() -> void:
 func _run() -> void:
 	await _check_visual_mappings()
 	await _check_layout_bounds()
+	await _check_card_detail_treatment()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -138,6 +139,34 @@ func _check_layout_bounds() -> void:
 	await process_frame
 
 
+func _check_card_detail_treatment() -> void:
+	var card := await _render_card({
+		"name": "detail treatment",
+		"color_id": "color_red",
+		"type": CARD_TYPE_ATTACK,
+		"rarity": CARD_RARITY_UNCOMMON,
+		"energy": "2",
+	})
+	if card == null:
+		failures.append("detail treatment failed to render card")
+		return
+
+	var visual := card.get_node("Pivot/CardVisual") as Control
+	_assert_panel_style(visual, "ColorBackground", 12, 3, "outer rounded frame")
+	_assert_panel_style(visual, "CardBackground", 9, 1, "inner rounded card body")
+	_assert_panel_style(visual, "CardArtFrame", 5, 2, "card art rounded frame")
+	_assert_panel_style(visual, "CardDescriptionBackground", 7, 1, "bottom description panel")
+	_assert_panel_style(visual, "CardTypeBackground", 6, 1, "type ribbon")
+	_assert_panel_style(visual, "EnergySprite", 17, 3, "energy badge")
+	_assert_panel_style(visual, "CardFaction", 8, 1, "faction badge")
+
+	_assert_rect_inside(_find_descendant(visual, "CardArtFrame") as Control, _find_descendant(visual, "CardTexture") as Control, "CardTexture inside art frame")
+	_assert_rect_inside(_find_descendant(visual, "CardDescriptionBackground") as Control, _find_descendant(visual, "CardDescription") as Control, "CardDescription inside bottom panel")
+
+	card.queue_free()
+	await process_frame
+
+
 func _render_card(case_data: Dictionary) -> Node:
 	var card_data_script := load(CARD_DATA_SCRIPT_PATH) as Script
 	if card_data_script == null or not card_data_script.can_instantiate():
@@ -187,6 +216,10 @@ func _assert_label(node: Node, expected: String, label: String) -> void:
 
 
 func _assert_rect_inside(parent: Control, child: Control, label: String) -> void:
+	if parent == null:
+		failures.append("%s parent is missing" % label)
+		return
+
 	if child == null:
 		failures.append("%s is missing" % label)
 		return
@@ -214,6 +247,43 @@ func _assert_vertical_non_overlap(parent: Control, first_name: String, second_na
 	var second_rect := second.get_global_rect()
 	if first_rect.position.y < second_rect.end.y and second_rect.position.y < first_rect.end.y:
 		failures.append("%s overlaps %s: %s vs %s" % [first_name, second_name, first_rect, second_rect])
+
+
+func _assert_panel_style(parent: Node, node_name: String, min_corner_radius: int, min_border_width: int, label: String) -> void:
+	var node := _find_descendant(parent, node_name)
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return
+
+	var panel := node as Panel
+	if panel == null:
+		failures.append("%s node %s is not a Panel" % [label, node.get_path()])
+		return
+
+	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		failures.append("%s node %s has no StyleBoxFlat panel style" % [label, panel.get_path()])
+		return
+
+	for corner_radius in [
+		style.corner_radius_top_left,
+		style.corner_radius_top_right,
+		style.corner_radius_bottom_left,
+		style.corner_radius_bottom_right,
+	]:
+		if corner_radius < min_corner_radius:
+			failures.append("%s corner radius expected at least %d, got %d" % [label, min_corner_radius, corner_radius])
+			return
+
+	for border_width in [
+		style.border_width_left,
+		style.border_width_top,
+		style.border_width_right,
+		style.border_width_bottom,
+	]:
+		if border_width < min_border_width:
+			failures.append("%s border width expected at least %d, got %d" % [label, min_border_width, border_width])
+			return
 
 
 func _find_descendant(parent: Node, node_name: String) -> Node:

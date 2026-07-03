@@ -47,16 +47,20 @@ const CARD_DEFAULT_FRAME_COLOR: Color = Color(0.86, 0.88, 0.92, 1.0)
 @onready var card_type: Label = %CardType
 @onready var card_description: RichLabelAutoSizer = %CardDescription
 @onready var card_energy_cost: Label = %EnergyCost
-@onready var card_color: ColorRect = %ColorBackground
-@onready var card_background: ColorRect = %CardBackground
-@onready var card_type_background: ColorRect = %CardTypeBackground
-@onready var card_faction_background: ColorRect = %CardFaction
+@onready var card_color: Panel = %ColorBackground
+@onready var card_background: Panel = %CardBackground
+@onready var card_art_frame: Panel = %CardArtFrame
+@onready var card_description_background: Panel = %CardDescriptionBackground
+@onready var card_type_background: Panel = %CardTypeBackground
+@onready var card_faction_background: Panel = %CardFaction
 @onready var card_faction_text: Label = %CardFactionText
+@onready var card_faction_stamp: Panel = %CardFactionStamp
+@onready var card_faction_stamp_text: Label = %CardFactionStampText
 @onready var card_stars: Label = %CardStars
-@onready var energy_sprite: ColorRect = %EnergySprite
+@onready var energy_sprite: Panel = %EnergySprite
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var card_glow: ColorRect = %CardGlow
+@onready var card_glow: Panel = %CardGlow
 
 @onready var keyword_container = $Pivot/KeywordContainer
 @onready var keyword_timer = $KeywordTimer
@@ -123,6 +127,7 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	card_description.set_bbcode(get_card_description(selected_enemy))
 	card_type.text = _get_card_type_label(card_data.card_type)
 	card_faction_text.text = _get_card_faction_label(card_data.card_color_id)
+	card_faction_stamp_text.text = _get_card_faction_label(card_data.card_color_id)
 	card_stars.text = _get_card_star_label(card_data.card_rarity)
 	
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
@@ -158,15 +163,34 @@ func _apply_card_palette(color_data: ColorData) -> void:
 	if color_data != null:
 		frame_color = color_data.color
 
-	card_color.color = frame_color
-	card_type_background.color = frame_color.darkened(0.12)
-	card_faction_background.color = frame_color.darkened(0.08)
-	energy_sprite.color = Color(0.16, 0.39, 0.88, 1.0)
-
 	var background_color := Color(1.0, 1.0, 1.0, 0.98)
 	if frame_color.get_luminance() < 0.82:
 		background_color = frame_color.lightened(0.82)
-	card_background.color = background_color
+
+	var frame_edge := frame_color.darkened(0.20)
+	var frame_highlight := frame_color.lightened(0.45)
+	var panel_white := Color(1.0, 1.0, 1.0, 0.96)
+	_set_panel_style(card_color, frame_color, frame_highlight)
+	_set_panel_style(card_background, background_color, panel_white)
+	_set_panel_style(card_art_frame, panel_white, frame_edge)
+	_set_panel_style(card_description_background, panel_white, frame_color.lightened(0.50))
+	_set_panel_style(card_type_background, frame_color.darkened(0.10), panel_white)
+	_set_panel_style(card_faction_background, panel_white, frame_highlight)
+	_set_panel_style(card_faction_stamp, Color(1.0, 1.0, 1.0, 0.0), Color(1.0, 1.0, 1.0, 0.0))
+	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_highlight)
+
+	card_faction_text.add_theme_color_override("font_color", frame_edge)
+	card_faction_stamp_text.add_theme_color_override("font_color", frame_color.darkened(0.08))
+
+func _set_panel_style(panel: Panel, bg_color: Color, border_color: Color) -> void:
+	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		style = StyleBoxFlat.new()
+	else:
+		style = style.duplicate()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	panel.add_theme_stylebox_override("panel", style)
 
 func set_card_glow(_visible: bool) -> void:
 	card_glow.visible = _visible
