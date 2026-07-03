@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://btxmfagad05n5"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_7f6u3"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_deck.png" id="1_7f6u3"]
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_n7s1f"]
 [ext_resource type="Script" uid="uid://k4n0whn5t0m" path="res://scripts/ui/Card.gd" id="1_u8ksl"]
 [ext_resource type="PackedScene" uid="uid://daimkj082tvn0" path="res://scenes/ui/general/KeywordContainer.tscn" id="3_6p3td"]
@@ -103,93 +103,140 @@ unique_name_in_owner = true
 layout_mode = 2
 offset_right = 144.0
 offset_bottom = 184.0
+color = Color(0.258824, 0.411765, 0.882353, 1)
 
-[node name="Background" type="ColorRect" parent="Pivot/CardVisual"]
+[node name="CardBackground" type="ColorRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
 layout_mode = 2
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 140.0
 offset_bottom = 180.0
-color = Color(1, 1, 1, 0.96)
+color = Color(1, 1, 1, 0.98)
 
-[node name="CardDescription" type="RichTextLabel" parent="Pivot/CardVisual"]
+[node name="CardName" type="RichTextLabel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 8.0
-offset_top = 112.0
-offset_right = 136.0
-offset_bottom = 184.0
+offset_left = 32.0
+offset_top = 7.0
+offset_right = 108.0
+offset_bottom = 26.0
 theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
 theme_override_font_sizes/normal_font_size = 12
-bbcode_enabled = true
-text = "100/100
-"
-scroll_active = false
-script = ExtResource("3_8gkbw")
-_max_size = 12
-_current_font_size = 12
-_editor_defaults_set = true
-
-[node name="EnergySprite" type="ColorRect" parent="Pivot/CardVisual"]
-layout_mode = 0
-offset_left = -8.0
-offset_top = -8.0
-offset_right = 16.0
-offset_bottom = 16.0
-color = Color(1, 0.686275, 0.141176, 1)
-metadata/_edit_group_ = true
-
-[node name="EnergyCost" type="Label" parent="Pivot/CardVisual/EnergySprite"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 24.0
-offset_bottom = 24.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_constants/line_spacing = -3
-theme_override_font_sizes/font_size = 12
-text = "3"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="CardTexture" type="TextureRect" parent="Pivot/CardVisual"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 24.0
-offset_top = 12.0
-offset_right = 120.0
-offset_bottom = 108.0
-texture = ExtResource("1_7f6u3")
-expand_mode = 1
-
-[node name="CardName" type="RichTextLabel" parent="Pivot/CardVisual/CardTexture"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = -16.0
-offset_top = -4.0
-offset_right = 112.0
-offset_bottom = 12.0
-theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
-theme_override_font_sizes/normal_font_size = 11
 bbcode_enabled = true
 text = "Card Name"
 scroll_active = false
 script = ExtResource("3_8gkbw")
 _max_size = 12
+_min_size = 8
+_current_font_size = 12
+_editor_defaults_set = true
+
+[node name="CardTexture" type="TextureRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 31.0
+offset_right = 132.0
+offset_bottom = 101.0
+texture = ExtResource("1_7f6u3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CardTypeBackground" type="ColorRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 105.0
+offset_right = 132.0
+offset_bottom = 124.0
+color = Color(0.258824, 0.411765, 0.882353, 1)
+
+[node name="CardType" type="Label" parent="Pivot/CardVisual/CardTypeBackground"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 120.0
+offset_bottom = 19.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -3
+theme_override_font_sizes/font_size = 12
+text = "攻击"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardDescription" type="RichTextLabel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 12.0
+offset_top = 129.0
+offset_right = 132.0
+offset_bottom = 167.0
+theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
+theme_override_font_sizes/normal_font_size = 11
+bbcode_enabled = true
+text = "100/100"
+scroll_active = false
+script = ExtResource("3_8gkbw")
+_max_size = 11
+_min_size = 7
 _current_font_size = 11
 _editor_defaults_set = true
 
-[node name="CardType" type="Label" parent="Pivot/CardVisual"]
+[node name="CardStars" type="Label" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 8.0
-offset_top = 95.0
-offset_right = 136.0
-offset_bottom = 112.0
-theme_override_colors/font_color = Color(0.121569, 0.156863, 0.207843, 1)
+offset_left = 9.0
+offset_top = 167.0
+offset_right = 88.0
+offset_bottom = 181.0
+theme_override_colors/font_color = Color(1, 0.835294, 0.184314, 1)
 theme_override_constants/line_spacing = -3
 theme_override_font_sizes/font_size = 12
-text = "Hit and Run"
+text = "★★"
+vertical_alignment = 1
+
+[node name="EnergySprite" type="ColorRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -6.0
+offset_top = -6.0
+offset_right = 28.0
+offset_bottom = 28.0
+color = Color(0.160784, 0.392157, 0.878431, 1)
+metadata/_edit_group_ = true
+
+[node name="EnergyCost" type="Label" parent="Pivot/CardVisual/EnergySprite"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 34.0
+offset_bottom = 34.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -3
+theme_override_font_sizes/font_size = 15
+text = "3"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardFaction" type="ColorRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 113.0
+offset_top = 6.0
+offset_right = 139.0
+offset_bottom = 32.0
+color = Color(0.258824, 0.411765, 0.882353, 1)
+
+[node name="CardFactionText" type="Label" parent="Pivot/CardVisual/CardFaction"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 26.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -3
+theme_override_font_sizes/font_size = 13
+text = "流"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="CardButton" type="Button" parent="Pivot"]
 unique_name_in_owner = true

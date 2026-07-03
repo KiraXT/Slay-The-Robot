@@ -11,16 +11,49 @@ var _card_is_rerendering: bool = false
 const CARD_TEXT_IMAGE_SIZE: int = 16	# images in card descriptions will be set to this size
 const ENERGY_ICON_KEYWORD: String = "[energy_icon]"	# tells description to display an energy icon in place
 
+const CARD_TYPE_LABELS: Dictionary = {
+	CardData.CARD_TYPES.ATTACK: "攻击",
+	CardData.CARD_TYPES.SKILL: "技能",
+	CardData.CARD_TYPES.POWER: "能力",
+	CardData.CARD_TYPES.STATUS: "状态",
+	CardData.CARD_TYPES.CURSE: "诅咒",
+}
+
+const CARD_RARITY_STARS: Dictionary = {
+	CardData.CARD_RARITIES.BASIC: "★",
+	CardData.CARD_RARITIES.COMMON: "★★",
+	CardData.CARD_RARITIES.UNCOMMON: "★★★",
+	CardData.CARD_RARITIES.RARE: "★★★★",
+	CardData.CARD_RARITIES.GENERATED: "",
+}
+
+const CARD_FACTION_LABELS: Dictionary = {
+	"color_red": "拳",
+	"color_green": "藤",
+	"color_blue": "流",
+	"color_orange": "械",
+	"color_white": "核",
+	"color_purple": "蚀",
+}
+
+const CARD_DEFAULT_FRAME_COLOR: Color = Color(0.86, 0.88, 0.92, 1.0)
+
 @onready var card_button: Button = %CardButton
 
 @onready var pivot: Node2D = $Pivot
 
-@onready var card_texture = %CardTexture
+@onready var card_texture: TextureRect = %CardTexture
 @onready var card_name: RichLabelAutoSizer = %CardName
 @onready var card_type: Label = %CardType
 @onready var card_description: RichLabelAutoSizer = %CardDescription
 @onready var card_energy_cost: Label = %EnergyCost
 @onready var card_color: ColorRect = %ColorBackground
+@onready var card_background: ColorRect = %CardBackground
+@onready var card_type_background: ColorRect = %CardTypeBackground
+@onready var card_faction_background: ColorRect = %CardFaction
+@onready var card_faction_text: Label = %CardFactionText
+@onready var card_stars: Label = %CardStars
+@onready var energy_sprite: ColorRect = %EnergySprite
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var card_glow: ColorRect = %CardGlow
@@ -88,13 +121,14 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	# updates the card's display
 	card_name.set_bbcode("[center]" + card_data.get_card_name() + "[/center]")
 	card_description.set_bbcode(get_card_description(selected_enemy))
-	card_type.text = CardData.CARD_RARITIES.keys()[card_data.card_rarity] + " " + CardData.CARD_TYPES.keys()[card_data.card_type]
+	card_type.text = _get_card_type_label(card_data.card_type)
+	card_faction_text.text = _get_card_faction_label(card_data.card_color_id)
+	card_stars.text = _get_card_star_label(card_data.card_rarity)
 	
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
-	if color_data != null:
-		card_color.color = color_data.color
+	_apply_card_palette(color_data)
 	
-	$Pivot/CardVisual/EnergySprite.visible = card_data.card_is_playable
+	energy_sprite.visible = card_data.card_is_playable
 	
 	if card_data.card_energy_cost_is_variable:
 		card_energy_cost.text = "X"
@@ -102,6 +136,37 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 			card_energy_cost.text = "X-" + str(card_data.card_energy_cost_variable_upper_bound)
 	else:
 		card_energy_cost.text = str(card_data.get_card_energy_cost())
+
+func _get_card_type_label(card_type_id: int) -> String:
+	if CARD_TYPE_LABELS.has(card_type_id):
+		return CARD_TYPE_LABELS[card_type_id]
+	if card_type_id >= 0 and card_type_id < CardData.CARD_TYPES.keys().size():
+		return CardData.CARD_TYPES.keys()[card_type_id]
+	return ""
+
+
+func _get_card_star_label(card_rarity_id: int) -> String:
+	return CARD_RARITY_STARS.get(card_rarity_id, "")
+
+
+func _get_card_faction_label(card_color_id: String) -> String:
+	return CARD_FACTION_LABELS.get(card_color_id, "?")
+
+
+func _apply_card_palette(color_data: ColorData) -> void:
+	var frame_color := CARD_DEFAULT_FRAME_COLOR
+	if color_data != null:
+		frame_color = color_data.color
+
+	card_color.color = frame_color
+	card_type_background.color = frame_color.darkened(0.12)
+	card_faction_background.color = frame_color.darkened(0.08)
+	energy_sprite.color = Color(0.16, 0.39, 0.88, 1.0)
+
+	var background_color := Color(1.0, 1.0, 1.0, 0.98)
+	if frame_color.get_luminance() < 0.82:
+		background_color = frame_color.lightened(0.82)
+	card_background.color = background_color
 
 func set_card_glow(_visible: bool) -> void:
 	card_glow.visible = _visible
