@@ -27,15 +27,6 @@ const CARD_RARITY_STARS: Dictionary = {
 	CardData.CARD_RARITIES.GENERATED: "",
 }
 
-const CARD_FACTION_LABELS: Dictionary = {
-	"color_red": "拳",
-	"color_green": "藤",
-	"color_blue": "流",
-	"color_orange": "械",
-	"color_white": "核",
-	"color_purple": "蚀",
-}
-
 const CARD_DEFAULT_FRAME_COLOR: Color = Color(0.86, 0.88, 0.92, 1.0)
 const CARD_NEUTRAL_FRAME_COLOR: Color = Color(0.70, 0.73, 0.76, 1.0)
 const CARD_NEUTRAL_FRAME_EDGE_COLOR: Color = Color(0.46, 0.49, 0.52, 1.0)
@@ -55,10 +46,6 @@ const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 @onready var card_art_frame: Panel = %CardArtFrame
 @onready var card_description_background: Panel = %CardDescriptionBackground
 @onready var card_type_background: Panel = %CardTypeBackground
-@onready var card_faction_background: Panel = %CardFaction
-@onready var card_faction_text: Label = %CardFactionText
-@onready var card_faction_stamp: Panel = %CardFactionStamp
-@onready var card_faction_stamp_text: Label = %CardFactionStampText
 @onready var card_stars: Label = %CardStars
 @onready var energy_sprite: Panel = %EnergySprite
 
@@ -129,8 +116,6 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	card_name.set_bbcode("[center]" + card_data.get_card_name() + "[/center]")
 	card_description.set_bbcode(get_card_description(selected_enemy))
 	card_type.text = _get_card_type_label(card_data.card_type)
-	card_faction_text.text = _get_card_faction_label(card_data.card_color_id)
-	card_faction_stamp_text.text = _get_card_faction_label(card_data.card_color_id)
 	card_stars.text = _get_card_star_label(card_data.card_rarity)
 	
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
@@ -155,10 +140,6 @@ func _get_card_type_label(card_type_id: int) -> String:
 
 func _get_card_star_label(card_rarity_id: int) -> String:
 	return CARD_RARITY_STARS.get(card_rarity_id, "")
-
-
-func _get_card_faction_label(card_color_id: String) -> String:
-	return CARD_FACTION_LABELS.get(card_color_id, "?")
 
 
 func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
@@ -188,12 +169,7 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	_set_panel_style(card_art_frame, panel_white, frame_edge)
 	_set_panel_style(card_description_background, panel_white, description_border)
 	_set_panel_style(card_type_background, type_color, panel_white)
-	_set_panel_style(card_faction_background, panel_white, frame_highlight)
-	_set_panel_style(card_faction_stamp, Color(1.0, 1.0, 1.0, 0.0), Color(1.0, 1.0, 1.0, 0.0))
 	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_highlight)
-
-	card_faction_text.add_theme_color_override("font_color", frame_edge)
-	card_faction_stamp_text.add_theme_color_override("font_color", frame_color.darkened(0.08))
 
 func _set_panel_style(panel: Panel, bg_color: Color, border_color: Color) -> void:
 	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat

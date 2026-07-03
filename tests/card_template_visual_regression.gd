@@ -30,6 +30,7 @@ func _run() -> void:
 	await _check_layout_bounds()
 	await _check_card_detail_treatment()
 	await _check_white_card_neutral_frame()
+	await _check_b_mech_template_layout()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -101,8 +102,8 @@ func _check_visual_mappings() -> void:
 		if card == null:
 			failures.append("%s failed to render card" % case_data["name"])
 			continue
+
 		var visual := card.get_node("Pivot/CardVisual") as Control
-		_assert_label(_find_descendant(visual, "CardFactionText"), case_data["faction"], "%s faction" % case_data["name"])
 		_assert_label(_find_descendant(visual, "CardStars"), case_data["stars"], "%s stars" % case_data["name"])
 		_assert_label(_find_descendant(visual, "CardType"), case_data["type_label"], "%s type" % case_data["name"])
 		_assert_label(_find_descendant(visual, "EnergyCost"), case_data["energy"], "%s energy" % case_data["name"])
@@ -129,7 +130,6 @@ func _check_layout_bounds() -> void:
 		"CardTypeBackground",
 		"CardDescription",
 		"CardStars",
-		"CardFaction",
 	]:
 		_assert_rect_inside(visual, _find_descendant(visual, node_name) as Control, node_name)
 
@@ -159,7 +159,6 @@ func _check_card_detail_treatment() -> void:
 	_assert_panel_style(visual, "CardDescriptionBackground", 7, 1, "bottom description panel")
 	_assert_panel_style(visual, "CardTypeBackground", 6, 1, "type ribbon")
 	_assert_panel_style(visual, "EnergySprite", 17, 3, "energy badge")
-	_assert_panel_style(visual, "CardFaction", 8, 1, "faction badge")
 
 	_assert_rect_inside(_find_descendant(visual, "CardArtFrame") as Control, _find_descendant(visual, "CardTexture") as Control, "CardTexture inside art frame")
 	_assert_rect_inside(_find_descendant(visual, "CardDescriptionBackground") as Control, _find_descendant(visual, "CardDescription") as Control, "CardDescription inside bottom panel")
@@ -184,7 +183,32 @@ func _check_white_card_neutral_frame() -> void:
 	_assert_panel_bg_luminance_below(visual, "ColorBackground", 0.78, "white card outer frame")
 	_assert_panel_bg_luminance_below(visual, "CardTypeBackground", 0.72, "white card type ribbon")
 	_assert_panel_border_luminance_below(visual, "CardArtFrame", 0.70, "white card art border")
-	_assert_panel_border_luminance_below(visual, "CardFaction", 0.78, "white card faction border")
+
+	card.queue_free()
+	await process_frame
+
+
+func _check_b_mech_template_layout() -> void:
+	var card := await _render_card({
+		"name": "b mech layout",
+		"color_id": "color_red",
+		"type": CARD_TYPE_ATTACK,
+		"rarity": CARD_RARITY_RARE,
+		"energy": "2",
+	})
+	if card == null:
+		failures.append("b mech layout failed to render card")
+		return
+
+	var visual := card.get_node("Pivot/CardVisual") as Control
+	_assert_no_visible_descendant(visual, "CardFaction", "top faction badge")
+	_assert_no_visible_descendant(visual, "CardFactionStamp", "bottom faction stamp")
+	_assert_rect_top_at_most(visual, "CardName", 7.0, "card name")
+	_assert_rect_top_at_most(visual, "CardArtFrame", 28.0, "card art frame")
+	_assert_rect_top_at_most(visual, "CardTypeBackground", 98.0, "card type ribbon")
+	_assert_rect_top_at_most(visual, "CardDescriptionBackground", 106.0, "effect panel")
+	_assert_rect_height_at_least(visual, "CardDescriptionBackground", 74.0, "effect panel")
+	_assert_label_font_size_at_most(visual, "CardStars", 10, "card stars")
 
 	card.queue_free()
 	await process_frame
@@ -258,6 +282,45 @@ func _assert_rect_inside(parent: Control, child: Control, label: String) -> void
 
 	if child_rect.end.y > parent_rect.end.y:
 		failures.append("%s exceeds card height: %s" % [label, child_rect])
+
+
+func _assert_no_visible_descendant(parent: Node, node_name: String, label: String) -> void:
+	var node := _find_descendant(parent, node_name)
+	if node == null:
+		return
+	var canvas_item := node as CanvasItem
+	if canvas_item != null and canvas_item.visible:
+		failures.append("%s should not be visible" % label)
+
+
+func _assert_rect_top_at_most(parent: Control, node_name: String, max_top: float, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Control
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return
+	var local_top := node.get_global_rect().position.y - parent.get_global_rect().position.y
+	if local_top > max_top:
+		failures.append("%s top expected <= %.1f, got %.1f" % [label, max_top, local_top])
+
+
+func _assert_rect_height_at_least(parent: Control, node_name: String, min_height: float, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Control
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return
+	var height := node.get_global_rect().size.y
+	if height < min_height:
+		failures.append("%s height expected >= %.1f, got %.1f" % [label, min_height, height])
+
+
+func _assert_label_font_size_at_most(parent: Node, node_name: String, max_size: int, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Label
+	if node == null:
+		failures.append("%s missing label %s" % [label, node_name])
+		return
+	var font_size := node.get_theme_font_size("font_size")
+	if font_size > max_size:
+		failures.append("%s font size expected <= %d, got %d" % [label, max_size, font_size])
 
 
 func _assert_vertical_non_overlap(parent: Control, first_name: String, second_name: String) -> void:
