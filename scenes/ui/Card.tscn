@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://btxmfagad05n5"]
+[gd_scene load_steps=18 format=3 uid="uid://btxmfagad05n5"]
 
 [ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_deck.png" id="1_7f6u3"]
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_n7s1f"]
 [ext_resource type="Script" uid="uid://k4n0whn5t0m" path="res://scripts/ui/Card.gd" id="1_u8ksl"]
+[ext_resource type="Script" path="res://scripts/ui/CardChrome.gd" id="2_od4t7"]
 [ext_resource type="PackedScene" uid="uid://daimkj082tvn0" path="res://scenes/ui/general/KeywordContainer.tscn" id="3_6p3td"]
 [ext_resource type="Script" uid="uid://c5i0sjwlko88l" path="res://addons/label_font_auto_sizer/rich_label_auto_sizer.gd" id="3_8gkbw"]
 
@@ -38,36 +39,36 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_art"]
-bg_color = Color(1, 1, 1, 0.96)
+bg_color = Color(1, 1, 1, 0)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.121569, 0.156863, 0.207843, 0.65)
+border_color = Color(1, 1, 1, 0)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_bottom"]
-bg_color = Color(1, 1, 1, 0.96)
+bg_color = Color(1, 1, 1, 0)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.879216, 0.931373, 1, 0.85)
+border_color = Color(1, 1, 1, 0)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_ribbon"]
-bg_color = Color(0.258824, 0.411765, 0.882353, 1)
+bg_color = Color(1, 1, 1, 0)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.85)
+border_color = Color(1, 1, 1, 0)
 corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
@@ -177,8 +178,17 @@ offset_right = 152.0
 offset_bottom = 192.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_glow")
 
+[node name="CardChrome" type="Control" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 144.0
+offset_bottom = 184.0
+mouse_filter = 2
+script = ExtResource("2_od4t7")
+
 [node name="ColorBackground" type="Panel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 offset_right = 144.0
 offset_bottom = 184.0
@@ -186,6 +196,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_card_outer")
 
 [node name="CardBackground" type="Panel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 offset_left = 4.0
 offset_top = 4.0
