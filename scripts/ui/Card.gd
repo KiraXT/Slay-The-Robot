@@ -43,7 +43,6 @@ const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 @onready var card_energy_cost: Label = %EnergyCost
 @onready var card_color: Panel = %ColorBackground
 @onready var card_background: Panel = %CardBackground
-@onready var card_chrome = %CardChrome
 @onready var card_art_frame: Panel = %CardArtFrame
 @onready var card_description_background: Panel = %CardDescriptionBackground
 @onready var card_type_background: Panel = %CardTypeBackground
@@ -148,24 +147,29 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	if color_data != null:
 		frame_color = color_data.color
 
-	var background_color := Color(0.98, 0.985, 0.99, 1.0)
+	var background_color := Color(1.0, 1.0, 1.0, 0.98)
+	if frame_color.get_luminance() < 0.82:
+		background_color = frame_color.lightened(0.82)
+
 	var frame_edge := frame_color.darkened(0.20)
 	var frame_highlight := frame_color.lightened(0.45)
+	var type_color := frame_color.darkened(0.10)
+	var description_border := frame_color.lightened(0.50)
+	var panel_white := Color(1.0, 1.0, 1.0, 0.96)
 	if card_color_id == "color_white":
 		frame_color = CARD_NEUTRAL_FRAME_COLOR
 		frame_edge = CARD_NEUTRAL_FRAME_EDGE_COLOR
 		frame_highlight = CARD_NEUTRAL_FRAME_BORDER_COLOR
-		background_color = Color(0.965, 0.972, 0.98, 1.0)
+		type_color = CARD_NEUTRAL_FRAME_BORDER_COLOR
+		description_border = CARD_NEUTRAL_FRAME_BORDER_COLOR.lightened(0.28)
+		background_color = Color(0.96, 0.97, 0.98, 0.98)
 
-	card_color.visible = false
-	card_background.visible = false
-	card_chrome.set_palette(frame_color, frame_edge, frame_highlight, background_color)
-
-	var transparent := Color(1.0, 1.0, 1.0, 0.0)
-	_set_panel_style(card_art_frame, transparent, transparent)
-	_set_panel_style(card_description_background, transparent, transparent)
-	_set_panel_style(card_type_background, transparent, transparent)
-	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_color.lightened(0.16))
+	_set_panel_style(card_color, frame_color, frame_highlight)
+	_set_panel_style(card_background, background_color, panel_white)
+	_set_panel_style(card_art_frame, panel_white, frame_edge)
+	_set_panel_style(card_description_background, panel_white, description_border)
+	_set_panel_style(card_type_background, type_color, panel_white)
+	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_highlight)
 
 func _set_panel_style(panel: Panel, bg_color: Color, border_color: Color) -> void:
 	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat

@@ -153,12 +153,11 @@ func _check_card_detail_treatment() -> void:
 		return
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
-	_assert_node_script_path(visual, "CardChrome", "res://scripts/ui/CardChrome.gd", "card chrome layer")
-	_assert_canvas_item_hidden(visual, "ColorBackground", "legacy outer color panel")
-	_assert_canvas_item_hidden(visual, "CardBackground", "legacy inner card panel")
-	_assert_panel_bg_alpha_at_most(visual, "CardArtFrame", 0.08, "card art layout panel")
-	_assert_panel_bg_alpha_at_most(visual, "CardDescriptionBackground", 0.08, "description layout panel")
-	_assert_panel_bg_alpha_at_most(visual, "CardTypeBackground", 0.08, "type label layout panel")
+	_assert_panel_style(visual, "ColorBackground", 12, 3, "outer rounded frame")
+	_assert_panel_style(visual, "CardBackground", 9, 1, "inner rounded card body")
+	_assert_panel_style(visual, "CardArtFrame", 5, 2, "card art rounded frame")
+	_assert_panel_style(visual, "CardDescriptionBackground", 7, 1, "bottom description panel")
+	_assert_panel_style(visual, "CardTypeBackground", 6, 1, "type ribbon")
 	_assert_panel_style(visual, "EnergySprite", 17, 3, "energy badge")
 
 	_assert_rect_inside(_find_descendant(visual, "CardArtFrame") as Control, _find_descendant(visual, "CardTexture") as Control, "CardTexture inside art frame")
@@ -181,16 +180,9 @@ func _check_white_card_neutral_frame() -> void:
 		return
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
-	var chrome := _find_descendant(visual, "CardChrome")
-	if chrome == null:
-		failures.append("white card chrome layer is missing")
-	else:
-		var frame_color = chrome.get("frame_color")
-		var accent_color = chrome.get("accent_color")
-		if frame_color is Color and frame_color.get_luminance() > 0.78:
-			failures.append("white card chrome frame luminance expected <= 0.78, got %.2f" % frame_color.get_luminance())
-		if accent_color is Color and accent_color.get_luminance() > 0.72:
-			failures.append("white card chrome accent luminance expected <= 0.72, got %.2f" % accent_color.get_luminance())
+	_assert_panel_bg_luminance_below(visual, "ColorBackground", 0.78, "white card outer frame")
+	_assert_panel_bg_luminance_below(visual, "CardTypeBackground", 0.72, "white card type ribbon")
+	_assert_panel_border_luminance_below(visual, "CardArtFrame", 0.70, "white card art border")
 
 	card.queue_free()
 	await process_frame
@@ -209,7 +201,6 @@ func _check_b_mech_template_layout() -> void:
 		return
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
-	_assert_node_script_path(visual, "CardChrome", "res://scripts/ui/CardChrome.gd", "b mech chrome layer")
 	_assert_no_visible_descendant(visual, "CardFaction", "top faction badge")
 	_assert_no_visible_descendant(visual, "CardFactionStamp", "bottom faction stamp")
 	_assert_rect_top_at_most(visual, "CardName", 7.0, "card name")
@@ -302,32 +293,6 @@ func _assert_no_visible_descendant(parent: Node, node_name: String, label: Strin
 		failures.append("%s should not be visible" % label)
 
 
-func _assert_canvas_item_hidden(parent: Node, node_name: String, label: String) -> void:
-	var node := _find_descendant(parent, node_name)
-	if node == null:
-		failures.append("%s missing node %s" % [label, node_name])
-		return
-	var canvas_item := node as CanvasItem
-	if canvas_item == null:
-		failures.append("%s node %s is not a CanvasItem" % [label, node.get_path()])
-		return
-	if canvas_item.visible:
-		failures.append("%s should be hidden" % label)
-
-
-func _assert_node_script_path(parent: Node, node_name: String, expected_path: String, label: String) -> void:
-	var node := _find_descendant(parent, node_name)
-	if node == null:
-		failures.append("%s missing node %s" % [label, node_name])
-		return
-	var script := node.get_script() as Script
-	if script == null:
-		failures.append("%s node %s has no script" % [label, node.get_path()])
-		return
-	if script.resource_path != expected_path:
-		failures.append("%s script expected %s, got %s" % [label, expected_path, script.resource_path])
-
-
 func _assert_rect_top_at_most(parent: Control, node_name: String, max_top: float, label: String) -> void:
 	var node := _find_descendant(parent, node_name) as Control
 	if node == null:
@@ -413,14 +378,6 @@ func _assert_panel_bg_luminance_below(parent: Node, node_name: String, max_lumin
 		return
 	if style.bg_color.get_luminance() > max_luminance:
 		failures.append("%s background luminance expected <= %.2f, got %.2f" % [label, max_luminance, style.bg_color.get_luminance()])
-
-
-func _assert_panel_bg_alpha_at_most(parent: Node, node_name: String, max_alpha: float, label: String) -> void:
-	var style := _get_panel_style(parent, node_name, label)
-	if style == null:
-		return
-	if style.bg_color.a > max_alpha:
-		failures.append("%s background alpha expected <= %.2f, got %.2f" % [label, max_alpha, style.bg_color.a])
 
 
 func _assert_panel_border_luminance_below(parent: Node, node_name: String, max_luminance: float, label: String) -> void:
