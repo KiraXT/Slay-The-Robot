@@ -37,6 +37,9 @@ const CARD_FACTION_LABELS: Dictionary = {
 }
 
 const CARD_DEFAULT_FRAME_COLOR: Color = Color(0.86, 0.88, 0.92, 1.0)
+const CARD_NEUTRAL_FRAME_COLOR: Color = Color(0.70, 0.73, 0.76, 1.0)
+const CARD_NEUTRAL_FRAME_EDGE_COLOR: Color = Color(0.46, 0.49, 0.52, 1.0)
+const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 
 @onready var card_button: Button = %CardButton
 
@@ -131,7 +134,7 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	card_stars.text = _get_card_star_label(card_data.card_rarity)
 	
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
-	_apply_card_palette(color_data)
+	_apply_card_palette(color_data, card_data.card_color_id)
 	
 	energy_sprite.visible = card_data.card_is_playable
 	
@@ -158,7 +161,7 @@ func _get_card_faction_label(card_color_id: String) -> String:
 	return CARD_FACTION_LABELS.get(card_color_id, "?")
 
 
-func _apply_card_palette(color_data: ColorData) -> void:
+func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	var frame_color := CARD_DEFAULT_FRAME_COLOR
 	if color_data != null:
 		frame_color = color_data.color
@@ -169,12 +172,22 @@ func _apply_card_palette(color_data: ColorData) -> void:
 
 	var frame_edge := frame_color.darkened(0.20)
 	var frame_highlight := frame_color.lightened(0.45)
+	var type_color := frame_color.darkened(0.10)
+	var description_border := frame_color.lightened(0.50)
 	var panel_white := Color(1.0, 1.0, 1.0, 0.96)
+	if card_color_id == "color_white":
+		frame_color = CARD_NEUTRAL_FRAME_COLOR
+		frame_edge = CARD_NEUTRAL_FRAME_EDGE_COLOR
+		frame_highlight = CARD_NEUTRAL_FRAME_BORDER_COLOR
+		type_color = CARD_NEUTRAL_FRAME_BORDER_COLOR
+		description_border = CARD_NEUTRAL_FRAME_BORDER_COLOR.lightened(0.28)
+		background_color = Color(0.96, 0.97, 0.98, 0.98)
+
 	_set_panel_style(card_color, frame_color, frame_highlight)
 	_set_panel_style(card_background, background_color, panel_white)
 	_set_panel_style(card_art_frame, panel_white, frame_edge)
-	_set_panel_style(card_description_background, panel_white, frame_color.lightened(0.50))
-	_set_panel_style(card_type_background, frame_color.darkened(0.10), panel_white)
+	_set_panel_style(card_description_background, panel_white, description_border)
+	_set_panel_style(card_type_background, type_color, panel_white)
 	_set_panel_style(card_faction_background, panel_white, frame_highlight)
 	_set_panel_style(card_faction_stamp, Color(1.0, 1.0, 1.0, 0.0), Color(1.0, 1.0, 1.0, 0.0))
 	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_highlight)

@@ -29,6 +29,7 @@ func _run() -> void:
 	await _check_visual_mappings()
 	await _check_layout_bounds()
 	await _check_card_detail_treatment()
+	await _check_white_card_neutral_frame()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -167,6 +168,28 @@ func _check_card_detail_treatment() -> void:
 	await process_frame
 
 
+func _check_white_card_neutral_frame() -> void:
+	var card := await _render_card({
+		"name": "white neutral frame",
+		"color_id": "color_white",
+		"type": CARD_TYPE_SKILL,
+		"rarity": CARD_RARITY_RARE,
+		"energy": "1",
+	})
+	if card == null:
+		failures.append("white neutral frame failed to render card")
+		return
+
+	var visual := card.get_node("Pivot/CardVisual") as Control
+	_assert_panel_bg_luminance_below(visual, "ColorBackground", 0.78, "white card outer frame")
+	_assert_panel_bg_luminance_below(visual, "CardTypeBackground", 0.72, "white card type ribbon")
+	_assert_panel_border_luminance_below(visual, "CardArtFrame", 0.70, "white card art border")
+	_assert_panel_border_luminance_below(visual, "CardFaction", 0.78, "white card faction border")
+
+	card.queue_free()
+	await process_frame
+
+
 func _render_card(case_data: Dictionary) -> Node:
 	var card_data_script := load(CARD_DATA_SCRIPT_PATH) as Script
 	if card_data_script == null or not card_data_script.can_instantiate():
@@ -284,6 +307,39 @@ func _assert_panel_style(parent: Node, node_name: String, min_corner_radius: int
 		if border_width < min_border_width:
 			failures.append("%s border width expected at least %d, got %d" % [label, min_border_width, border_width])
 			return
+
+
+func _assert_panel_bg_luminance_below(parent: Node, node_name: String, max_luminance: float, label: String) -> void:
+	var style := _get_panel_style(parent, node_name, label)
+	if style == null:
+		return
+	if style.bg_color.get_luminance() > max_luminance:
+		failures.append("%s background luminance expected <= %.2f, got %.2f" % [label, max_luminance, style.bg_color.get_luminance()])
+
+
+func _assert_panel_border_luminance_below(parent: Node, node_name: String, max_luminance: float, label: String) -> void:
+	var style := _get_panel_style(parent, node_name, label)
+	if style == null:
+		return
+	if style.border_color.get_luminance() > max_luminance:
+		failures.append("%s border luminance expected <= %.2f, got %.2f" % [label, max_luminance, style.border_color.get_luminance()])
+
+
+func _get_panel_style(parent: Node, node_name: String, label: String) -> StyleBoxFlat:
+	var node := _find_descendant(parent, node_name)
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return null
+
+	var panel := node as Panel
+	if panel == null:
+		failures.append("%s node %s is not a Panel" % [label, node.get_path()])
+		return null
+
+	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		failures.append("%s node %s has no StyleBoxFlat panel style" % [label, panel.get_path()])
+	return style
 
 
 func _find_descendant(parent: Node, node_name: String) -> Node:
