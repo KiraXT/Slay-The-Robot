@@ -4,7 +4,7 @@
 
 **Goal:** 将选关地图节点从英文文字节点改为透明图标节点，并在右侧显示固定中文图例栏。
 
-**Architecture:** 地图节点继续由 `Map.gd` 实例化 `MapLocation.tscn`，`MapLocation.gd` 负责按 `LocationData.LOCATION_TYPES` 选择图标。`Root.tscn` 提供右侧 `LegendPanel` 静态容器，`Map.gd` 在 `_ready()` 中用同一份映射填充图例贴图和中文名，避免场景文件直接绑定 PNG 导入资源。
+**Architecture:** 地图节点继续由 `Map.gd` 实例化 `MapLocation.tscn`，`MapLocation.gd` 负责按 `LocationData.LOCATION_TYPES` 选择图标。`Map.gd` 在 `_ready()` 中配置地图布局并创建右侧 `LegendPanel`，用同一份映射填充图例贴图和中文名，避免场景文件直接绑定 PNG 导入资源。
 
 **Tech Stack:** Godot 4.6、GDScript、`SceneTree` 回归测试、外部 PNG 资源、内置 image generation + 本地 chroma-key 抠图。
 
@@ -24,8 +24,7 @@
 - Modify: `scripts/ui/MapLocation.gd`
 - Modify: `scenes/ui/MapLocation.tscn`
 - Modify: `scripts/ui/Map.gd`
-- Modify: `scenes/Root.tscn`
-- Modify: `tests/ui_layout_bounds_regression.gd`
+- Create: `tests/map_location_layout_regression.gd`
 
 ## Task 1: 准备透明地图图标资源
 
@@ -106,11 +105,11 @@ Use case: stylized-concept
 Asset type: Godot map location icon
 Primary request: Create one treasure chest floating island icon in the same cute fantasy isometric style as the provided six map-location icons.
 Input images: provided 2x3 map location sheet as style reference.
-Scene/backdrop: perfectly flat solid #00ff00 chroma-key background for background removal.
+Scene/backdrop: perfectly flat solid #ff00ff chroma-key background for background removal.
 Subject: a small floating island with a golden treasure chest at the center, blue water rim, grass, stones, flowers, and light fantasy game polish.
 Style/medium: bright stylized 2D game art, isometric floating island, matching the reference image scale and detail density.
 Composition/framing: centered, full subject visible, generous padding.
-Constraints: no text, no watermark, no cast shadow, no contact shadow, no gradients or texture in the green background, do not use #00ff00 in the subject.
+Constraints: no text, no watermark, no cast shadow, no contact shadow, no gradients or texture in the magenta background, do not use #ff00ff in the subject.
 ```
 
 Copy the generated source image into `tmp/imagegen/map_location_treasure_source.png`, then run:
@@ -384,21 +383,46 @@ Expected: PASS with `ALL_TESTS_PASSED`。
 ## Task 3: TDD 右侧图例栏与地图布局
 
 **Files:**
-- Modify: `tests/ui_layout_bounds_regression.gd`
+- Create: `tests/map_location_layout_regression.gd`
 - Modify: `scripts/ui/Map.gd`
-- Modify: `scenes/Root.tscn`
 
 - [ ] **Step 1: Write the failing layout test**
 
-Add this call in `_run()` after `_check_combat_hand(root_scene)`:
+Create `tests/map_location_layout_regression.gd`:
 
 ```gdscript
+extends SceneTree
+
+const CANVAS_SIZE := Vector2(1200.0, 700.0)
+
+var failures: Array[String] = []
+
+
+func _init() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
+	var root_scene: Node = load("res://scenes/Root.tscn").instantiate()
+	root.add_child(root_scene)
+	await process_frame
+	await process_frame
+
 	_check_map_layout(root_scene)
-```
 
-Add these helpers to `tests/ui_layout_bounds_regression.gd`:
+	root_scene.queue_free()
 
-```gdscript
+	if failures.is_empty():
+		print("ALL_TESTS_PASSED")
+		quit(0)
+		return
+
+	for failure in failures:
+		push_error(failure)
+		print("FAIL: %s" % failure)
+	quit(1)
+
+
 func _check_map_layout(root_scene: Node) -> void:
 	var map: Control = root_scene.get_node("RunScreen/Map")
 	var scroll_container: Control = map.get_node("ScrollContainer")
@@ -435,28 +459,28 @@ func _assert_no_overlap(first: Control, second: Control, first_label: String, se
 Run:
 
 ```bash
-godot --headless --path . --script tests/ui_layout_bounds_regression.gd
+godot --headless --path . --script tests/map_location_layout_regression.gd
 ```
 
 Expected: FAIL because `RunScreen/Map/LegendPanel` does not exist yet。
 
-- [ ] **Step 3: Add static legend container and fill it from Map.gd**
+- [ ] **Step 3: Add runtime legend container and fill it from Map.gd**
 
-Modify `scenes/Root.tscn` under `RunScreen/Map`:
-
-```text
-Move BackButton to left/top safe area.
-Set ScrollContainer offsets approximately left=96, top=72, right=930, bottom=656.
-Add LegendPanel as VBoxContainer or PanelContainer at approximately left=960, top=88, right=1148, bottom=612.
-Inside LegendPanel add 7 HBoxContainer children named:
-CombatLegend, EventLegend, ShopLegend, MinibossLegend, BossLegend, TreasureLegend, RestSiteLegend.
-Each entry contains TextureRect named Icon and Label named NameLabel.
-```
-
-Modify `scripts/ui/Map.gd`:
+Modify `scripts/ui/Map.gd` to configure map layout and create `LegendPanel` at runtime:
 
 ```gdscript
-@onready var legend_panel: Control = $LegendPanel
+@onready var background_panel: ColorRect = $Background2
+
+var legend_panel: VBoxContainer = null
+
+const MAP_SCROLL_POSITION := Vector2(96, 72)
+const MAP_SCROLL_SIZE := Vector2(834, 584)
+const MAP_LEGEND_POSITION := Vector2(960, 88)
+const MAP_LEGEND_SIZE := Vector2(188, 524)
+const MAP_BACK_BUTTON_POSITION := Vector2(32, 32)
+const MAP_BACK_BUTTON_SIZE := Vector2(96, 32)
+const MAP_BACKGROUND_PANEL_OFFSET_LEFT: float = -504
+const MAP_BACKGROUND_PANEL_OFFSET_RIGHT: float = 548
 
 const MAP_LEGEND_ENTRIES := [
 	{"type": LocationData.LOCATION_TYPES.COMBAT, "label": "基础战斗"},
@@ -479,16 +503,49 @@ func _ready():
 	Signals.shop_opened.connect(_on_shop_opened)
 	Signals.map_location_selected.connect(_on_map_location_selected)
 
+func _configure_map_layout() -> void:
+	scroll_container.position = MAP_SCROLL_POSITION
+	scroll_container.size = MAP_SCROLL_SIZE
+	back_button.position = MAP_BACK_BUTTON_POSITION
+	back_button.size = MAP_BACK_BUTTON_SIZE
+	background_panel.offset_left = MAP_BACKGROUND_PANEL_OFFSET_LEFT
+	background_panel.offset_right = MAP_BACKGROUND_PANEL_OFFSET_RIGHT
+
+func _ensure_legend_panel() -> void:
+	legend_panel = get_node_or_null("LegendPanel") as VBoxContainer
+	if legend_panel == null:
+		legend_panel = VBoxContainer.new()
+		legend_panel.name = "LegendPanel"
+		add_child(legend_panel)
+	legend_panel.position = MAP_LEGEND_POSITION
+	legend_panel.size = MAP_LEGEND_SIZE
+	legend_panel.custom_minimum_size = MAP_LEGEND_SIZE
+	legend_panel.add_theme_constant_override("separation", 8)
+
 func _populate_legend_panel() -> void:
-	for i in min(legend_panel.get_child_count(), MAP_LEGEND_ENTRIES.size()):
-		var entry: Dictionary = MAP_LEGEND_ENTRIES[i]
-		var row: Control = legend_panel.get_child(i)
-		var icon: TextureRect = row.get_node("Icon")
-		var label: Label = row.get_node("NameLabel")
+	for child in legend_panel.get_children():
+		child.queue_free()
+	for entry: Dictionary in MAP_LEGEND_ENTRIES:
+		var row := HBoxContainer.new()
+		row.name = "%sLegend" % str(entry["label"])
+		row.custom_minimum_size = Vector2(MAP_LEGEND_SIZE.x, 64)
+		row.add_theme_constant_override("separation", 8)
+		legend_panel.add_child(row)
+		var icon := TextureRect.new()
+		icon.name = "Icon"
+		icon.custom_minimum_size = Vector2(56, 56)
+		icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		row.add_child(icon)
+		var label := Label.new()
+		label.name = "NameLabel"
+		label.text = entry["label"]
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(label)
 		var location_data := LocationData.new()
 		location_data.location_type = entry["type"]
 		icon.texture = FileLoader.load_texture(MapLocation.get_location_texture_path(location_data))
-		label.text = entry["label"]
 ```
 
 - [ ] **Step 4: Run layout test to verify it passes**
@@ -496,7 +553,7 @@ func _populate_legend_panel() -> void:
 Run:
 
 ```bash
-godot --headless --path . --script tests/ui_layout_bounds_regression.gd
+godot --headless --path . --script tests/map_location_layout_regression.gd
 ```
 
 Expected: PASS with `ALL_TESTS_PASSED`。
@@ -521,7 +578,7 @@ Expected: PASS with `ALL_TESTS_PASSED`。
 Run:
 
 ```bash
-godot --headless --path . --script tests/ui_layout_bounds_regression.gd
+godot --headless --path . --script tests/map_location_layout_regression.gd
 ```
 
 Expected: PASS with `ALL_TESTS_PASSED`。
@@ -541,7 +598,7 @@ Expected: exit 0 without scene resource errors。
 Run:
 
 ```bash
-git status --short external/sprites/ui/map_locations scripts/ui/MapLocation.gd scenes/ui/MapLocation.tscn scripts/ui/Map.gd scenes/Root.tscn tests/map_location_icon_regression.gd tests/ui_layout_bounds_regression.gd
+git status --short external/sprites/ui/map_locations scripts/ui/MapLocation.gd scenes/ui/MapLocation.tscn scripts/ui/Map.gd tests/map_location_icon_regression.gd tests/map_location_layout_regression.gd docs/superpowers/plans/2026-07-04-map-location-icons.md
 ```
 
 Expected: only the intended files from this plan are listed, plus Godot-generated `.uid` files if the editor/runtime creates them for new tests。
@@ -551,6 +608,6 @@ Expected: only the intended files from this plan are listed, plus Godot-generate
 Run:
 
 ```bash
-git add external/sprites/ui/map_locations scripts/ui/MapLocation.gd scenes/ui/MapLocation.tscn scripts/ui/Map.gd scenes/Root.tscn tests/map_location_icon_regression.gd tests/ui_layout_bounds_regression.gd
+git add external/sprites/ui/map_locations scripts/ui/MapLocation.gd scenes/ui/MapLocation.tscn scripts/ui/Map.gd tests/map_location_icon_regression.gd tests/map_location_layout_regression.gd docs/superpowers/plans/2026-07-04-map-location-icons.md
 git commit -m "Refresh map location icons"
 ```
