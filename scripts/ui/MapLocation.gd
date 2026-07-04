@@ -1,8 +1,8 @@
 extends TextureButton
 class_name MapLocation
 
-const FALLBACK_TEXTURE_PATH := "sprites/ui/flipper/icon_map.png"
-const UNKNOWN_TEXTURE_PATH := "external/sprites/ui/map_locations/map_location_unknown.png"
+const FALLBACK_TEXTURE_PATH := "external/sprites/ui/map_locations/map_location_event.png"
+const HIDDEN_LOCATION_TEXTURE_PATH := "external/sprites/ui/map_locations/map_location_event.png"
 const LOCATION_TYPE_TO_TEXTURE_PATH := {
 	LocationData.LOCATION_TYPES.COMBAT: "external/sprites/ui/map_locations/map_location_combat.png",
 	LocationData.LOCATION_TYPES.EVENT: "external/sprites/ui/map_locations/map_location_event.png",
@@ -31,8 +31,8 @@ func init(_location_data: LocationData):
 
 static func get_location_texture_path(_location_data: LocationData) -> String:
 	if _location_data.location_obfuscated and not _location_data.location_visited and _location_data.location_type != LocationData.LOCATION_TYPES.EVENT:
-		return UNKNOWN_TEXTURE_PATH
-	return LOCATION_TYPE_TO_TEXTURE_PATH.get(_location_data.location_type, UNKNOWN_TEXTURE_PATH)
+		return HIDDEN_LOCATION_TEXTURE_PATH
+	return LOCATION_TYPE_TO_TEXTURE_PATH.get(_location_data.location_type, HIDDEN_LOCATION_TEXTURE_PATH)
 
 
 func flash_location() -> void:
