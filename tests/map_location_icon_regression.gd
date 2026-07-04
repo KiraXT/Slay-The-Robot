@@ -31,6 +31,8 @@ func _init() -> void:
 func _run() -> void:
 	root.get_node("Global")
 
+	await _assert_scene_has_no_static_texture()
+
 	for location_type in EXPECTED_TEXTURES.keys():
 		await _assert_location_texture(location_type, EXPECTED_TEXTURES[location_type])
 
@@ -85,6 +87,16 @@ func _assert_map_label_removed() -> void:
 	await process_frame
 	if map_location.has_node("MapLabel"):
 		failures.append("MapLocation should not keep the old MapLabel node")
+	map_location.queue_free()
+	await process_frame
+
+
+func _assert_scene_has_no_static_texture() -> void:
+	var map_location = load("res://scenes/ui/MapLocation.tscn").instantiate()
+	root.add_child(map_location)
+	await process_frame
+	if map_location.texture_normal != null:
+		failures.append("MapLocation scene should not bind a static texture before init")
 	map_location.queue_free()
 	await process_frame
 

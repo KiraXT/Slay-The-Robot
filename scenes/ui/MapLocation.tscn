@@ -1,6 +1,5 @@
-[gd_scene load_steps=5 format=3 uid="uid://bf2csrm8e8fl1"]
+[gd_scene load_steps=4 format=3 uid="uid://bf2csrm8e8fl1"]
 
-[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_map.png" id="1_rkvl2"]
 [ext_resource type="Script" uid="uid://t65xqvojt1pl" path="res://scripts/ui/MapLocation.gd" id="2_7lvet"]
 
 [sub_resource type="Animation" id="Animation_i5j5c"]
@@ -28,7 +27,6 @@ _data = {
 [node name="MapLocation" type="TextureButton"]
 offset_right = 80.0
 offset_bottom = 80.0
-texture_normal = ExtResource("1_rkvl2")
 ignore_texture_size = true
 stretch_mode = 0
 script = ExtResource("2_7lvet")
