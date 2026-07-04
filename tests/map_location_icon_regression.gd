@@ -36,6 +36,7 @@ func _run() -> void:
 	for location_type in EXPECTED_TEXTURES.keys():
 		await _assert_location_texture(location_type, EXPECTED_TEXTURES[location_type])
 
+	await _assert_obfuscated_event_uses_event_texture()
 	await _assert_obfuscated_location_uses_unknown_texture()
 	await _assert_map_label_removed()
 
@@ -77,6 +78,22 @@ func _assert_obfuscated_location_uses_unknown_texture() -> void:
 	map_location.init(location_data)
 
 	_assert_texture_path(map_location.texture_normal, UNKNOWN_TEXTURE, "obfuscated location")
+	map_location.queue_free()
+	await process_frame
+
+
+func _assert_obfuscated_event_uses_event_texture() -> void:
+	var map_location = load("res://scenes/ui/MapLocation.tscn").instantiate()
+	root.add_child(map_location)
+	await process_frame
+
+	var location_data = _create_location_data()
+	location_data.location_type = LOCATION_TYPES.EVENT
+	location_data.location_obfuscated = true
+	location_data.location_visited = false
+	map_location.init(location_data)
+
+	_assert_texture_path(map_location.texture_normal, EXPECTED_TEXTURES[LOCATION_TYPES.EVENT], "obfuscated event")
 	map_location.queue_free()
 	await process_frame
 

@@ -30,7 +30,7 @@ func init(_location_data: LocationData):
 
 
 static func get_location_texture_path(_location_data: LocationData) -> String:
-	if _location_data.location_obfuscated and not _location_data.location_visited:
+	if _location_data.location_obfuscated and not _location_data.location_visited and _location_data.location_type != LocationData.LOCATION_TYPES.EVENT:
 		return UNKNOWN_TEXTURE_PATH
 	return LOCATION_TYPE_TO_TEXTURE_PATH.get(_location_data.location_type, UNKNOWN_TEXTURE_PATH)
 
