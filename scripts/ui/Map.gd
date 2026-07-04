@@ -1,5 +1,7 @@
 extends Control
 
+const MAP_ROUTE_LAYER_SCRIPT := preload("res://scripts/ui/MapRouteLayer.gd")
+
 @onready var scroll_container = $ScrollContainer
 @onready var location_container = $ScrollContainer/LocationContainer
 @onready var back_button: Button = $BackButton
@@ -20,6 +22,8 @@ const MAP_BACK_BUTTON_POSITION := Vector2(32, 32)
 const MAP_BACK_BUTTON_SIZE := Vector2(96, 32)
 const MAP_BACKGROUND_PANEL_OFFSET_LEFT: float = -504
 const MAP_BACKGROUND_PANEL_OFFSET_RIGHT: float = 548
+const MAP_LOCATION_CENTER_OFFSET := Vector2(40, 40)
+const ROUTE_LAYER_NAME := "RouteLayer"
 
 const MAP_LEGEND_ENTRIES := [
 	{"type": LocationData.LOCATION_TYPES.COMBAT, "label": "基础战斗"},
@@ -107,13 +111,16 @@ func populate_locations(locations: Array[LocationData] = Global.get_all_act_loca
 	
 	var next_locations: Array[LocationData] = Global.get_next_locations()
 	var max_y: float = 0.0 # the highest location position, used to determine container size
+	var max_x: float = MAP_SCROLL_SIZE.x
+	var route_segments := _build_route_segments(locations)
+	var route_layer = MAP_ROUTE_LAYER_SCRIPT.new()
+	route_layer.name = ROUTE_LAYER_NAME
+	route_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	location_container.add_child(route_layer)
 	
 	var current_map_location: MapLocation = null
 	
 	for location_data in locations:
-		if location_data.location_type == LocationData.LOCATION_TYPES.STARTING:
-			continue	# starting area not displayed
-		
 		var map_location: MapLocation = Scenes.MAP_LOCATION.instantiate()
 		location_container.add_child(map_location)
 		map_location.init(location_data)
@@ -121,6 +128,7 @@ func populate_locations(locations: Array[LocationData] = Global.get_all_act_loca
 		map_location.map_location_button_up.connect(_on_map_location_button_up)
 		
 		max_y = max(max_y, location_data.location_position.y)
+		max_x = max(max_x, location_data.location_position.x + MAP_LOCATION_CENTER_OFFSET.x + MAP_Y_MARGIN)
 		
 		# flash the locations the player can travel to
 		if can_travel:
@@ -132,8 +140,11 @@ func populate_locations(locations: Array[LocationData] = Global.get_all_act_loca
 			#current_map_location = map_location
 	
 	# set the size of the container to make scrolling posible
-	location_container.custom_minimum_size.y = max_y + MAP_Y_MARGIN
-	location_container.size.y = max_y + MAP_Y_MARGIN
+	var container_size := Vector2(max_x, max_y + MAP_Y_MARGIN)
+	location_container.custom_minimum_size = container_size
+	location_container.size = container_size
+	route_layer.size = container_size
+	route_layer.set_route_segments(route_segments)
 	
 	# wait a frame to ensure container is properly resized
 	await Global.get_tree().process_frame
@@ -147,7 +158,26 @@ func populate_locations(locations: Array[LocationData] = Global.get_all_act_loca
 
 func clear_locations() -> void:
 	for child in location_container.get_children():
+		location_container.remove_child(child)
 		child.queue_free()
+
+
+func _build_route_segments(locations: Array[LocationData]) -> Array[Dictionary]:
+	var locations_by_id := {}
+	for location_data in locations:
+		locations_by_id[location_data.location_id] = location_data
+
+	var route_segments: Array[Dictionary] = []
+	for location_data in locations:
+		for next_location_id in location_data.location_next_location_ids:
+			var next_location: LocationData = locations_by_id.get(next_location_id)
+			if next_location == null:
+				continue
+			route_segments.append({
+				"from": location_data.location_position + MAP_LOCATION_CENTER_OFFSET,
+				"to": next_location.location_position + MAP_LOCATION_CENTER_OFFSET,
+			})
+	return route_segments
 
 func show_map():
 	populate_locations()
