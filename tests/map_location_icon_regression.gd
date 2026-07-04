@@ -18,7 +18,7 @@ const EXPECTED_TEXTURES := {
 	LOCATION_TYPES.REST_SITE: "external/sprites/ui/map_locations/map_location_rest_site.png",
 	LOCATION_TYPES.TREASURE: "external/sprites/ui/map_locations/map_location_treasure.png",
 }
-const UNKNOWN_TEXTURE := "external/sprites/ui/map_locations/map_location_unknown.png"
+const HIDDEN_LOCATION_TEXTURE := "external/sprites/ui/map_locations/map_location_event.png"
 const LOCATION_DATA_SCRIPT := "res://data/mutable/LocationData.gd"
 
 var failures: Array[String] = []
@@ -37,7 +37,8 @@ func _run() -> void:
 		await _assert_location_texture(location_type, EXPECTED_TEXTURES[location_type])
 
 	await _assert_obfuscated_event_uses_event_texture()
-	await _assert_obfuscated_location_uses_unknown_texture()
+	await _assert_obfuscated_location_uses_hidden_texture(LOCATION_TYPES.COMBAT)
+	await _assert_obfuscated_location_uses_hidden_texture(LOCATION_TYPES.TREASURE)
 	await _assert_map_label_removed()
 
 	if failures.is_empty():
@@ -66,18 +67,18 @@ func _assert_location_texture(location_type: int, expected_path: String) -> void
 	await process_frame
 
 
-func _assert_obfuscated_location_uses_unknown_texture() -> void:
+func _assert_obfuscated_location_uses_hidden_texture(location_type: int) -> void:
 	var map_location = load("res://scenes/ui/MapLocation.tscn").instantiate()
 	root.add_child(map_location)
 	await process_frame
 
 	var location_data = _create_location_data()
-	location_data.location_type = LOCATION_TYPES.BOSS
+	location_data.location_type = location_type
 	location_data.location_obfuscated = true
 	location_data.location_visited = false
 	map_location.init(location_data)
 
-	_assert_texture_path(map_location.texture_normal, UNKNOWN_TEXTURE, "obfuscated location")
+	_assert_texture_path(map_location.texture_normal, HIDDEN_LOCATION_TEXTURE, "obfuscated %s" % _get_location_type_label(location_type))
 	map_location.queue_free()
 	await process_frame
 
