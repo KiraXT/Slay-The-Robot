@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dxoib0a0v5top"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_gbc1c"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_discard.png" id="1_gbc1c"]
 
 [node name="CardRemovalShopButton" type="Button"]
 offset_right = 112.0

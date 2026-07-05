@@ -13,7 +13,7 @@
         "consumable_name": "格挡药剂",
         "consumable_rarity": 0,
         "consumable_requires_target": false,
-        "consumable_texture_path": "res://icon.svg",
+		"consumable_texture_path": "external/sprites/consumables/consumable_block.png",
         "object_id": "consumable_block"
     }
 }

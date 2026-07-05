@@ -142,7 +142,7 @@ func reset_dialogue() -> void:
 	clear_dialogue_options()
 	visible = false
 	dialogue_prompt_label.parse_bbcode("")
-	dialogue_texture_rect.texture = load("res://icon.svg")
+	dialogue_texture_rect.texture = load("res://sprites/ui/flipper/icon_menu.png")
 	
 	current_dialogue_data = null
 	current_dialogue_state = null

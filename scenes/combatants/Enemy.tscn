@@ -1,8 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://528isoebkdpv"]
+[gd_scene load_steps=9 format=3 uid="uid://528isoebkdpv"]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://d4l5y1jvle1mq" path="res://scripts/combatants/Enemy.gd" id="1_10iyf"]
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_x4bdi"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_swords.png" id="2_x4bdi"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_nimvv"]
 
 [sub_resource type="Animation" id="Animation_3iu6k"]
@@ -92,6 +92,18 @@ _data = {
 &"death": SubResource("Animation_8wuxe")
 }
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_intent_badge"]
+bg_color = Color(1, 1, 1, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color(0.188235, 0.784314, 0.792157, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
 [node name="Enemy" type="Control" groups=["enemies", "enemies_alive_or_dead"]]
 custom_minimum_size = Vector2(200, 144)
 layout_mode = 3
@@ -141,29 +153,40 @@ offset_bottom = 64.0
 [node name="Intent" type="Control" parent="Visible"]
 visible = false
 anchors_preset = 0
-offset_top = 24.0
-offset_right = 200.0
+offset_left = 53.0
+offset_top = -76.0
+offset_right = 169.0
+offset_bottom = -28.0
+mouse_filter = 2
+
+[node name="BadgePanel" type="Panel" parent="Visible/Intent"]
+layout_mode = 0
+offset_right = 116.0
 offset_bottom = 48.0
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_intent_badge")
 
 [node name="IntentTexture" type="TextureRect" parent="Visible/Intent"]
 layout_mode = 0
-offset_left = 80.0
-offset_top = -16.0
-offset_right = 120.0
-offset_bottom = 24.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 40.0
+offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("2_x4bdi")
 expand_mode = 1
 
 [node name="IntentAmount" type="Label" parent="Visible/Intent"]
 layout_mode = 0
-offset_left = 104.0
-offset_top = 8.0
-offset_right = 144.0
-offset_bottom = 31.0
+offset_left = 40.0
+offset_top = 4.0
+offset_right = 110.0
+offset_bottom = 42.0
 theme = ExtResource("1_1k9pz")
+theme_override_font_sizes/font_size = 26
 text = "15"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="FadeContainer" type="Node2D" parent="Visible"]
 position = Vector2(100, -8)

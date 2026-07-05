@@ -3,9 +3,9 @@ extends BaseCombatant
 class_name Player
 
 @onready var incoming_damage: Control = $Visible/IncomingDamage
-@onready var incoming_damage_amount_text: Label = $Visible/IncomingDamage/IncomingDamageAmount
 
 const INTENT_UPDATES_LAZILY: bool = true	# batches intent updates
+const PLAYER_COMBAT_SPRITE_HEIGHT: int = 200
 var _intent_is_updating: bool = false
 
 func _ready():
@@ -22,7 +22,7 @@ func _ready():
 ## bypass_block = true will do damage directly to health.
 func damage(_damage: int, bypass_block: bool = false) -> Array[int]:
 	var player_data: PlayerData = Global.player_data
-	
+
 	var bypassed_damage: int = _damage # raw unblocked damage
 	var bypassed_damage_capped: int = 0 # damage done that does not factor in overkill damage
 	var overkill_damage: int = 0 # damage done past 0
@@ -39,27 +39,27 @@ func damage(_damage: int, bypass_block: bool = false) -> Array[int]:
 			bypassed_damage = _damage - player_data.player_block
 			player_data.player_block = 0
 			Signals.combatant_block_broken.emit(self)
-	
+
 	block.visible = player_data.player_block > 0
 	block_amount.text = str(player_data.player_block)
-	
+
 	if bypassed_damage <= 0:
 		return [0,0,0]
-	
+
 	create_damage_text(bypassed_damage)
 	overkill_damage = max(0, bypassed_damage - player_data.player_health)
 	bypassed_damage_capped = bypassed_damage - overkill_damage
-	
+
 	if player_data.player_health > 0:
 		player_data.add_health(-bypassed_damage)
 		Signals.combatant_damaged.emit(self, bypassed_damage)
-		
+
 	return [bypassed_damage, bypassed_damage_capped, overkill_damage]
 
 func set_block(amount: int) -> void:
 	Global.player_data.player_block = amount
 	Global.player_data.player_block = max(0, Global.player_data.player_block)
-	
+
 	block.visible = Global.player_data.player_block > 0
 	block_amount.text = str(Global.player_data.player_block)
 
@@ -82,28 +82,21 @@ func update_player_display(_player_data: PlayerData):
 	update_health_bar(false)
 
 func update_incoming_damage_amount(recalculate_enemy_intent: bool = true) -> void:
-	# updates the damage preview above the player's head
-	# flag to force recalculation of all enemy intents as well
-	
-	# optional lazy updating
+	incoming_damage.visible = false
+
 	if _intent_is_updating:
 		return
 	if INTENT_UPDATES_LAZILY:
 		_intent_is_updating = true
 		await get_tree().process_frame
 		_intent_is_updating = false
-	
-	var incoming_damage_amount = 0 # totaled value
+
+	if not recalculate_enemy_intent:
+		return
+
 	for en in get_tree().get_nodes_in_group("enemies"):
 		var enemy: Enemy = en # typecast
-		
-		if recalculate_enemy_intent:
-			enemy.update_enemy_intent()
-		
-		incoming_damage_amount += enemy.enemy_intent_attack_damage * enemy.enemy_intent_number_of_attacks
-
-	incoming_damage_amount_text.text = str(incoming_damage_amount)
-	incoming_damage.visible = incoming_damage_amount > 0
+		enemy.update_enemy_intent()
 
 func is_alive() -> bool:
 	return Global.player_data.player_health > 0
@@ -128,21 +121,21 @@ func register_run_modifier_interceptors() -> void:
 
 func _on_run_started():
 	var character_data: CharacterData = Global.get_player_character_data()
-	sprite.texture = FileLoader.load_texture(character_data.character_texture_path)
-	
+	set_combat_sprite_texture(character_data.character_texture_path, PLAYER_COMBAT_SPRITE_HEIGHT)
+
 	reset_block()
 	clear_all_status_effects()
 	unregister_all_custom_ui()
-	
+
 	# reinitialize healthbar
 	var player_data: PlayerData = Global.player_data
 	layered_health_bar.init(player_data.player_health, player_data.player_health_max)
 	update_health_bar(false)
-	
+
 	update_incoming_damage_amount(true)
 	# run modifiers
 	register_run_modifier_interceptors()
-	
+
 	# reset animation and state
 	var location_data: LocationData = Global.get_player_location_data()
 	if location_data.location_type == LocationData.LOCATION_TYPES.STARTING:
@@ -155,7 +148,7 @@ func _on_run_ended():
 
 func _on_combat_started(_event_id: String):
 	clear_all_status_effects()
-	
+
 func _on_combat_ended():
 	clear_all_status_effects()
 	reset_block()

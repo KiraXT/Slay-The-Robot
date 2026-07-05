@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://enxqcwo08s3h"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_q0xbe"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_chest.png" id="1_q0xbe"]
 [ext_resource type="Script" uid="uid://cn357mo7x75qr" path="res://scripts/ui/rewards/ArtifactRewardButton.gd" id="2_7ler5"]
 
 [node name="ArtifactRewardButton" type="Button"]

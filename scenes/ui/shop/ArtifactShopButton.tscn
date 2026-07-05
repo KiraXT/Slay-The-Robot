@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bm8bb6vrjhbrx"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_3r3br"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_chest.png" id="1_3r3br"]
 [ext_resource type="Script" uid="uid://dastyj0nm12fr" path="res://scripts/ui/shop/ArtifactShopButton.gd" id="2_nmaik"]
 
 [node name="ArtifactShopButton" type="Control"]

@@ -36,6 +36,7 @@ var performing_card_right_click: bool = false	# flag used to lock card plays whi
 
 ### Drag-to-Play
 var drag_line: Line2D
+var drag_arrow_head: Polygon2D
 var is_dragging: bool = false
 var dragged_card: Card = null
 var drag_original_scale: Vector2 = Vector2.ONE
@@ -43,6 +44,7 @@ var drag_original_scale: Vector2 = Vector2.ONE
 var _target_borders: Dictionary = {}   # BaseCombatant -> Panel
 var _last_drag_hover_target: BaseCombatant = null
 var _cards_in_play_animation: Array[Card] = []   # cards currently in play-release animation
+var _card_hover_tweens: Dictionary = {}
 
 ### Retain
 var cards_retained_this_turn: Array[CardData] = []
@@ -70,7 +72,17 @@ var middle: float = (size[0] / 2) - MIDDLE_OFFSET # calculate middle X position 
 
 # y offsets for when the player hovers over a card
 const CARD_UNHOVERED_HEIGHT = 0.0
-const CARD_HOVERED_HEIGHT = -30
+const CARD_HOVERED_HEIGHT = -45.0
+const CARD_UNHOVERED_SCALE: float = 1.0
+const CARD_HOVERED_SCALE: float = 1.22
+const CARD_HOVER_OVERSHOOT_MULTIPLIER: float = 1.06
+const CARD_HOVER_SCALE_IN_TIME: float = 0.09
+const CARD_HOVER_SCALE_SETTLE_TIME: float = 0.13
+const CARD_HOVERED_Z_INDEX: int = 50
+const DRAG_LINE_WIDTH: float = 7.0
+const DRAG_LINE_COLOR: Color = Color(0.19, 0.88, 0.94, 0.92)
+const DRAG_ARROW_LENGTH: float = 34.0
+const DRAG_ARROW_WIDTH: float = 30.0
 
 const CARD_PICK_POSITIONS: Array = [
 	[0.0],
@@ -122,11 +134,22 @@ func _ready():
 	drag_line = Line2D.new()
 	drag_line.name = "DragLine"
 	drag_line.visible = false
-	drag_line.width = 3.0
-	drag_line.default_color = Color(0.5, 0.5, 0.5, 0.7)
+	drag_line.width = DRAG_LINE_WIDTH
+	drag_line.default_color = DRAG_LINE_COLOR
+	drag_line.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	drag_line.end_cap_mode = Line2D.LINE_CAP_ROUND
+	drag_line.joint_mode = Line2D.LINE_JOINT_ROUND
 	drag_line.z_index = 100
 	drag_line.top_level = true
 	add_child(drag_line)
+
+	drag_arrow_head = Polygon2D.new()
+	drag_arrow_head.name = "DragArrowHead"
+	drag_arrow_head.visible = false
+	drag_arrow_head.color = DRAG_LINE_COLOR
+	drag_arrow_head.z_index = 101
+	drag_arrow_head.top_level = true
+	add_child(drag_arrow_head)
 
 ## Recalculates the transforms of Card objects in hand and tweens them to their new positions.
 func tween_hand():
@@ -205,21 +228,57 @@ func tween_hand():
 
 func _on_card_hovered(card: Card):
 	for child in get_children():
+		var child_card: Card = child as Card
+		if child_card == null:
+			continue
 		if child == dragged_card:
 			continue
 		if card == child:
-			child.position.y = CARD_HOVERED_HEIGHT
-			child.z_index = 1
+			_tween_card_hover_visual(child_card, CARD_HOVERED_HEIGHT, CARD_HOVERED_SCALE, CARD_HOVERED_Z_INDEX)
 		else:
-			child.position.y = CARD_UNHOVERED_HEIGHT
-			child.z_index = 0
+			_tween_card_hover_visual(child_card, CARD_UNHOVERED_HEIGHT, CARD_UNHOVERED_SCALE, 0)
 
 func _on_card_unhovered(_card: Card):
 	for child in get_children():
+		var child_card: Card = child as Card
+		if child_card == null:
+			continue
 		if child == dragged_card:
 			continue
-		child.position.y = CARD_UNHOVERED_HEIGHT
-		child.z_index = 0
+		_tween_card_hover_visual(child_card, CARD_UNHOVERED_HEIGHT, CARD_UNHOVERED_SCALE, 0)
+
+func _tween_card_hover_visual(card: Card, target_y: float, target_scale: float, target_z_index: int) -> void:
+	_kill_card_hover_tween(card)
+	card.z_index = target_z_index
+	var position_tween := create_tween()
+	position_tween.tween_property(card, "position:y", target_y, CARD_TWEEN_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+	var scale_tween := create_tween()
+	if target_scale > CARD_UNHOVERED_SCALE:
+		var overshoot_scale := target_scale * CARD_HOVER_OVERSHOOT_MULTIPLIER
+		scale_tween.tween_property(card.pivot, "scale", Vector2.ONE * overshoot_scale, CARD_HOVER_SCALE_IN_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		scale_tween.tween_property(card.pivot, "scale", Vector2.ONE * target_scale, CARD_HOVER_SCALE_SETTLE_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	else:
+		scale_tween.tween_property(card.pivot, "scale", Vector2.ONE * target_scale, CARD_TWEEN_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+	var active_tweens: Array[Tween] = [position_tween, scale_tween]
+	_card_hover_tweens[card] = active_tweens
+	scale_tween.finished.connect(func():
+		if _card_hover_tweens.get(card) == active_tweens:
+			_card_hover_tweens.erase(card)
+	)
+
+func _kill_card_hover_tween(card: Card) -> void:
+	var tween_entry = _card_hover_tweens.get(card)
+	var tweens: Array = []
+	if tween_entry is Array:
+		tweens = tween_entry
+	elif tween_entry is Tween:
+		tweens = [tween_entry]
+	for tween in tweens:
+		if tween != null and tween.is_valid():
+			tween.kill()
+	_card_hover_tweens.erase(card)
 
 func _on_card_drag_started(card: Card):
 	if is_dragging:
@@ -239,16 +298,16 @@ func _on_card_drag_started(card: Card):
 
 	is_dragging = true
 	dragged_card = card
-	drag_original_scale = card.pivot.scale
+	drag_original_scale = Vector2.ONE * CARD_UNHOVERED_SCALE
 
-	# reset hover offset so the card doesn't float above the mouse
-	card.position = Vector2.ZERO
+	_kill_card_hover_tween(card)
+	card.position.y = CARD_HOVERED_HEIGHT
 
 	# bring to front
 	card.z_index = 100
 
-	# scale up card slightly during drag
-	card.pivot.scale = Vector2.ONE * 1.15
+	# hold the card at the same visual emphasis as hover while the targeting arrow is active
+	card.pivot.scale = Vector2.ONE * CARD_HOVERED_SCALE
 
 	# show trail line only for target-requiring cards
 	if card.card_data.card_requires_target:
@@ -256,6 +315,8 @@ func _on_card_drag_started(card: Card):
 		drag_line.clear_points()
 		drag_line.add_point(card.pivot.global_position)
 		drag_line.add_point(card.pivot.global_position)
+		drag_arrow_head.visible = true
+		_update_drag_arrow_head(card.pivot.global_position)
 
 func _on_card_drag_ended(card: Card):
 	if not is_dragging or dragged_card != card:
@@ -320,6 +381,7 @@ func _on_card_drag_cancelled(card: Card):
 
 func _cleanup_drag_state(reset_card_visuals: bool = true):
 	if dragged_card != null and is_instance_valid(dragged_card):
+		_kill_card_hover_tween(dragged_card)
 		if reset_card_visuals:
 			dragged_card.z_index = 0
 			dragged_card.pivot.scale = drag_original_scale
@@ -328,6 +390,8 @@ func _cleanup_drag_state(reset_card_visuals: bool = true):
 	dragged_card = null
 	drag_line.visible = false
 	drag_line.clear_points()
+	drag_arrow_head.visible = false
+	drag_arrow_head.polygon = PackedVector2Array()
 	_unprompt_target()
 	_update_drag_target_highlight(null)
 	_last_drag_hover_target = null
@@ -335,10 +399,10 @@ func _cleanup_drag_state(reset_card_visuals: bool = true):
 func _update_drag_line(p0: Vector2, p2: Vector2) -> void:
 	var mid = (p0 + p2) * 0.5
 	var dist = p0.distance_to(p2)
-	var p1 = mid + Vector2(0, -dist * 0.3)
+	var p1 = mid + Vector2(0, -clamp(dist * 0.34, 60.0, 180.0))
 
 	var points: PackedVector2Array = PackedVector2Array()
-	const SEGMENTS: int = 20
+	const SEGMENTS: int = 28
 	for i in range(SEGMENTS + 1):
 		var t = float(i) / SEGMENTS
 		var q0 = p0.lerp(p1, t)
@@ -346,6 +410,24 @@ func _update_drag_line(p0: Vector2, p2: Vector2) -> void:
 		points.append(q0.lerp(q1, t))
 
 	drag_line.points = points
+
+func _update_drag_arrow_head(mouse_pos: Vector2) -> void:
+	if drag_line.points.size() < 2:
+		return
+	var previous_point := drag_line.points[drag_line.points.size() - 2]
+	var direction := (mouse_pos - previous_point).normalized()
+	if direction == Vector2.ZERO:
+		direction = Vector2.UP
+	var normal := Vector2(-direction.y, direction.x)
+	var base_center := mouse_pos - direction * DRAG_ARROW_LENGTH
+	drag_arrow_head.polygon = PackedVector2Array([
+		mouse_pos,
+		base_center + normal * (DRAG_ARROW_WIDTH * 0.5),
+		base_center - normal * (DRAG_ARROW_WIDTH * 0.5),
+	])
+
+func _is_drag_visual_node(child: Node) -> bool:
+	return child == drag_line or child == drag_arrow_head
 
 func _process(_delta: float):
 	if not is_dragging or dragged_card == null or not is_instance_valid(dragged_card):
@@ -361,6 +443,7 @@ func _process(_delta: float):
 	# update trail line: curved from card position to mouse
 	if dragged_card.card_data.card_requires_target:
 		_update_drag_line(dragged_card.pivot.global_position, mouse_pos)
+		_update_drag_arrow_head(mouse_pos)
 
 	# target detection
 	var hover_target = _get_drag_hover_target(mouse_pos)
@@ -977,7 +1060,7 @@ func reset_deck() -> void:
 	_cards_in_play_animation.clear()
 
 	for child in get_children():
-		if child == drag_line:
+		if _is_drag_visual_node(child):
 			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
@@ -1096,7 +1179,7 @@ func _on_combat_ended():
 
 	# remove cards in hand
 	for child in get_children():
-		if child == drag_line:
+		if _is_drag_visual_node(child):
 			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
@@ -1118,7 +1201,7 @@ func _on_run_ended():
 
 	# remove cards in hand
 	for child in get_children():
-		if child == drag_line:
+		if _is_drag_visual_node(child):
 			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()

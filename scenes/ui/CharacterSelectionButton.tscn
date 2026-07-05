@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dkooa02iutqlt"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_mr4lp"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_menu.png" id="1_mr4lp"]
 [ext_resource type="Script" uid="uid://b30k46q1v2d56" path="res://scripts/ui/CharacterSelectionButton.gd" id="2_4l5ru"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_uke2i"]

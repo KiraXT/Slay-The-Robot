@@ -14,7 +14,7 @@
         "consumable_name": "群体伤害药剂",
         "consumable_rarity": 0,
         "consumable_requires_target": false,
-        "consumable_texture_path": "res://icon.svg",
+		"consumable_texture_path": "external/sprites/consumables/consumable_multi_damaging.png",
         "object_id": "consumable_multi_damaging"
     }
 }
