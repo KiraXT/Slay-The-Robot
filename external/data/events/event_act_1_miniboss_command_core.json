@@ -1,0 +1,32 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "event_act_1_miniboss_command_core",
+        "event_background_texture_path": "",
+        "event_dialogue_object_id": "",
+        "event_dialogue_data": null,
+        "event_enemy_placement_is_automatic": false,
+        "event_enemy_placement_positions": [
+            [
+                0,
+                0
+            ],
+            [
+                180,
+                0
+            ],
+            [
+                360,
+                0
+            ]
+        ],
+        "event_initial_combat_actions": [],
+        "event_pool_validator_data": [],
+        "event_weighted_enemy_object_ids": [
+            {
+                "enemy_act_1_miniboss_command_core": 1.0
+            }
+        ],
+        "location_event_pool_validator_failed_strategy": 1
+    }
+}
