@@ -7,7 +7,7 @@ DONE
 ## Commit
 
 ```text
-待提交（最终提交哈希见本次交付记录）
+1950af6 fix: isolate character event pool regression fixtures
 ```
 
 ## 本次修复
@@ -44,4 +44,4 @@ ALL_TESTS_PASSED
 
 ## Concerns
 
-- 同一提交无法在文件内容中稳定自引用其最终提交哈希；最终提交哈希以本次交付记录为准。
+- 报告中记录的是实际修复提交 `1950af6`；若后续还有补充提交，需要以最新交付记录为准。
