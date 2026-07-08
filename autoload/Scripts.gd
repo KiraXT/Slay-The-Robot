@@ -145,6 +145,7 @@ const VALIDATOR_HAS_RELIC: String = "res://scripts/validators/ValidatorHasRelic.
 const VALIDATOR_LOCATION_TYPE: String = "res://scripts/validators/ValidatorLocationType.gd"
 const VALIDATOR_MONEY: String = "res://scripts/validators/ValidatorMoney.gd"
 const VALIDATOR_PLAYER_HEALTH: String = "res://scripts/validators/ValidatorPlayerHealth.gd"
+const VALIDATOR_CHARACTER: String = "res://scripts/validators/ValidatorCharacter.gd"
 const VALIDATOR_RNG: String = "res://scripts/validators/ValidatorRNG.gd"
 
 #endregion
