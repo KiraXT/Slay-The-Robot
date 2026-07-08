@@ -27,6 +27,7 @@ func _run() -> void:
 		_assert_character_validator("character_blue", false)
 		_assert_pool_selects_matching_event_for_red()
 		_assert_pool_selects_matching_event_for_blue()
+		_assert_pool_population_skips_blacklisted_events()
 
 	_cleanup_test_data(previous_player_data)
 
@@ -124,3 +125,18 @@ func _assert_pool_selects_matching_event_for_blue() -> void:
 	var remaining_pool: Array = game_global.player_data.player_event_pools[TEST_POOL_ID]
 	if remaining_pool.has(RED_EVENT_ID):
 		failures.append("Expected failed red event to be removed from blue player's event pool.")
+
+
+func _assert_pool_population_skips_blacklisted_events() -> void:
+	game_global.player_data = game_global.get_player_data_from_prototype("player_red")
+	game_global.player_data.player_run_seed = 1
+	var blacklisted_event_ids: Array[String] = [BLUE_EVENT_ID]
+	game_global.player_data.player_event_blacklisted_ids = blacklisted_event_ids
+
+	var selected_event_id: String = game_global.player_data.get_next_event_object_id_from_pool(TEST_POOL_ID)
+	if selected_event_id != RED_EVENT_ID:
+		failures.append("Expected blacklisted event to be skipped and select %s, got %s." % [RED_EVENT_ID, selected_event_id])
+
+	var remaining_pool: Array = game_global.player_data.player_event_pools[TEST_POOL_ID]
+	if remaining_pool.has(BLUE_EVENT_ID):
+		failures.append("Expected blacklisted event to be excluded when populating the event pool.")
