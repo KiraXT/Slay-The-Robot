@@ -4,7 +4,7 @@ const TEST_POOL_ID := "test_character_event_pool_regression_pool"
 const RED_EVENT_ID := "test_character_event_pool_regression_red"
 const BLUE_EVENT_ID := "test_character_event_pool_regression_blue"
 const FALLBACK_EVENT_ID := "test_character_event_pool_regression_fallback"
-const VALIDATOR_CHARACTER := "res://scripts/validators/ValidatorCharacter.gd"
+const MISSING_EVENT_ID := "test_character_event_pool_regression_missing"
 
 var failures: Array[String] = []
 var game_global: Node
@@ -23,11 +23,13 @@ func _run() -> void:
 	var previous_player_data = game_global.player_data
 
 	if _prepare_test_data():
+		_assert_validator_character_constant()
 		_assert_character_validator("character_red", true)
 		_assert_character_validator("character_blue", false)
 		_assert_pool_selects_matching_event_for_red()
 		_assert_pool_selects_matching_event_for_blue()
 		_assert_pool_population_skips_blacklisted_events()
+		_assert_pool_removes_missing_events()
 
 	_cleanup_test_data(previous_player_data)
 
@@ -83,12 +85,17 @@ func _new_test_event(event_data_script: Script, event_id: String, character_obje
 
 
 func _character_validators(character_object_id: String) -> Array[Dictionary]:
-	var validators: Array[Dictionary] = [{
-		VALIDATOR_CHARACTER: {
-			"character_object_ids": [character_object_id],
-		}
-	}]
+	var validator_data: Dictionary = {}
+	validator_data[Scripts.VALIDATOR_CHARACTER] = {
+		"character_object_ids": [character_object_id],
+	}
+	var validators: Array[Dictionary] = [validator_data]
 	return validators
+
+
+func _assert_validator_character_constant() -> void:
+	if Scripts.VALIDATOR_CHARACTER != "res://scripts/validators/ValidatorCharacter.gd":
+		failures.append("Expected Scripts.VALIDATOR_CHARACTER to point at ValidatorCharacter.gd.")
 
 
 func _assert_character_validator(character_id: String, expected: bool) -> void:
@@ -140,3 +147,17 @@ func _assert_pool_population_skips_blacklisted_events() -> void:
 	var remaining_pool: Array = game_global.player_data.player_event_pools[TEST_POOL_ID]
 	if remaining_pool.has(BLUE_EVENT_ID):
 		failures.append("Expected blacklisted event to be excluded when populating the event pool.")
+
+
+func _assert_pool_removes_missing_events() -> void:
+	game_global.player_data = game_global.get_player_data_from_prototype("player_red")
+	game_global.player_data.player_run_seed = 1
+	game_global.player_data.player_event_pools[TEST_POOL_ID] = [MISSING_EVENT_ID, RED_EVENT_ID]
+
+	var selected_event_id: String = game_global.player_data.get_next_event_object_id_from_pool(TEST_POOL_ID)
+	if selected_event_id != RED_EVENT_ID:
+		failures.append("Expected missing event to be skipped and select %s, got %s." % [RED_EVENT_ID, selected_event_id])
+
+	var remaining_pool: Array = game_global.player_data.player_event_pools[TEST_POOL_ID]
+	if remaining_pool.has(MISSING_EVENT_ID):
+		failures.append("Expected missing event ID to be removed from the event pool.")
