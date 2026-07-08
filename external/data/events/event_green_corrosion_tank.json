@@ -1,0 +1,117 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "event_green_corrosion_tank",
+        "event_background_texture_path": "",
+        "event_dialogue_object_id": "",
+        "event_dialogue_data": {
+            "object_id": "dialogue_green_corrosion_tank",
+            "dialogue_initial_dialogue_state_object_id": "dialogue_state_green_corrosion_tank_initial",
+            "dialogue_option_id_to_dialogue_options": {
+                "dialogue_option_green_corrosion_tank_1": {
+                    "object_id": "dialogue_option_green_corrosion_tank_1",
+                    "dialogue_option_bbcode": "提取试剂: [color=green]获得1个伤害药剂和30金币[/color]",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+                                "consumable_object_id": "consumable_damaging"
+                            }
+                        },
+                        {
+                            "res://scripts/actions/player_actions/ActionAddMoney.gd": {
+                                "money_amount": 30
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [],
+                    "dialogue_option_visible_on_failed_validation": true
+                },
+                "dialogue_option_green_corrosion_tank_2": {
+                    "object_id": "dialogue_option_green_corrosion_tank_2",
+                    "dialogue_option_bbcode": "强化样本: [color=red]失去5点生命[/color]，升级1张绿色牌",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/ActionAddHealth.gd": {
+                                "health_amount": -5
+                            }
+                        },
+                        {
+                            "res://scripts/actions/pick_card_actions/ActionPickUpgradeCards.gd": {
+                                "card_pick_text": "选择 1 张牌升级",
+                                "card_pick_type": 1,
+                                "force_manual_selection": true,
+                                "max_card_amount": 1,
+                                "min_card_amount": 1,
+                                "min_cards_are_required_for_action": false,
+                                "validator_data": [
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardUpgradeable.gd": {}
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardColor.gd": {
+                                            "card_color_ids": ["color_green"]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [
+                        {
+                            "res://scripts/validators/ValidatorPlayerHealth.gd": {
+                                "health_amount": 6
+                            }
+                        },
+                        {
+                            "res://scripts/validators/deck/ValidatorDeckHasUpgradeableCard.gd": {}
+                        }
+                    ],
+                    "dialogue_option_visible_on_failed_validation": true
+                },
+                "dialogue_option_green_corrosion_tank_3": {
+                    "object_id": "dialogue_option_green_corrosion_tank_3",
+                    "dialogue_option_bbcode": "封存危险品: [color=green]获得1个治疗药剂[/color]",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+                                "consumable_object_id": "consumable_heal"
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [],
+                    "dialogue_option_visible_on_failed_validation": true
+                }
+            },
+            "dialogue_state_id_to_dialogue_states": {
+                "dialogue_state_green_corrosion_tank_initial": {
+                    "object_id": "dialogue_state_green_corrosion_tank_initial",
+                    "dialogue_state_dialogue_texture_path": "",
+                    "dialogue_state_dialogue_option_object_ids": [
+                        "dialogue_option_green_corrosion_tank_1",
+                        "dialogue_option_green_corrosion_tank_2",
+                        "dialogue_option_green_corrosion_tank_3"
+                    ],
+                    "dialogue_state_prompt_bbcode": "玻璃槽里残留着会慢慢侵蚀金属的试剂。槽壁上写着“低剂量稳定，高剂量危险”。"
+                }
+            }
+        },
+        "event_enemy_placement_is_automatic": true,
+        "event_enemy_placement_positions": [],
+        "event_initial_combat_actions": [],
+        "event_pool_validator_data": [
+            {
+                "res://scripts/validators/ValidatorCharacter.gd": {
+                    "character_object_ids": ["character_green"]
+                }
+            }
+        ],
+        "event_weighted_enemy_object_ids": [],
+        "location_event_pool_validator_failed_strategy": 1
+    }
+}
