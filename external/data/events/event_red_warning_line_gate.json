@@ -134,7 +134,7 @@
             "dialogue_state_id_to_dialogue_states": {
                 "dialogue_state_red_warning_line_gate_initial": {
                     "object_id": "dialogue_state_red_warning_line_gate_initial",
-                    "dialogue_state_dialogue_texture_path": "",
+                    "dialogue_state_dialogue_texture_path": "external/sprites/events/event_red_warning_line_gate.png",
                     "dialogue_state_dialogue_option_object_ids": [
                         "dialogue_option_red_warning_line_gate_1",
                         "dialogue_option_red_warning_line_gate_2",

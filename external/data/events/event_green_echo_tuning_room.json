@@ -153,7 +153,7 @@
             "dialogue_state_id_to_dialogue_states": {
                 "dialogue_state_green_echo_tuning_room_initial": {
                     "object_id": "dialogue_state_green_echo_tuning_room_initial",
-                    "dialogue_state_dialogue_texture_path": "",
+                    "dialogue_state_dialogue_texture_path": "external/sprites/events/event_green_echo_tuning_room.png",
                     "dialogue_state_dialogue_option_object_ids": [
                         "dialogue_option_green_echo_tuning_room_1",
                         "dialogue_option_green_echo_tuning_room_2",

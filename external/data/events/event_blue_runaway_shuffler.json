@@ -139,7 +139,7 @@
             "dialogue_state_id_to_dialogue_states": {
                 "dialogue_state_blue_runaway_shuffler_initial": {
                     "object_id": "dialogue_state_blue_runaway_shuffler_initial",
-                    "dialogue_state_dialogue_texture_path": "",
+                    "dialogue_state_dialogue_texture_path": "external/sprites/events/event_blue_runaway_shuffler.png",
                     "dialogue_state_dialogue_option_object_ids": [
                         "dialogue_option_blue_runaway_shuffler_1",
                         "dialogue_option_blue_runaway_shuffler_2",

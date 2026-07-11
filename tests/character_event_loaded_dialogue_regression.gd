@@ -1,6 +1,16 @@
 extends SceneTree
 
 const EVENT_POOL_ID := "event_pool_act_1_dialogue"
+const EXPECTED_TEXTURE_PATHS := {
+	"event_red_broken_boxing_ring": "external/sprites/events/event_red_broken_boxing_ring.png",
+	"event_red_warning_line_gate": "external/sprites/events/event_red_warning_line_gate.png",
+	"event_blue_scattered_toolbox": "external/sprites/events/event_blue_scattered_toolbox.png",
+	"event_blue_runaway_shuffler": "external/sprites/events/event_blue_runaway_shuffler.png",
+	"event_green_echo_tuning_room": "external/sprites/events/event_green_echo_tuning_room.png",
+	"event_green_corrosion_tank": "external/sprites/events/event_green_corrosion_tank.png",
+	"event_orange_prep_supply_stop": "external/sprites/events/event_orange_prep_supply_stop.png",
+	"event_orange_hidden_backpack_pocket": "external/sprites/events/event_orange_hidden_backpack_pocket.png",
+}
 const CHARACTER_EVENTS := {
 	"character_red": [
 		"event_red_broken_boxing_ring",
@@ -22,6 +32,7 @@ const CHARACTER_EVENTS := {
 
 var failures: Array[String] = []
 var game_global: Node
+var game_file_loader: Node
 
 
 func _init() -> void:
@@ -30,6 +41,7 @@ func _init() -> void:
 
 func _run() -> void:
 	game_global = root.get_node("Global")
+	game_file_loader = root.get_node("FileLoader")
 	var previous_player_data = game_global.player_data
 
 	_assert_loaded_dialogue_data()
@@ -73,8 +85,15 @@ func _assert_loaded_dialogue_data() -> void:
 				failures.append("Expected %s to load initial DialogueStateData %s." % [event_id, initial_state_id])
 				continue
 
-			if dialogue_state.dialogue_state_dialogue_texture_path != "":
-				failures.append("Expected %s dialogue texture path to be empty." % event_id)
+			var expected_texture_path: String = EXPECTED_TEXTURE_PATHS.get(event_id, "")
+			if dialogue_state.dialogue_state_dialogue_texture_path != expected_texture_path:
+				failures.append("Expected %s dialogue texture path to be %s." % [event_id, expected_texture_path])
+			if expected_texture_path != "" and not FileAccess.file_exists("res://" + expected_texture_path):
+				failures.append("Expected %s texture file to exist." % event_id)
+			if expected_texture_path != "":
+				var texture: ImageTexture = game_file_loader.load_texture(expected_texture_path)
+				if texture.get_width() != 768 or texture.get_height() != 768:
+					failures.append("Expected %s texture to load at 768x768." % event_id)
 			if dialogue_state.dialogue_state_dialogue_option_object_ids.size() != 3:
 				failures.append("Expected %s to load exactly 3 dialogue options." % event_id)
 

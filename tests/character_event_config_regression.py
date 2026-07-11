@@ -207,6 +207,7 @@ EXPECTED_EVENTS = {
     "event_red_broken_boxing_ring": {
         "character": "character_red",
         "suffix": "red_broken_boxing_ring",
+        "texture_path": "external/sprites/events/event_red_broken_boxing_ring.png",
         "prompt": "废弃训练场里还有一台会反击的拳击测试机器人。它的记分屏闪烁着红色警告，只要出拳，它就会回击。",
         "options": [
             {
@@ -229,6 +230,7 @@ EXPECTED_EVENTS = {
     "event_red_warning_line_gate": {
         "character": "character_red",
         "suffix": "red_warning_line_gate",
+        "texture_path": "external/sprites/events/event_red_warning_line_gate.png",
         "prompt": "一扇门前投射着红色警戒线。系统不断播报“只允许攻击姿态通过”，门后的奖励箱已经半开。",
         "options": [
             {
@@ -251,6 +253,7 @@ EXPECTED_EVENTS = {
     "event_blue_scattered_toolbox": {
         "character": "character_blue",
         "suffix": "blue_scattered_toolbox",
+        "texture_path": "external/sprites/events/event_blue_scattered_toolbox.png",
         "prompt": "一个工具箱翻倒在走廊中央，螺丝、线缆、备用电池和不明零件滚得到处都是。",
         "options": [
             {
@@ -273,6 +276,7 @@ EXPECTED_EVENTS = {
     "event_blue_runaway_shuffler": {
         "character": "character_blue",
         "suffix": "blue_runaway_shuffler",
+        "texture_path": "external/sprites/events/event_blue_runaway_shuffler.png",
         "prompt": "一台旧洗牌机还在工作。它吸入卡牌、吐出卡牌，偶尔还会把标签贴错。",
         "options": [
             {
@@ -295,6 +299,7 @@ EXPECTED_EVENTS = {
     "event_green_echo_tuning_room": {
         "character": "character_green",
         "suffix": "green_echo_tuning_room",
+        "texture_path": "external/sprites/events/event_green_echo_tuning_room.png",
         "prompt": "破旧音响在小房间里循环播放一段节拍。每次节拍落下，墙上的仪表都会同步闪一下。",
         "options": [
             {
@@ -317,6 +322,7 @@ EXPECTED_EVENTS = {
     "event_green_corrosion_tank": {
         "character": "character_green",
         "suffix": "green_corrosion_tank",
+        "texture_path": "external/sprites/events/event_green_corrosion_tank.png",
         "prompt": "玻璃槽里残留着会慢慢侵蚀金属的试剂。槽壁上写着“低剂量稳定，高剂量危险”。",
         "options": [
             {
@@ -339,6 +345,7 @@ EXPECTED_EVENTS = {
     "event_orange_prep_supply_stop": {
         "character": "character_orange",
         "suffix": "orange_prep_supply_stop",
+        "texture_path": "external/sprites/events/event_orange_prep_supply_stop.png",
         "prompt": "一处自动补给站还亮着灯。货架上有饮料、旧护具和临时路线图，但每个格子都快卡住了。",
         "options": [
             {
@@ -361,6 +368,7 @@ EXPECTED_EVENTS = {
     "event_orange_hidden_backpack_pocket": {
         "character": "character_orange",
         "suffix": "orange_hidden_backpack_pocket",
+        "texture_path": "external/sprites/events/event_orange_hidden_backpack_pocket.png",
         "prompt": "旧背包夹层里藏着票据、备用卡和一枚小徽章。很多东西已经过期，但仍然有用。",
         "options": [
             {
@@ -451,7 +459,10 @@ def assert_dialogue(event_id: str, event: dict, expected: dict) -> None:
 
     state = states[initial_state_id]
     assert state["object_id"] == initial_state_id
-    assert state["dialogue_state_dialogue_texture_path"] == ""
+    assert state["dialogue_state_dialogue_texture_path"] == expected.get("texture_path", "")
+    texture_path = state["dialogue_state_dialogue_texture_path"]
+    if texture_path:
+        assert (ROOT / texture_path).exists(), f"{event_id} missing texture {texture_path}"
     assert state["dialogue_state_prompt_bbcode"] == expected["prompt"]
     assert state["dialogue_state_dialogue_option_object_ids"] == expected_option_ids
 
