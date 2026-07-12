@@ -1,7 +1,7 @@
 ## UI menu to display all content in the game such as all cards
 extends Control
 
-@onready var title_screen: Control = $%TitleScreen
+@onready var title_screen: Control = get_parent()
 @onready var back_button: Button = $BackButton
 @onready var cards_button: Button = $VBoxContainer/Button
 @onready var enemies_button: Button = $VBoxContainer/Button2

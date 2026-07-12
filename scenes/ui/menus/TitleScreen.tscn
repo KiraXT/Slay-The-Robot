@@ -1,0 +1,489 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="2_bi5lp"]
+[ext_resource type="Script" uid="uid://dw0xyfu580mkb" path="res://scripts/ui/menus/TitleScreen.gd" id="2_m6atk"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_chest.png" id="3_8ax2e"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/background_soft_cyan.png" id="42_bg"]
+[ext_resource type="Script" uid="uid://cg1kj2nrg24jw" path="res://scripts/ui/menus/MainMenu.gd" id="3_jd5n0"]
+[ext_resource type="Script" uid="uid://c4twsg7v4ky8u" path="res://scripts/ui/menus/NewRunMenu.gd" id="5_878fa"]
+[ext_resource type="Script" uid="uid://chcjmcum7dbn7" path="res://scripts/ui/CharacterButtonContainer.gd" id="6_2ahpg"]
+[ext_resource type="Script" uid="uid://djp4k7pq27a7e" path="res://scripts/ui/CustomRunModifierButtonContainer.gd" id="8_nlp47"]
+[ext_resource type="Script" uid="uid://dgls5w4w7ym84" path="res://scripts/ui/menus/CodexMenu.gd" id="9_uxrgu"]
+[ext_resource type="Script" uid="uid://b2t515tpjrija" path="res://addons/smooth_scroll_container/SmoothScrollContainer.gd" id="25_t3i5t"]
+[ext_resource type="Script" uid="uid://b3nvcsku8u75w" path="res://addons/smooth_scroll_container/scroll_damper/expo_scroll_damper.gd" id="26_08sam"]
+[ext_resource type="Script" uid="uid://pfylc0wo8aq2" path="res://scripts/ui/menus/SettingsMenu.gd" id="30_ba5fs"]
+
+[sub_resource type="Resource" id="Resource_i7igs"]
+script = ExtResource("26_08sam")
+friction = 10.0
+minimum_velocity = 0.4
+rebound_strength = 7.0
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="Resource" id="Resource_elxq6"]
+script = ExtResource("26_08sam")
+friction = 4.0
+minimum_velocity = 0.4
+rebound_strength = 7.0
+
+[node name="TitleScreen" type="Control"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+theme = ExtResource("2_bi5lp")
+script = ExtResource("2_m6atk")
+metadata/_edit_lock_ = true
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+color = Color(0.780392, 0.964706, 0.984314, 1)
+
+[node name="BackgroundArt" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+mouse_filter = 2
+texture = ExtResource("42_bg")
+expand_mode = 1
+
+[node name="MainMenu" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_jd5n0")
+
+[node name="Label" type="Label" parent="MainMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_top = 27.3429
+offset_right = 1160.0
+offset_bottom = 93.0286
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+text = "Slay the Robot"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 392.0
+offset_right = 420.0
+offset_bottom = 660.0
+
+[node name="ContinueButton" type="Button" parent="MainMenu/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "Continue"
+
+[node name="ForfeitRunButton" type="Button" parent="MainMenu/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "Forfeit Run"
+
+[node name="NewRunButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "New Game"
+
+[node name="CodexButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "Codex"
+
+[node name="SettingsButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "Settings"
+
+[node name="ExitButton" type="Button" parent="MainMenu/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "Exit"
+
+[node name="NewRunMenu" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("5_878fa")
+
+[node name="Label" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_top = 27.3429
+offset_right = 1160.0
+offset_bottom = 93.0286
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+text = "New Run"
+horizontal_alignment = 1
+
+[node name="CharacterNameLabel" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 56.0
+offset_top = 126.343
+offset_right = 205.0
+offset_bottom = 159.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 24
+text = "Character Name"
+
+[node name="CharacterHealthLabel" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 56.0
+offset_top = 166.343
+offset_right = 80.0
+offset_bottom = 199.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 17
+text = "HP: "
+vertical_alignment = 1
+
+[node name="CharacterMoneyLabel" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 184.0
+offset_top = 166.343
+offset_right = 208.0
+offset_bottom = 199.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 17
+text = "Money:"
+
+[node name="CharacterDescriptionLabel" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 56.0
+offset_top = 214.343
+offset_right = 328.0
+offset_bottom = 309.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 16
+text = "Character Description"
+
+[node name="CharacterArtifactTextureRect" type="TextureRect" parent="NewRunMenu"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 0
+offset_left = 56.0
+offset_top = 320.0
+offset_right = 120.0
+offset_bottom = 384.0
+texture = ExtResource("3_8ax2e")
+expand_mode = 1
+
+[node name="CharacterArtifactNameLabel" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 128.0
+offset_top = 318.343
+offset_right = 352.0
+offset_bottom = 349.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 16
+text = "Artifact Name"
+clip_text = true
+
+[node name="CharacterArtifactDescriptionLabel" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 128.0
+offset_top = 350.343
+offset_right = 320.0
+offset_bottom = 461.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 16
+text = "Description "
+autowrap_mode = 2
+
+[node name="DifficultySelect" type="Control" parent="NewRunMenu"]
+anchors_preset = 0
+offset_left = 64.0
+offset_top = 504.0
+offset_right = 336.0
+offset_bottom = 544.0
+
+[node name="DecreaseDifficultyButton" type="Button" parent="NewRunMenu/DifficultySelect"]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 64.0
+offset_bottom = 40.0
+text = "<--"
+
+[node name="DifficultyLabel" type="Label" parent="NewRunMenu/DifficultySelect"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 72.0
+offset_top = 6.34286
+offset_right = -72.0
+offset_bottom = 37.0286
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 16
+text = "Difficulty 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="IncreaseDifficultyButton" type="Button" parent="NewRunMenu/DifficultySelect"]
+layout_mode = 0
+offset_left = 208.0
+offset_top = 8.0
+offset_right = 272.0
+offset_bottom = 39.0
+text = "-->"
+
+[node name="CharacterButtonContainer" type="ScrollContainer" parent="NewRunMenu"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 552.0
+offset_right = 344.0
+offset_bottom = 688.0
+script = ExtResource("6_2ahpg")
+
+[node name="GridContainer" type="GridContainer" parent="NewRunMenu/CharacterButtonContainer"]
+layout_mode = 2
+columns = 4
+
+[node name="CustomRunModifierButtonContainer" type="ScrollContainer" parent="NewRunMenu"]
+layout_mode = 0
+offset_left = 824.0
+offset_top = 168.0
+offset_right = 1168.0
+offset_bottom = 680.0
+theme = ExtResource("2_bi5lp")
+script = ExtResource("8_nlp47")
+
+[node name="MarginContainer" type="MarginContainer" parent="NewRunMenu/CustomRunModifierButtonContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NewRunMenu/CustomRunModifierButtonContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 400.0
+offset_top = 550.343
+offset_right = 424.0
+offset_bottom = 583.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 24
+text = "Seed"
+vertical_alignment = 1
+
+[node name="Label4" type="Label" parent="NewRunMenu"]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 824.0
+offset_top = 126.343
+offset_right = 1128.0
+offset_bottom = 159.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 24
+text = "Custom Modifiers"
+horizontal_alignment = 1
+
+[node name="SeedInput" type="LineEdit" parent="NewRunMenu"]
+layout_mode = 0
+offset_left = 472.0
+offset_top = 552.0
+offset_right = 784.0
+offset_bottom = 584.0
+text = "1234567890123456"
+alignment = 1
+max_length = 16
+
+[node name="StartRunButton" type="Button" parent="NewRunMenu"]
+layout_mode = 2
+offset_left = 392.0
+offset_top = 600.0
+offset_right = 785.0
+offset_bottom = 634.0
+theme = ExtResource("2_bi5lp")
+text = "Start Run"
+
+[node name="BackButton" type="Button" parent="NewRunMenu"]
+layout_mode = 2
+offset_left = 392.0
+offset_top = 648.0
+offset_right = 785.0
+offset_bottom = 682.0
+theme = ExtResource("2_bi5lp")
+text = "Back"
+
+[node name="CodexMenu" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("9_uxrgu")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CodexMenu"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 24.0
+offset_right = 1176.0
+offset_bottom = 632.0
+follow_focus = true
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
+script = ExtResource("25_t3i5t")
+wheel_scroll_damper = SubResource("Resource_i7igs")
+dragging_scroll_damper = SubResource("Resource_elxq6")
+follow_focus_margin = 200
+allow_horizontal_scroll = false
+
+[node name="MarginContainer" type="MarginContainer" parent="CodexMenu/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CodexCardContainer" type="GridContainer" parent="CodexMenu/ScrollContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 6
+
+[node name="BackButton" type="Button" parent="CodexMenu"]
+layout_mode = 2
+offset_left = 392.0
+offset_top = 648.0
+offset_right = 785.0
+offset_bottom = 682.0
+theme = ExtResource("2_bi5lp")
+text = "Back"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CodexMenu"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 88.0
+offset_right = 136.0
+offset_bottom = 584.0
+
+[node name="Button" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+text = "Cards"
+
+[node name="Button2" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+text = "Enemies"
+
+[node name="Button3" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+text = "Artifacts"
+
+[node name="Button4" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Consumables"
+
+[node name="SettingsMenu" type="Control" parent="."]
+visible = false
+anchors_preset = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+script = ExtResource("30_ba5fs")
+
+[node name="Label" type="Label" parent="SettingsMenu"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_top = 27.3429
+offset_bottom = 93.0286
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="ResolutionLabel" type="Label" parent="SettingsMenu"]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 200.0
+offset_right = 520.0
+offset_bottom = 233.0
+theme = ExtResource("2_bi5lp")
+text = "Resolution"
+
+[node name="ResolutionOptionButton" type="OptionButton" parent="SettingsMenu"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 195.0
+offset_right = 840.0
+offset_bottom = 235.0
+theme = ExtResource("2_bi5lp")
+
+[node name="BackButton" type="Button" parent="SettingsMenu"]
+layout_mode = 0
+offset_left = 403.5
+offset_top = 648.0
+offset_right = 796.5
+offset_bottom = 682.0
+theme = ExtResource("2_bi5lp")
+text = "Back"

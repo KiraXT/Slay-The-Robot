@@ -1,7 +1,7 @@
 # Main menu on title screen
 extends Control
 
-@onready var title_screen: Control = $%TitleScreen
+@onready var title_screen: Control = get_parent()
 
 @onready var continue_button: Button = $VBoxContainer/ContinueButton
 @onready var forfeit_run_button: Button = $VBoxContainer/ForfeitRunButton

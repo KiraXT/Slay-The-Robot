@@ -1,6 +1,6 @@
 extends Control
 
-@onready var title_screen: Control = $%TitleScreen
+@onready var title_screen: Control = get_parent()
 
 @onready var character_name_label = $CharacterNameLabel
 @onready var character_health_label = $CharacterHealthLabel
