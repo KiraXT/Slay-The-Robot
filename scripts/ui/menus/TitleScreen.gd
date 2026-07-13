@@ -19,6 +19,8 @@ var pending_run_request: Dictionary = {}
 var pending_run_request_generation := 0
 var next_run_request_generation := 0
 var current_character_data: CharacterData
+var character_tween: Tween
+var pending_character_visual: CharacterData
 
 @onready var main_menu = $MainMenu
 @onready var new_run_menu = $NewRunMenu
@@ -38,6 +40,7 @@ func _ready() -> void:
 	new_run_menu.connect("run_requested", _on_run_requested)
 	new_run_menu.connect("back_requested", show_main_menu)
 	performance_controller.transition_finished.connect(_on_transition_finished)
+	backdrop.start_idle_motion()
 	performance_controller.play_title_intro()
 
 
@@ -133,12 +136,12 @@ func _input(event: InputEvent) -> void:
 func _on_transition_finished(target_state: String) -> void:
 	match target_state:
 		"MAIN_MENU":
-			var restore_default_focus := screen_state == ScreenState.TO_MAIN_MENU
 			screen_state = ScreenState.MAIN_MENU
-			if restore_default_focus:
-				call_deferred("_restore_default_main_focus")
-		"CHARACTER_SELECT": screen_state = ScreenState.CHARACTER_SELECT
-		"LEAVING": pass
+			main_menu.call_deferred("grab_default_focus")
+		"CHARACTER_SELECT":
+			screen_state = ScreenState.CHARACTER_SELECT
+			call_deferred("_focus_selected_character")
+		"LEAVING": complete_leaving_request(pending_run_request_generation)
 
 
 func get_current_character_data() -> CharacterData:
@@ -165,6 +168,21 @@ func complete_leaving_request(request_generation: int) -> void:
 
 func _on_character_changed(character_data: CharacterData) -> void:
 	current_character_data = character_data
+	pending_character_visual = character_data
+	if character_tween != null and character_tween.is_valid():
+		character_tween.kill()
+	character_tween = create_tween()
+	character_tween.tween_property(character_portrait, "modulate:a", 0.0, 0.08)
+	character_tween.parallel().tween_property(character_portrait, "scale", Vector2(0.90, 0.90), 0.08)
+	character_tween.tween_callback(_apply_pending_character_visual)
+	character_tween.tween_property(character_portrait, "modulate:a", 1.0, 0.14)
+	character_tween.parallel().tween_property(character_portrait, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _apply_pending_character_visual() -> void:
+	if pending_character_visual == null:
+		return
+	var character_data := pending_character_visual
 	character_portrait.texture = _load_character_portrait(character_data)
 	backdrop.set_character_background(character_data.character_background_texture_path)
 	var color_data := Global.get_color_data(character_data.character_color_id)
@@ -204,8 +222,7 @@ func _on_run_requested(character_object_id: String, run_seed: int, difficulty_le
 	}
 	screen_state = ScreenState.LEAVING
 	performance_controller.play_run_confirm()
-	if performance_controller.active_tween != null and performance_controller.active_tween.is_valid():
-		performance_controller.active_tween.finished.connect(complete_leaving_request.bind(pending_run_request_generation), CONNECT_ONE_SHOT)
+	backdrop.play_confirm_particles()
 
 
 func _cancel_pending_run_request() -> void:
@@ -220,22 +237,26 @@ func _cancel_pending_run_request() -> void:
 
 
 func _complete_active_leaving_transition() -> void:
-	var request_generation := pending_run_request_generation
 	performance_controller.complete_active_transition()
-	complete_leaving_request(request_generation)
 
 
 func _restore_default_main_focus() -> void:
-	for control in main_menu.get_node("VBoxContainer").get_children():
-		if control is Control and control.visible and control.focus_mode != Control.FOCUS_NONE:
+	main_menu.grab_default_focus()
+
+
+func _focus_selected_character() -> void:
+	for control in new_run_menu.get_node("CharacterButtonContainer/GridContainer").get_children():
+		if control is BaseButton and control.button_pressed:
 			control.grab_focus()
 			return
 
 
 func _on_run_started() -> void:
+	backdrop.stop_idle_motion()
 	visible = false
 
 
 
 func _on_run_ended() -> void:
 	visible = true
+	backdrop.start_idle_motion()

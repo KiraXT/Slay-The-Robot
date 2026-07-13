@@ -55,22 +55,24 @@ func _assert_visual_state(control: Control, expected_visible: bool, expected_alp
 		failures.append("%s mouse filter did not settle" % label)
 
 
-func _assert_main_menu_final_state(title_screen: Control, main_menu_rest_position: Vector2) -> void:
+func _assert_main_menu_final_state(title_screen: Control, performance_controller: Node, main_menu_rest_position: Vector2) -> void:
 	_assert_stable_control(title_screen.get_node("MainMenu"), true, main_menu_rest_position, Control.MOUSE_FILTER_STOP, "main menu")
 	_assert_visual_state(title_screen.get_node("NewRunMenu"), false, 1.0, Control.MOUSE_FILTER_IGNORE, "main menu new run")
-	_assert_visual_state(title_screen.get_node("Backdrop"), true, 1.0, Control.MOUSE_FILTER_IGNORE, "main menu backdrop")
+	_assert_stable_control(title_screen.get_node("Backdrop"), true, performance_controller.backdrop_rest_position, Control.MOUSE_FILTER_IGNORE, "main menu backdrop")
 	_assert_visual_state(title_screen.get_node("TitleOrnament"), true, 1.0, Control.MOUSE_FILTER_IGNORE, "main menu ornament")
 	_assert_visual_state(title_screen.get_node("GameTitle"), true, 1.0, Control.MOUSE_FILTER_IGNORE, "main menu title")
 	_assert_visual_state(title_screen.get_node("TransitionOverlay"), false, 0.0, Control.MOUSE_FILTER_IGNORE, "main menu overlay")
+	_assert_equal(title_screen.get_node("NewRunMenu/CharacterStage").scale, Vector2.ONE, "main menu character stage resets scale")
 
 
-func _assert_character_select_final_state(title_screen: Control, new_run_menu_rest_position: Vector2) -> void:
+func _assert_character_select_final_state(title_screen: Control, performance_controller: Node, new_run_menu_rest_position: Vector2) -> void:
 	_assert_visual_state(title_screen.get_node("MainMenu"), false, 1.0, Control.MOUSE_FILTER_IGNORE, "character select main menu")
 	_assert_stable_control(title_screen.get_node("NewRunMenu"), true, new_run_menu_rest_position, Control.MOUSE_FILTER_STOP, "character select new run")
-	_assert_visual_state(title_screen.get_node("Backdrop"), true, 1.0, Control.MOUSE_FILTER_IGNORE, "character select backdrop")
+	_assert_stable_control(title_screen.get_node("Backdrop"), true, performance_controller.backdrop_rest_position + Vector2(-42.0, 16.0), Control.MOUSE_FILTER_IGNORE, "character select backdrop")
 	_assert_visual_state(title_screen.get_node("TitleOrnament"), false, 1.0, Control.MOUSE_FILTER_IGNORE, "character select ornament")
 	_assert_visual_state(title_screen.get_node("GameTitle"), false, 1.0, Control.MOUSE_FILTER_IGNORE, "character select title")
 	_assert_visual_state(title_screen.get_node("TransitionOverlay"), false, 0.0, Control.MOUSE_FILTER_IGNORE, "character select overlay")
+	_assert_equal(title_screen.get_node("NewRunMenu/CharacterStage").scale, Vector2.ONE, "character select stage settles at full scale")
 
 
 func _send_action(action: String) -> void:
@@ -156,22 +158,25 @@ func _run() -> void:
 	_assert_equal(title_screen.get_screen_state_name(), "MAIN_MENU", "confirm skips intro")
 	_assert_equal(run_started_counts[0], 0, "confirm during intro must not start a run")
 	main_menu_rest_position = main_menu.position
-	_assert_main_menu_final_state(title_screen, main_menu_rest_position)
+	_assert_main_menu_final_state(title_screen, performance_controller, main_menu_rest_position)
 
 	title_screen.show_new_run_menu()
+	var first_character_transition: Tween = performance_controller.active_tween
+	title_screen.show_new_run_menu()
+	_assert_equal(performance_controller.active_tween, first_character_transition, "repeated new run request must not start a second transition")
 	_send_action("ui_cancel")
 	await process_frame
 	_assert_equal(title_screen.get_screen_state_name(), "CHARACTER_SELECT", "cancel skips new run transition")
 	_assert_equal(run_started_counts[0], 0, "cancel during transition must not start a run")
 	new_run_menu_rest_position = new_run_menu.position
-	_assert_character_select_final_state(title_screen, new_run_menu_rest_position)
+	_assert_character_select_final_state(title_screen, performance_controller, new_run_menu_rest_position)
 	var start_run_button: Button = title_screen.get_node("NewRunMenu/RunConfigPanel/StartRunButton")
 	title_screen.show_main_menu()
 	_send_mouse_click(start_run_button.get_global_rect().get_center())
 	await process_frame
 	_assert_equal(title_screen.get_screen_state_name(), "MAIN_MENU", "mouse click skips main menu transition")
 	_assert_equal(run_started_counts[0], 0, "mouse click during transition must not start a run")
-	_assert_main_menu_final_state(title_screen, main_menu_rest_position)
+	_assert_main_menu_final_state(title_screen, performance_controller, main_menu_rest_position)
 
 	title_screen.show_new_run_menu()
 	title_screen.skip_active_transition()
@@ -181,7 +186,7 @@ func _run() -> void:
 	await create_timer(0.70).timeout
 	_assert_equal(title_screen.get_screen_state_name(), "MAIN_MENU", "natural back transition")
 	_assert_equal(title_screen.get_viewport().gui_get_focus_owner(), new_run_button, "natural back transition restores default focus")
-	_assert_main_menu_final_state(title_screen, main_menu_rest_position)
+	_assert_main_menu_final_state(title_screen, performance_controller, main_menu_rest_position)
 
 	title_screen.show_new_run_menu()
 	title_screen.skip_active_transition()
@@ -190,13 +195,19 @@ func _run() -> void:
 	title_screen.skip_active_transition()
 	await process_frame
 	_assert_equal(title_screen.get_viewport().gui_get_focus_owner(), new_run_button, "skipped back transition restores default focus")
-	_assert_main_menu_final_state(title_screen, main_menu_rest_position)
+	_assert_main_menu_final_state(title_screen, performance_controller, main_menu_rest_position)
 
 	new_run_button.grab_focus()
 	title_screen.show_settings_menu()
 	title_screen.show_main_menu()
 	await process_frame
 	_assert_equal(title_screen.get_viewport().gui_get_focus_owner(), new_run_button, "settings return restores main menu focus")
+	var new_run_button_base_x: float = main_menu.button_base_x[new_run_button]
+	title_screen.get_node("MainMenu/VBoxContainer/CodexButton").grab_focus()
+	await create_timer(0.14).timeout
+	new_run_button.grab_focus()
+	await create_timer(0.14).timeout
+	_assert_equal(new_run_button.position.x, new_run_button_base_x + 12.0, "focused main menu button shifts right")
 
 	title_screen.show_new_run_menu()
 	title_screen.skip_active_transition()
@@ -208,6 +219,21 @@ func _run() -> void:
 
 	var character_button_container: Control = new_run_menu.get_node("CharacterButtonContainer")
 	var character_button: TextureButton = character_button_container.get_node("GridContainer").get_child(0)
+	var avatar_motion_test: TextureRect = character_button.get_node("AvatarFrame/Avatar")
+	var avatar_rest_position: Vector2 = character_button.get("avatar_rest_position")
+	var avatar_rest_y: float = avatar_rest_position.y
+	character_button.grab_focus()
+	await create_timer(0.14).timeout
+	_assert_equal(avatar_motion_test.position.y, avatar_rest_y - 8.0, "focused character avatar rises without moving its button")
+	var focus_outline: Control = character_button.get_node("FocusOutline")
+	if not focus_outline.visible:
+		failures.append("focused character button must show focus outline")
+	start_run_button.grab_focus()
+	await process_frame
+	if not focus_outline.visible:
+		failures.append("selected character button must retain focus outline after focus leaves")
+	await create_timer(0.14).timeout
+	_assert_equal(avatar_motion_test.position.y, avatar_rest_y, "unfocused character avatar returns to rest")
 	var selected_button_character_data: CharacterData = game_global.get_character_data(new_run_menu.selected_character_object_id)
 	var original_icon_path := selected_button_character_data.character_icon_texture_path
 	selected_button_character_data.character_icon_texture_path = ICON_MENU_PATH
@@ -238,8 +264,18 @@ func _run() -> void:
 	else:
 		_assert_equal(title_screen.call("get_current_character_data"), changed_character_data[0], "title screen retains selected CharacterData")
 	var character_portrait: TextureRect = title_screen.get_node("NewRunMenu/CharacterStage/CharacterPortrait")
+	await create_timer(0.25).timeout
 	if character_portrait.texture == null or character_portrait.texture.get_size() == Vector2.ZERO:
 		failures.append("character stage must show a portrait or neutral fallback")
+	for character_id: String in game_global._id_to_character_data:
+		if character_id != selected_character_id:
+			new_run_menu._on_character_selected(character_id)
+			new_run_menu._on_character_selected(selected_character_id)
+			break
+	await create_timer(0.25).timeout
+	_assert_equal(title_screen.get_current_character_data(), game_global.get_character_data(selected_character_id), "rapid character changes settle on the latest selection")
+	_assert_equal(character_portrait.modulate.a, 1.0, "character portrait opacity settles after rapid selection")
+	_assert_equal(character_portrait.scale, Vector2.ONE, "character portrait scale settles after rapid selection")
 	new_run_menu._on_character_selected("missing_character")
 	if not new_run_menu.start_run_button.disabled:
 		failures.append("invalid character must disable start run")
@@ -323,6 +359,9 @@ func _run() -> void:
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append(custom_modifier_id)
 		var confirmed_character_id: String = new_run_menu.selected_character_object_id
 		start_run_button.button_up.emit()
+		var pending_generation_after_first_input: int = title_screen.call("get_pending_run_request_generation")
+		start_run_button.button_up.emit()
+		_assert_equal(title_screen.call("get_pending_run_request_generation"), pending_generation_after_first_input, "duplicate start input must not create another leaving request")
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
 		_assert_equal(title_screen.pending_run_request["custom_modifier_ids"], [custom_modifier_id], "pending request keeps modifier snapshot")
 		var second_generation: int = title_screen.call("get_pending_run_request_generation")

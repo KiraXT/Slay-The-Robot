@@ -11,17 +11,30 @@ const TITLE_LAYER_PATHS := {
 
 var active_background_index := 0
 var background_tween: Tween
-var idle_tween: Tween
-var far_islands_rest_position := Vector2.ZERO
-var mid_ruins_rest_position := Vector2.ZERO
+var idle_motion_enabled := false
+var idle_time := 0.0
+var far_origin := Vector2.ZERO
+var mid_origin := Vector2.ZERO
+var foreground_origin := Vector2.ZERO
 
 @onready var background_layers: Array[TextureRect] = [$CharacterBackgroundA, $CharacterBackgroundB]
 
 
 func _ready() -> void:
+	far_origin = $FarIslands.position
+	mid_origin = $MidRuins.position
+	foreground_origin = $Foreground.position
 	load_title_layers()
 	preload_character_backgrounds()
-	start_idle_motion()
+
+
+func _process(delta: float) -> void:
+	if not idle_motion_enabled:
+		return
+	idle_time += delta
+	$FarIslands.position = far_origin + Vector2(sin(idle_time * 0.22) * 12.0, cos(idle_time * 0.16) * 2.0)
+	$MidRuins.position = mid_origin + Vector2(sin(idle_time * 0.31) * 8.0, cos(idle_time * 0.21) * 2.0)
+	$Foreground.position = foreground_origin + Vector2(sin(idle_time * 0.45) * 5.0, 0.0)
 
 
 func load_title_layers() -> void:
@@ -30,8 +43,6 @@ func load_title_layers() -> void:
 		layer.texture = _load_optional_texture(TITLE_LAYER_PATHS[node_name])
 		layer.visible = layer.texture.get_size() != Vector2.ZERO
 	$FallbackSky.visible = not $Sky.visible
-	far_islands_rest_position = $FarIslands.position
-	mid_ruins_rest_position = $MidRuins.position
 
 
 func preload_character_backgrounds() -> void:
@@ -64,23 +75,26 @@ func set_character_background(path: String, immediate: bool = false) -> void:
 
 
 func start_idle_motion() -> void:
-	if idle_tween != null and idle_tween.is_valid():
-		return
-	idle_tween = create_tween().set_loops()
-	idle_tween.set_parallel(true)
-	idle_tween.tween_property($FarIslands, "position:y", far_islands_rest_position.y - 3.0, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	idle_tween.tween_property($MidRuins, "position:y", mid_ruins_rest_position.y + 2.0, 2.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	idle_tween.chain().set_parallel(true)
-	idle_tween.tween_property($FarIslands, "position:y", far_islands_rest_position.y, 2.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	idle_tween.tween_property($MidRuins, "position:y", mid_ruins_rest_position.y, 2.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	idle_motion_enabled = true
+	_set_particle_state($AmbientParticles, true, 24)
 
 
 func stop_idle_motion() -> void:
-	if idle_tween != null and idle_tween.is_valid():
-		idle_tween.kill()
-	idle_tween = null
-	$FarIslands.position = far_islands_rest_position
-	$MidRuins.position = mid_ruins_rest_position
+	idle_motion_enabled = false
+	_set_particle_state($AmbientParticles, false, 24)
+	$FarIslands.position = far_origin
+	$MidRuins.position = mid_origin
+	$Foreground.position = foreground_origin
+
+
+func play_confirm_particles() -> void:
+	_set_particle_state($ConfirmParticles, true, 16)
+
+
+func _set_particle_state(node: Node, active: bool, amount: int) -> void:
+	if node is GPUParticles2D or node is CPUParticles2D:
+		node.amount = amount
+		node.emitting = active
 
 
 func _finish_background_swap(target_index: int) -> void:
