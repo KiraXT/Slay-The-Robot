@@ -1,6 +1,7 @@
 extends SceneTree
 
 const TITLE_SCENE_PATH := "res://scenes/ui/menus/TitleScreen.tscn"
+const CHARACTER_BUTTON_SCENE_PATH := "res://scenes/ui/CharacterSelectionButton.tscn"
 const REQUIRED_PATHS := [
 	"MainMenu/VBoxContainer/ContinueButton",
 	"MainMenu/VBoxContainer/ForfeitRunButton",
@@ -8,12 +9,16 @@ const REQUIRED_PATHS := [
 	"MainMenu/VBoxContainer/CodexButton",
 	"MainMenu/VBoxContainer/SettingsButton",
 	"MainMenu/VBoxContainer/ExitButton",
-	"NewRunMenu/DifficultySelect",
+	"NewRunMenu/RunConfigPanel/DifficultySelect",
+	"NewRunMenu/InfoPanel",
+	"NewRunMenu/CharacterStage/StageRing",
+	"NewRunMenu/CharacterStage/CharacterGlow",
+	"NewRunMenu/CharacterStage/CharacterPortrait",
 	"NewRunMenu/CharacterButtonContainer",
-	"NewRunMenu/CustomRunModifierButtonContainer",
-	"NewRunMenu/SeedInput",
-	"NewRunMenu/StartRunButton",
-	"NewRunMenu/BackButton",
+	"NewRunMenu/RunConfigPanel/CustomRunModifierButtonContainer",
+	"NewRunMenu/RunConfigPanel/SeedInput",
+	"NewRunMenu/RunConfigPanel/StartRunButton",
+	"NewRunMenu/RunConfigPanel/BackButton",
 	"CodexMenu",
 	"SettingsMenu",
 ]
@@ -101,12 +106,24 @@ func _run() -> void:
 		push_error("Missing TitleScreen.tscn")
 		quit(1)
 		return
+	var character_button_scene: PackedScene = load(CHARACTER_BUTTON_SCENE_PATH)
+	if character_button_scene == null:
+		failures.append("Missing character selection button scene")
+	else:
+		var character_selection_button: TextureButton = character_button_scene.instantiate()
+		if not character_selection_button.custom_minimum_size.is_equal_approx(Vector2(72.0, 72.0)):
+			failures.append("character selection button must keep a 72x72 footprint")
+		for child_name: String in ["AvatarFrame", "FocusOutline", "SelectionDecoration"]:
+			if not character_selection_button.has_node(child_name):
+				failures.append("character selection button must provide %s" % child_name)
+		character_selection_button.queue_free()
 	var title_screen := packed.instantiate()
 	root.add_child(title_screen)
 	await process_frame
 	var main_menu: Control = title_screen.get_node("MainMenu")
 	var new_run_menu: Control = title_screen.get_node("NewRunMenu")
 	var performance_controller: Node = title_screen.get_node("TitlePerformanceController")
+	var backdrop: Control = title_screen.get_node("Backdrop")
 	var game_title: Label = title_screen.get_node("GameTitle")
 	var new_run_button: Button = title_screen.get_node("MainMenu/VBoxContainer/NewRunButton")
 	var main_menu_rest_position := Vector2.ZERO
@@ -122,6 +139,9 @@ func _run() -> void:
 	for path: String in REQUIRED_PATHS:
 		if not title_screen.has_node(path):
 			failures.append("Missing title node: %s" % path)
+	for method: String in ["set_character_background", "preload_character_backgrounds", "start_idle_motion", "stop_idle_motion"]:
+		if not backdrop.has_method(method):
+			failures.append("Backdrop must expose %s" % method)
 	for path: String in MENU_PATHS:
 		var menu: Control = title_screen.get_node(path)
 		if menu.title_screen != title_screen:
@@ -141,7 +161,7 @@ func _run() -> void:
 	_assert_equal(run_started_counts[0], 0, "cancel during transition must not start a run")
 	new_run_menu_rest_position = new_run_menu.position
 	_assert_character_select_final_state(title_screen, new_run_menu_rest_position)
-	var start_run_button: Button = title_screen.get_node("NewRunMenu/StartRunButton")
+	var start_run_button: Button = title_screen.get_node("NewRunMenu/RunConfigPanel/StartRunButton")
 	title_screen.show_main_menu()
 	_send_mouse_click(start_run_button.get_global_rect().get_center())
 	await process_frame
@@ -151,7 +171,7 @@ func _run() -> void:
 
 	title_screen.show_new_run_menu()
 	title_screen.skip_active_transition()
-	var back_button: Button = title_screen.get_node("NewRunMenu/BackButton")
+	var back_button: Button = title_screen.get_node("NewRunMenu/RunConfigPanel/BackButton")
 	back_button.grab_focus()
 	title_screen.show_main_menu()
 	await create_timer(0.70).timeout
@@ -184,6 +204,18 @@ func _run() -> void:
 
 	var character_button_container: Control = new_run_menu.get_node("CharacterButtonContainer")
 	var character_button: TextureButton = character_button_container.get_node("GridContainer").get_child(0)
+	var selected_button_character_data: CharacterData = game_global.get_character_data(new_run_menu.selected_character_object_id)
+	var original_icon_path := selected_button_character_data.character_icon_texture_path
+	selected_button_character_data.character_icon_texture_path = "sprites/ui/flipper/icon_menu.png"
+	character_button.init(new_run_menu.selected_character_object_id)
+	var expected_avatar: Texture2D = file_loader.load_texture(selected_button_character_data.character_icon_texture_path)
+	_assert_equal(
+		character_button.get_node("AvatarFrame/Avatar").texture,
+		expected_avatar,
+		"character selection button uses the character avatar when available",
+	)
+	selected_button_character_data.character_icon_texture_path = original_icon_path
+	character_button.init(new_run_menu.selected_character_object_id)
 	var container_character_ids: Array = []
 	var changed_character_data: Array = []
 	character_button_container.connect("character_selected", func(character_id: String) -> void:
@@ -201,6 +233,9 @@ func _run() -> void:
 		failures.append("Title screen must retain selected CharacterData for the stage")
 	else:
 		_assert_equal(title_screen.call("get_current_character_data"), changed_character_data[0], "title screen retains selected CharacterData")
+	var character_portrait: TextureRect = title_screen.get_node("NewRunMenu/CharacterStage/CharacterPortrait")
+	if character_portrait.texture == null or character_portrait.texture.get_size() == Vector2.ZERO:
+		failures.append("character stage must show a portrait or neutral fallback")
 	new_run_menu._on_character_selected("missing_character")
 	if not new_run_menu.start_run_button.disabled:
 		failures.append("invalid character must disable start run")

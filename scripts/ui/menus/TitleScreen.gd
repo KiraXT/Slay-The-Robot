@@ -23,6 +23,10 @@ var current_character_data: CharacterData
 @onready var codex_menu = $CodexMenu
 @onready var settings_menu = $SettingsMenu
 @onready var performance_controller = $TitlePerformanceController
+@onready var backdrop: Control = $Backdrop
+@onready var character_portrait: TextureRect = %CharacterPortrait
+@onready var stage_ring: Control = %StageRing
+@onready var character_glow: Control = %CharacterGlow
 
 
 func _ready() -> void:
@@ -159,6 +163,17 @@ func complete_leaving_request(request_generation: int) -> void:
 
 func _on_character_changed(character_data: CharacterData) -> void:
 	current_character_data = character_data
+	var portrait := FileLoader.load_texture(character_data.character_texture_path)
+	if portrait.get_size() == Vector2.ZERO:
+		portrait = FileLoader.load_texture(character_data.character_icon_texture_path)
+	if portrait.get_size() == Vector2.ZERO:
+		portrait = FileLoader.load_texture("external/sprites/ui/flipper/icon_menu.png")
+	character_portrait.texture = portrait
+	backdrop.set_character_background(character_data.character_background_texture_path)
+	var color_data := Global.get_color_data(character_data.character_color_id)
+	var accent := color_data.color if color_data != null else Color.WHITE
+	stage_ring.modulate = accent
+	character_glow.modulate = Color(accent, 0.35)
 
 
 func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:

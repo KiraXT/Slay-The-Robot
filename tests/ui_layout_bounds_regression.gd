@@ -4,6 +4,15 @@ const CANVAS_SIZE := Vector2(1200.0, 700.0)
 const BOTTOM_MARGIN := 12.0
 const HAND_CARD_VISUAL_BOTTOM := 94.0
 const SAVED_RUN_MENU_REQUIRED_HEIGHT := 268.0
+const TITLE_CONTROLS := [
+	"TitleScreen/MainMenu/VBoxContainer",
+	"TitleScreen/NewRunMenu/InfoPanel",
+	"TitleScreen/NewRunMenu/CharacterStage",
+	"TitleScreen/NewRunMenu/RunConfigPanel",
+	"TitleScreen/NewRunMenu/CharacterButtonContainer",
+	"TitleScreen/NewRunMenu/RunConfigPanel/StartRunButton",
+	"TitleScreen/NewRunMenu/RunConfigPanel/BackButton",
+]
 
 var failures: Array[String] = []
 
@@ -13,6 +22,8 @@ func _init() -> void:
 
 
 func _run() -> void:
+	DisplayServer.window_set_size(Vector2i(CANVAS_SIZE))
+	await process_frame
 	var root_scene: Node = load("res://scenes/Root.tscn").instantiate()
 	root.add_child(root_scene)
 	await process_frame
@@ -23,6 +34,7 @@ func _run() -> void:
 		failures.append("Root must instance the extracted TitleScreen scene")
 
 	await _check_saved_run_main_menu(root_scene)
+	await _check_title_stage_layout(root_scene)
 	_check_combat_hand(root_scene)
 
 	root_scene.queue_free()
@@ -70,6 +82,47 @@ func _check_combat_hand(root_scene: Node) -> void:
 			"Hand cards extend below the combat canvas: bottom %.1f, limit %.1f"
 			% [hand_visual_bottom, CANVAS_SIZE.y - BOTTOM_MARGIN]
 		)
+
+
+func _check_title_stage_layout(root_scene: Node) -> void:
+	var title_screen: Control = root_scene.get_node("TitleScreen")
+	title_screen.show_new_run_menu()
+	title_screen.skip_active_transition()
+	await process_frame
+
+	for path: String in TITLE_CONTROLS:
+		if not root_scene.has_node(path):
+			failures.append("Missing title stage control: %s" % path)
+			continue
+		_assert_inside_rect(root_scene.get_node(path), title_screen.get_global_rect(), path)
+
+	var info_panel: Control = title_screen.get_node_or_null("NewRunMenu/InfoPanel")
+	var character_stage: Control = title_screen.get_node_or_null("NewRunMenu/CharacterStage")
+	var run_config_panel: Control = title_screen.get_node_or_null("NewRunMenu/RunConfigPanel")
+	if info_panel != null and character_stage != null:
+		_assert_not_overlapping(info_panel, character_stage, "InfoPanel and CharacterStage")
+	if character_stage != null and run_config_panel != null:
+		_assert_not_overlapping(character_stage, run_config_panel, "CharacterStage and RunConfigPanel")
+	if info_panel != null and run_config_panel != null:
+		_assert_not_overlapping(info_panel, run_config_panel, "InfoPanel and RunConfigPanel")
+
+	DisplayServer.window_set_size(Vector2i(1920, 1080))
+	await process_frame
+	await process_frame
+	for path: String in TITLE_CONTROLS:
+		if root_scene.has_node(path):
+			_assert_inside_rect(root_scene.get_node(path), title_screen.get_global_rect(), "%s after resize" % path)
+	DisplayServer.window_set_size(Vector2i(CANVAS_SIZE))
+
+
+func _assert_inside_rect(control: Control, container_rect: Rect2, label: String) -> void:
+	if not container_rect.encloses(control.get_global_rect()):
+		failures.append("%s must remain inside the title screen bounds" % label)
+
+
+func _assert_not_overlapping(first: Control, second: Control, label: String) -> void:
+	if first.get_global_rect().intersects(second.get_global_rect()):
+		failures.append("%s must not overlap" % label)
 
 
 func _assert_bottom_inside(control: Control, label: String) -> void:

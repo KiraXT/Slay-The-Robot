@@ -1,15 +1,82 @@
-[gd_scene load_steps=4 format=3 uid="uid://dkooa02iutqlt"]
+[gd_scene load_steps=5 format=3 uid="uid://dkooa02iutqlt"]
 
-[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_menu.png" id="1_mr4lp"]
-[ext_resource type="Script" uid="uid://b30k46q1v2d56" path="res://scripts/ui/CharacterSelectionButton.gd" id="2_4l5ru"]
+[ext_resource type="Script" uid="uid://b30k46q1v2d56" path="res://scripts/ui/CharacterSelectionButton.gd" id="1_script"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_uke2i"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBox_avatar"]
+bg_color = Color(0.95, 0.98, 0.99, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.133333, 0.831373, 0.839216, 0.85)
+corner_radius_top_left = 36
+corner_radius_top_right = 36
+corner_radius_bottom_right = 36
+corner_radius_bottom_left = 36
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_outline"]
+bg_color = Color(1, 1, 1, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.890196, 0.258824, 0.95)
+corner_radius_top_left = 36
+corner_radius_top_right = 36
+corner_radius_bottom_right = 36
+corner_radius_bottom_left = 36
+
 [node name="CharacterSelectionButton" type="TextureButton"]
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 0
 toggle_mode = true
 button_group = SubResource("ButtonGroup_uke2i")
-texture_normal = ExtResource("1_mr4lp")
 ignore_texture_size = true
-stretch_mode = 0
-script = ExtResource("2_4l5ru")
+stretch_mode = 5
+script = ExtResource("1_script")
+
+[node name="AvatarFrame" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_avatar")
+clip_contents = true
+mouse_filter = 2
+
+[node name="Avatar" type="TextureRect" parent="AvatarFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="SelectionDecoration" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_outline")
+mouse_filter = 2
+
+[node name="FocusOutline" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_outline")
+mouse_filter = 2
