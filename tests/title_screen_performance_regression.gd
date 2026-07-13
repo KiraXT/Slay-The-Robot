@@ -363,6 +363,7 @@ func _run() -> void:
 		first_generation = title_screen.call("get_pending_run_request_generation")
 	new_run_menu.back_requested.emit()
 	_assert_equal(title_screen.get_screen_state_name(), "MAIN_MENU", "back cancels leaving request")
+	_assert_particle_state(confirm_particles, 16, false, "cancelled confirm particles")
 	if not title_screen.pending_run_request.is_empty():
 		failures.append("back must clear a pending leaving request")
 
@@ -376,6 +377,7 @@ func _run() -> void:
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append(custom_modifier_id)
 		var confirmed_character_id: String = new_run_menu.selected_character_object_id
 		start_run_button.button_up.emit()
+		_assert_particle_state(confirm_particles, 16, true, "retriggered confirm particles")
 		var pending_generation_after_first_input: int = title_screen.call("get_pending_run_request_generation")
 		start_run_button.button_up.emit()
 		_assert_equal(title_screen.call("get_pending_run_request_generation"), pending_generation_after_first_input, "duplicate start input must not create another leaving request")

@@ -228,6 +228,7 @@ func _on_run_requested(character_object_id: String, run_seed: int, difficulty_le
 func _cancel_pending_run_request() -> void:
 	pending_run_request = {}
 	pending_run_request_generation = 0
+	backdrop.stop_confirm_particles()
 	if performance_controller.active_target_state != "LEAVING":
 		return
 	if performance_controller.active_tween != null and performance_controller.active_tween.is_valid():

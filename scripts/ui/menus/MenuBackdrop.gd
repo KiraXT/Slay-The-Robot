@@ -18,6 +18,7 @@ var mid_origin := Vector2.ZERO
 var foreground_origin := Vector2.ZERO
 
 @onready var background_layers: Array[TextureRect] = [$CharacterBackgroundA, $CharacterBackgroundB]
+@onready var confirm_particles: CPUParticles2D = $ConfirmParticles
 
 
 func _ready() -> void:
@@ -88,7 +89,13 @@ func stop_idle_motion() -> void:
 
 
 func play_confirm_particles() -> void:
-	_set_particle_state($ConfirmParticles, true, 16)
+	_set_particle_state(confirm_particles, false, 16)
+	confirm_particles.restart()
+	_set_particle_state(confirm_particles, true, 16)
+
+
+func stop_confirm_particles() -> void:
+	_set_particle_state(confirm_particles, false, 16)
 
 
 func _set_particle_state(node: Node, active: bool, amount: int) -> void:

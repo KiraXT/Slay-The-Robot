@@ -47,4 +47,20 @@
    - 结果：通过，输出 `ALL_TESTS_PASSED`。
    - 退出仍输出既有 `ObjectDB instances leaked` 和 `4 resources still in use` 警告。
 2. `godot --headless --path . --script tests/ui_layout_bounds_regression.gd`
-   - 结果：失败，仅剩已知的战斗手牌越界：`bottom 718.0, limit 688.0`；未改动战斗 UI。
+   - 结果：失败，完整失败内容为 `Hand cards extend below the combat canvas: bottom 718.0, limit 688.0`。
+   - 该失败已在 `.superpowers/sdd/progress.md` 的既有基线记录中存在；Task 6 修改未新增标题布局失败，未改动战斗 UI。
+
+## Review Fix: Confirm Particle Reset
+
+- `MenuBackdrop.play_confirm_particles()` 先停止确认粒子、调用 `restart()`，再重新开启发射，确保每次确认都有新的 burst。
+- `TitleScreen` 取消 `LEAVING` 请求时调用 `stop_confirm_particles()`；取消后不会保留 `emitting = true`。
+- `tests/title_screen_performance_regression.gd` 断言取消后确认粒子停止，并断言下一次确认重新发射。
+
+### 修复测试
+
+1. `godot --headless --path . --script tests/title_screen_performance_regression.gd`
+   - 结果：通过，输出 `ALL_TESTS_PASSED`。
+   - 退出仍输出既有 `ObjectDB instances leaked` 和 `4 resources still in use` 警告；未扩大到无关生命周期修复。
+2. `godot --headless --path . --script tests/ui_layout_bounds_regression.gd`
+   - 结果：失败，完整失败内容为 `Hand cards extend below the combat canvas: bottom 718.0, limit 688.0`。
+   - 这是 `.superpowers/sdd/progress.md` 已记录的战斗手牌基线；本次运行未报告标题布局失败，未改动战斗 UI。
