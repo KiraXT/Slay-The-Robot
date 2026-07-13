@@ -14,6 +14,7 @@ enum ScreenState {
 var screen_state := ScreenState.ENTERING
 var previous_main_focus: Control
 var pending_run_request: Dictionary = {}
+var current_character_data: CharacterData
 
 @onready var main_menu = $MainMenu
 @onready var new_run_menu = $NewRunMenu
@@ -42,6 +43,11 @@ func skip_active_transition() -> void:
 
 
 func show_main_menu() -> void:
+	if screen_state == ScreenState.LEAVING:
+		_cancel_pending_run_request()
+		performance_controller.apply_main_menu_state()
+		screen_state = ScreenState.MAIN_MENU
+		return
 	if screen_state == ScreenState.CHARACTER_SELECT:
 		screen_state = ScreenState.TO_MAIN_MENU
 		performance_controller.play_to_main_menu()
@@ -121,20 +127,24 @@ func _on_transition_finished(target_state: String) -> void:
 				call_deferred("_restore_default_main_focus")
 		"CHARACTER_SELECT": screen_state = ScreenState.CHARACTER_SELECT
 		"LEAVING":
-			screen_state = ScreenState.LEAVING
-			if pending_run_request.is_empty():
+			if screen_state != ScreenState.LEAVING or pending_run_request.is_empty():
 				return
-			Global.start_run(
-				pending_run_request["character_object_id"],
-				pending_run_request["run_seed"],
-				pending_run_request["difficulty_level"],
-				pending_run_request["custom_modifier_ids"],
-			)
+			var run_request := pending_run_request
 			pending_run_request = {}
+			Global.start_run(
+				run_request["character_object_id"],
+				run_request["run_seed"],
+				run_request["difficulty_level"],
+				run_request["custom_modifier_ids"],
+			)
 
 
-func _on_character_changed(_character_data: CharacterData) -> void:
-	pass
+func get_current_character_data() -> CharacterData:
+	return current_character_data
+
+
+func _on_character_changed(character_data: CharacterData) -> void:
+	current_character_data = character_data
 
 
 func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:
@@ -148,6 +158,16 @@ func _on_run_requested(character_object_id: String, run_seed: int, difficulty_le
 	}
 	screen_state = ScreenState.LEAVING
 	performance_controller.play_run_confirm()
+
+
+func _cancel_pending_run_request() -> void:
+	pending_run_request = {}
+	if performance_controller.active_target_state != "LEAVING":
+		return
+	if performance_controller.active_tween != null and performance_controller.active_tween.is_valid():
+		performance_controller.active_tween.kill()
+	performance_controller.active_tween = null
+	performance_controller.active_target_state = ""
 
 
 func _restore_default_main_focus() -> void:
