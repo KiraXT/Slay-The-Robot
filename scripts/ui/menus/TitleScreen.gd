@@ -14,7 +14,10 @@ enum ScreenState {
 var screen_state := ScreenState.ENTERING
 var previous_main_focus: Control
 var pending_run_request: Dictionary = {}
+var pending_run_request_generation := 0
+var next_run_request_generation := 0
 var current_character_data: CharacterData
+var run_start_handler: Callable
 
 @onready var main_menu = $MainMenu
 @onready var new_run_menu = $NewRunMenu
@@ -38,7 +41,9 @@ func get_screen_state_name() -> String:
 
 
 func skip_active_transition() -> void:
-	if screen_state in [ScreenState.ENTERING, ScreenState.TO_CHARACTER_SELECT, ScreenState.TO_MAIN_MENU, ScreenState.LEAVING]:
+	if screen_state == ScreenState.LEAVING:
+		_complete_active_leaving_transition()
+	elif screen_state in [ScreenState.ENTERING, ScreenState.TO_CHARACTER_SELECT, ScreenState.TO_MAIN_MENU]:
 		performance_controller.complete_active_transition()
 
 
@@ -102,7 +107,9 @@ func _restore_main_focus() -> void:
 func _notification(what: int) -> void:
 	if what != NOTIFICATION_APPLICATION_FOCUS_IN or not is_node_ready():
 		return
-	if screen_state in [ScreenState.ENTERING, ScreenState.TO_CHARACTER_SELECT, ScreenState.TO_MAIN_MENU, ScreenState.LEAVING]:
+	if screen_state == ScreenState.LEAVING:
+		_complete_active_leaving_transition()
+	elif screen_state in [ScreenState.ENTERING, ScreenState.TO_CHARACTER_SELECT, ScreenState.TO_MAIN_MENU]:
 		performance_controller.complete_active_transition()
 	elif screen_state == ScreenState.MAIN_MENU:
 		performance_controller.apply_main_menu_state()
@@ -126,21 +133,41 @@ func _on_transition_finished(target_state: String) -> void:
 			if restore_default_focus:
 				call_deferred("_restore_default_main_focus")
 		"CHARACTER_SELECT": screen_state = ScreenState.CHARACTER_SELECT
-		"LEAVING":
-			if screen_state != ScreenState.LEAVING or pending_run_request.is_empty():
-				return
-			var run_request := pending_run_request
-			pending_run_request = {}
-			Global.start_run(
-				run_request["character_object_id"],
-				run_request["run_seed"],
-				run_request["difficulty_level"],
-				run_request["custom_modifier_ids"],
-			)
+		"LEAVING": pass
 
 
 func get_current_character_data() -> CharacterData:
 	return current_character_data
+
+
+func set_run_start_handler(handler: Callable) -> void:
+	run_start_handler = handler
+
+
+func get_pending_run_request_generation() -> int:
+	return pending_run_request_generation
+
+
+func complete_leaving_request(request_generation: int) -> void:
+	if screen_state != ScreenState.LEAVING or pending_run_request.is_empty() or request_generation != pending_run_request_generation:
+		return
+	var run_request := pending_run_request
+	pending_run_request = {}
+	pending_run_request_generation = 0
+	if run_start_handler.is_valid():
+		run_start_handler.call(
+			run_request["character_object_id"],
+			run_request["run_seed"],
+			run_request["difficulty_level"],
+			run_request["custom_modifier_ids"],
+		)
+		return
+	Global.start_run(
+		run_request["character_object_id"],
+		run_request["run_seed"],
+		run_request["difficulty_level"],
+		run_request["custom_modifier_ids"],
+	)
 
 
 func _on_character_changed(character_data: CharacterData) -> void:
@@ -150,6 +177,8 @@ func _on_character_changed(character_data: CharacterData) -> void:
 func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:
 	if screen_state != ScreenState.CHARACTER_SELECT or not pending_run_request.is_empty():
 		return
+	next_run_request_generation += 1
+	pending_run_request_generation = next_run_request_generation
 	pending_run_request = {
 		"character_object_id": character_object_id,
 		"run_seed": run_seed,
@@ -158,16 +187,25 @@ func _on_run_requested(character_object_id: String, run_seed: int, difficulty_le
 	}
 	screen_state = ScreenState.LEAVING
 	performance_controller.play_run_confirm()
+	if performance_controller.active_tween != null and performance_controller.active_tween.is_valid():
+		performance_controller.active_tween.finished.connect(complete_leaving_request.bind(pending_run_request_generation), CONNECT_ONE_SHOT)
 
 
 func _cancel_pending_run_request() -> void:
 	pending_run_request = {}
+	pending_run_request_generation = 0
 	if performance_controller.active_target_state != "LEAVING":
 		return
 	if performance_controller.active_tween != null and performance_controller.active_tween.is_valid():
 		performance_controller.active_tween.kill()
 	performance_controller.active_tween = null
 	performance_controller.active_target_state = ""
+
+
+func _complete_active_leaving_transition() -> void:
+	var request_generation := pending_run_request_generation
+	performance_controller.complete_active_transition()
+	complete_leaving_request(request_generation)
 
 
 func _restore_default_main_focus() -> void:

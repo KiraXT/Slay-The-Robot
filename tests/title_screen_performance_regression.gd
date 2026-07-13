@@ -201,16 +201,26 @@ func _run() -> void:
 		failures.append("Title screen must retain selected CharacterData for the stage")
 	else:
 		_assert_equal(title_screen.call("get_current_character_data"), changed_character_data[0], "title screen retains selected CharacterData")
+	new_run_menu._on_character_selected("missing_character")
+	if not new_run_menu.start_run_button.disabled:
+		failures.append("invalid character must disable start run")
+	if not new_run_menu.empty_state_label.visible:
+		failures.append("invalid character must show empty state")
+	new_run_menu.populate_new_run_menu()
+	await process_frame
+	selected_character_id = new_run_menu.selected_character_object_id
 
 	var character_data: CharacterData = game_global.get_character_data(selected_character_id)
 	var original_artifact_ids: Array[String] = character_data.character_starting_artifact_ids.duplicate()
 	var original_artifact_texture = new_run_menu.character_artifact_texture_rect.texture
+	var fallback_artifact_texture = file_loader.load_texture("external/sprites/ui/flipper/icon_menu.png")
 	character_data.character_starting_artifact_ids.clear()
 	new_run_menu._on_character_selected(selected_character_id)
 	_assert_equal(new_run_menu.character_artifact_name_label.text, "无初始遗物", "character without artifact clears artifact name")
 	_assert_equal(new_run_menu.character_artifact_description_label.text, "", "character without artifact clears artifact description")
 	if new_run_menu.character_artifact_texture_rect.texture == original_artifact_texture:
 		failures.append("character without artifact must clear the previous artifact texture")
+	_assert_equal(new_run_menu.character_artifact_texture_rect.texture, fallback_artifact_texture, "character without artifact uses fallback texture")
 	character_data.character_starting_artifact_ids.assign(original_artifact_ids)
 	var artifact_id: String = original_artifact_ids[0]
 	var artifact_data = game_global.get_artifact_data(artifact_id)
@@ -218,6 +228,7 @@ func _run() -> void:
 	new_run_menu._on_character_selected(selected_character_id)
 	_assert_equal(new_run_menu.character_artifact_name_label.text, "无初始遗物", "missing artifact data clears artifact name")
 	_assert_equal(new_run_menu.character_artifact_description_label.text, "", "missing artifact data clears artifact description")
+	_assert_equal(new_run_menu.character_artifact_texture_rect.texture, fallback_artifact_texture, "missing artifact data uses fallback texture")
 	game_global._id_to_artifact_data[artifact_id] = artifact_data
 
 	var original_character_data: Dictionary = game_global._id_to_character_data.duplicate()
@@ -233,24 +244,32 @@ func _run() -> void:
 	await process_frame
 
 	var requests: Array = []
+	var started_runs: Array = []
 	new_run_menu.run_requested.connect(func(character_id: String, seed: int, difficulty: int, modifiers: Array[String]) -> void:
 		requests.append([character_id, seed, difficulty, modifiers])
 	)
+	var supports_generation := title_screen.has_method("set_run_start_handler") and title_screen.has_method("get_pending_run_request_generation") and title_screen.has_method("complete_leaving_request")
+	if not supports_generation:
+		failures.append("title screen must expose generation-aware leaving completion")
+	else:
+		title_screen.call("set_run_start_handler", func(character_id: String, seed: int, difficulty: int, modifiers: Array[String]) -> void:
+			started_runs.append([character_id, seed, difficulty, modifiers.duplicate()])
+		)
 	new_run_menu.seed_input.text = "31415"
 	new_run_menu.selected_difficulty_level = 2
 	new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
 	new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("cancelled_modifier")
-	var run_started_before_cancel: int = run_started_counts[0]
 	start_run_button.button_up.emit()
 	_assert_equal(title_screen.get_screen_state_name(), "LEAVING", "run request enters leaving state")
+	var first_generation: int = 0
+	if title_screen.has_method("get_pending_run_request_generation"):
+		first_generation = title_screen.call("get_pending_run_request_generation")
 	new_run_menu.back_requested.emit()
 	_assert_equal(title_screen.get_screen_state_name(), "MAIN_MENU", "back cancels leaving request")
 	if not title_screen.pending_run_request.is_empty():
 		failures.append("back must clear a pending leaving request")
-	else:
-		performance_controller.emit_signal("transition_finished", "LEAVING")
-		_assert_equal(run_started_counts[0], run_started_before_cancel, "cancelled leaving request must not start a run")
 
+	if supports_generation:
 		title_screen.show_new_run_menu()
 		title_screen.skip_active_transition()
 		await process_frame
@@ -258,20 +277,22 @@ func _run() -> void:
 		new_run_menu.selected_difficulty_level = 1
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("pending_modifier")
-		var run_started_before_confirm: int = run_started_counts[0]
+		var confirmed_character_id: String = new_run_menu.selected_character_object_id
 		start_run_button.button_up.emit()
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("mutated_modifier")
 		_assert_equal(title_screen.pending_run_request["custom_modifier_ids"], ["pending_modifier"], "pending request keeps modifier snapshot")
-		var no_custom_modifiers: Array[String] = []
-		title_screen.pending_run_request["custom_modifier_ids"] = no_custom_modifiers
-		performance_controller.emit_signal("transition_finished", "LEAVING")
-		performance_controller.emit_signal("transition_finished", "LEAVING")
-		_assert_equal(run_started_counts[0], run_started_before_confirm + 1, "duplicate leaving completion starts exactly one run")
+		var second_generation: int = title_screen.call("get_pending_run_request_generation")
+		if second_generation <= first_generation:
+			failures.append("new leaving request must receive a newer generation")
+		title_screen.call("complete_leaving_request", first_generation)
+		_assert_equal(started_runs.size(), 0, "stale leaving completion must not start the newer request")
+		_assert_equal(title_screen.call("get_pending_run_request_generation"), second_generation, "stale completion must preserve newer pending request")
+		await create_timer(0.70).timeout
+		_assert_equal(started_runs, [[confirmed_character_id, 27182, 1, ["pending_modifier"]]], "completed run receives full request payload")
+		title_screen.call("complete_leaving_request", second_generation)
+		_assert_equal(started_runs.size(), 1, "duplicate leaving completion starts exactly one run")
 		_assert_equal(requests.size(), 2, "each new run confirmation emits one request")
-		if game_global.is_run:
-			game_global.end_run()
-			file_loader.delete_save()
 	signals.run_started.disconnect(run_started_callback)
 	title_screen.queue_free()
 	if failures.is_empty():
