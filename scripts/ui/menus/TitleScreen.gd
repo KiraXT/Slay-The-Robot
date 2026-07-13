@@ -86,7 +86,7 @@ func _restore_main_focus() -> void:
 	if is_instance_valid(previous_main_focus) and previous_main_focus.visible:
 		previous_main_focus.grab_focus()
 	else:
-		main_menu.grab_default_focus()
+		_restore_default_main_focus()
 
 
 func _notification(what: int) -> void:
@@ -100,7 +100,7 @@ func _notification(what: int) -> void:
 		performance_controller.apply_character_select_state()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if screen_state not in [ScreenState.ENTERING, ScreenState.TO_CHARACTER_SELECT, ScreenState.TO_MAIN_MENU, ScreenState.LEAVING]:
 		return
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.pressed):
@@ -110,9 +110,20 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_transition_finished(target_state: String) -> void:
 	match target_state:
-		"MAIN_MENU": screen_state = ScreenState.MAIN_MENU
+		"MAIN_MENU":
+			var restore_default_focus := screen_state == ScreenState.TO_MAIN_MENU
+			screen_state = ScreenState.MAIN_MENU
+			if restore_default_focus:
+				call_deferred("_restore_default_main_focus")
 		"CHARACTER_SELECT": screen_state = ScreenState.CHARACTER_SELECT
 		"LEAVING": screen_state = ScreenState.LEAVING
+
+
+func _restore_default_main_focus() -> void:
+	for control in main_menu.get_node("VBoxContainer").get_children():
+		if control is Control and control.visible and control.focus_mode != Control.FOCUS_NONE:
+			control.grab_focus()
+			return
 
 
 func _on_run_started() -> void:
