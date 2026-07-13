@@ -69,4 +69,13 @@
   - 验证：`tests/title_screen_performance_regression.gd` 通过，输出 `ALL_TESTS_PASSED`；仍有既有 ObjectDB/resource 退出警告。
   - 验证：`tests/ui_layout_bounds_regression.gd` 仍失败于既有战斗手牌越界 `718.0 > 688.0`，未出现标题布局失败。
   - Minor/基线：性能测试退出资源警告保留；布局回归失败限定为既有战斗手牌问题。
-- Task 7：准备开始。
+- Task 7：阻塞，自动化验证已执行并记录，完整验收待 Task 1 资产和既有布局基线处理后恢复。
+  - Brief：`.superpowers/sdd/task-7-brief.md`
+  - Report：`.superpowers/sdd/task-7-report.md`
+  - `godot --headless --path . --quit`：通过。
+  - `tests/title_screen_performance_regression.gd`：通过，输出 `ALL_TESTS_PASSED`；仍有既有 ObjectDB/resource 退出警告。
+  - `tests/codex_menu_display_regression.gd`：通过，输出 `ALL_TESTS_PASSED`；仍有既有 ObjectDB/resource 退出警告。
+  - `tests/title_screen_asset_regression.gd`：失败，原因是 Task 1 资产和角色 `character_background_texture_path` 未交付。
+  - `tests/ui_layout_bounds_regression.gd`：失败，仍仅为既有战斗手牌越界 `718.0 > 688.0`，未出现标题布局失败。
+  - GUI/视觉验收：未完成；Task 1 资产缺失使最终视觉无法验收，本轮也未取得可审阅截图或完成鼠标/键盘/手柄路径验证。
+  - 后续恢复点：完成 Task 1 资产与角色 JSON、解决或单独豁免战斗手牌布局基线，并在可观察桌面 GUI 会话中重跑 Step 3-5。

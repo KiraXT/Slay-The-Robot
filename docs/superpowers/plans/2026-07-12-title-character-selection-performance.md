@@ -1205,3 +1205,11 @@ git commit -m "docs: finalize title screen implementation plan"
 ```
 
 如果 Step 3-5 修改了实现文件，将这些实现修正与对应测试加入同一次最终提交；无实现修正时仅提交两份文档。
+
+### Task 7 验证状态（2026-07-13）
+
+- [x] Step 1：`godot --headless --path . --quit` 以退出码 0 通过；未见 parser、场景资源或无效节点路径错误。
+- [x] Step 2：`title_screen_performance_regression.gd` 和 `codex_menu_display_regression.gd` 输出 `ALL_TESTS_PASSED`。`title_screen_asset_regression.gd` 仅因 Task 1 未交付的八个标题 PNG 与四个空的 `character_background_texture_path` 失败；`ui_layout_bounds_regression.gd` 仅命中任务前既有的战斗手牌越界（`bottom 718.0, limit 688.0`）。两者均不属于 Task 7 可修范围。
+- [ ] Step 3-5：阻塞。Task 1 资产缺失使完整视觉验收无法完成；本轮 GUI 启动后未能取得可审阅截图或完成鼠标、键盘、手柄路径验证。资产到位后，从标题稳定态、四个角色选中态和快速输入路径重新执行视觉验收。
+- [x] Step 6：工作区包含既有 `.superpowers/sdd/` 任务资料、`designer/art_source/validation-pack/` 导入副产物、若干 `.uid` 文件，以及 Task 1 的未跟踪 `tests/title_screen_asset_regression.gd`；它们与本任务的计划更新和报告分离，未暂存。
+- [x] Step 7：仅提交本计划和 Task 7 验证报告；未改动标题资产、角色 JSON、战斗 UI 或规格。
