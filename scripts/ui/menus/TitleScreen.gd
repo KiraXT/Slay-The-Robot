@@ -13,6 +13,7 @@ enum ScreenState {
 
 var screen_state := ScreenState.ENTERING
 var previous_main_focus: Control
+var pending_run_request: Dictionary = {}
 
 @onready var main_menu = $MainMenu
 @onready var new_run_menu = $NewRunMenu
@@ -24,6 +25,9 @@ var previous_main_focus: Control
 func _ready() -> void:
 	Signals.run_started.connect(_on_run_started)
 	Signals.run_ended.connect(_on_run_ended)
+	new_run_menu.connect("character_changed", _on_character_changed)
+	new_run_menu.connect("run_requested", _on_run_requested)
+	new_run_menu.connect("back_requested", show_main_menu)
 	performance_controller.transition_finished.connect(_on_transition_finished)
 	performance_controller.play_title_intro()
 
@@ -116,7 +120,34 @@ func _on_transition_finished(target_state: String) -> void:
 			if restore_default_focus:
 				call_deferred("_restore_default_main_focus")
 		"CHARACTER_SELECT": screen_state = ScreenState.CHARACTER_SELECT
-		"LEAVING": screen_state = ScreenState.LEAVING
+		"LEAVING":
+			screen_state = ScreenState.LEAVING
+			if pending_run_request.is_empty():
+				return
+			Global.start_run(
+				pending_run_request["character_object_id"],
+				pending_run_request["run_seed"],
+				pending_run_request["difficulty_level"],
+				pending_run_request["custom_modifier_ids"],
+			)
+			pending_run_request = {}
+
+
+func _on_character_changed(_character_data: CharacterData) -> void:
+	pass
+
+
+func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:
+	if screen_state != ScreenState.CHARACTER_SELECT or not pending_run_request.is_empty():
+		return
+	pending_run_request = {
+		"character_object_id": character_object_id,
+		"run_seed": run_seed,
+		"difficulty_level": difficulty_level,
+		"custom_modifier_ids": custom_modifier_ids.duplicate(),
+	}
+	screen_state = ScreenState.LEAVING
+	performance_controller.play_run_confirm()
 
 
 func _restore_default_main_focus() -> void:

@@ -137,6 +137,44 @@ func _run() -> void:
 	_assert_equal(run_started_count, 0, "cancel during transition must not start a run")
 	new_run_menu_rest_position = new_run_menu.position
 	_assert_character_select_final_state(title_screen, new_run_menu_rest_position)
+	new_run_menu.populate_new_run_menu()
+	await process_frame
+	if new_run_menu.selected_character_object_id.is_empty():
+		failures.append("New run menu must select the first character")
+
+	var selected_character_data: Array = []
+	if not new_run_menu.has_signal("character_changed"):
+		failures.append("New run menu must expose character_changed")
+	else:
+		new_run_menu.character_changed.connect(func(character_data: CharacterData) -> void:
+			selected_character_data.append(character_data)
+		)
+		new_run_menu._on_character_selected(new_run_menu.selected_character_object_id)
+		if selected_character_data.size() != 1 or not selected_character_data[0] is CharacterData:
+			failures.append("Character selection must emit CharacterData")
+
+	var requests: Array = []
+	if not new_run_menu.has_signal("run_requested"):
+		failures.append("New run menu must expose run_requested")
+	else:
+		new_run_menu.run_requested.connect(func(character_id: String, seed: int, difficulty: int, modifiers: Array[String]) -> void:
+			requests.append([character_id, seed, difficulty, modifiers])
+		)
+		new_run_menu.seed_input.text = "31415"
+		new_run_menu.selected_difficulty_level = 2
+		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
+		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("test_modifier")
+		var selected_character_id: String = new_run_menu.selected_character_object_id
+		var start_run_button: Button = new_run_menu.get_node("StartRunButton")
+		start_run_button.button_up.emit()
+		start_run_button.button_up.emit()
+		_assert_equal(requests.size(), 1, "start run emits exactly one request")
+		if requests.size() == 1:
+			_assert_equal(requests[0], [selected_character_id, 31415, 2, ["test_modifier"]], "start run request payload")
+
+	new_run_menu._on_character_selected("missing_character")
+	if not new_run_menu.start_run_button.disabled:
+		failures.append("Invalid character must disable start run")
 
 	var start_run_button: Button = title_screen.get_node("NewRunMenu/StartRunButton")
 	title_screen.show_main_menu()

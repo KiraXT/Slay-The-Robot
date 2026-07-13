@@ -259,6 +259,17 @@ theme_override_font_sizes/font_size = 16
 text = "Description "
 autowrap_mode = 2
 
+[node name="EmptyStateLabel" type="Label" parent="NewRunMenu"]
+visible = false
+layout_mode = 0
+offset_left = 56.0
+offset_top = 470.0
+offset_right = 344.0
+offset_bottom = 502.0
+theme = ExtResource("2_bi5lp")
+text = "No playable characters available"
+horizontal_alignment = 1
+
 [node name="DifficultySelect" type="Control" parent="NewRunMenu"]
 anchors_preset = 0
 offset_left = 64.0
