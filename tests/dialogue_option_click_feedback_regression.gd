@@ -14,6 +14,8 @@ func _run() -> void:
 	var option = packed.instantiate()
 	root.add_child(option)
 	await process_frame
+	if not option is Button:
+		failures.append("DialogueOption must use a native Button root so real mouse clicks are handled reliably")
 	option.init("", "[color=green]Test option[/color]", "[color=red]Disabled[/color]", [] as Array[Dictionary], [] as Array[Dictionary])
 	
 	var clicked_count := [0]
@@ -26,15 +28,14 @@ func _run() -> void:
 	if option.self_modulate == DialogueOption.NORMAL_MODULATE:
 		failures.append("DialogueOption hover must provide visual feedback")
 	
-	var click_event := InputEventMouseButton.new()
-	click_event.button_index = MOUSE_BUTTON_LEFT
-	click_event.pressed = true
-	option._on_gui_input(click_event)
+	option.button_down.emit()
 	
-	if clicked_count[0] != 1:
-		failures.append("DialogueOption left click must emit dialogue_option_clicked once")
 	if option.scale == DialogueOption.NORMAL_SCALE and option.self_modulate == DialogueOption.HOVER_MODULATE:
 		failures.append("DialogueOption click must provide pressed visual feedback")
+	option.button_up.emit()
+	
+	if clicked_count[0] != 1:
+		failures.append("DialogueOption button_up must emit dialogue_option_clicked once")
 	await create_timer(0.03).timeout
 	
 	option.queue_free()

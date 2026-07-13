@@ -1,6 +1,6 @@
 ## UI component for a selectable option. Used for run start options and dialogue options.
 ## Supports rich text.
-extends PanelContainer
+extends Button
 class_name DialogueOption
 
 @onready var rich_text_label = $RichTextLabel
@@ -25,7 +25,8 @@ signal dialogue_option_clicked(dialogue_option: DialogueOption)
 func _ready():
 	focus_mode = Control.FOCUS_ALL
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	gui_input.connect(_on_gui_input)
+	button_down.connect(_on_button_down)
+	button_up.connect(_on_button_up)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 
@@ -36,9 +37,11 @@ func init(_dialogue_option_object_id: String, option_bbcode: String, option_fail
 	option_enabled = validate_dialogue_option()
 	if option_enabled:
 		set_dialogue_bb_code(option_bbcode)
+		disabled = false
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	else:
 		set_dialogue_bb_code(option_failed_validator_bbcode)
+		disabled = true
 		mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 func validate_dialogue_option() -> bool:
@@ -51,16 +54,21 @@ func validate_dialogue_option() -> bool:
 func set_dialogue_bb_code(bb_code: String) -> void:
 	rich_text_label.parse_bbcode(bb_code)
 
-func _on_gui_input(event: InputEvent):
+func _on_gui_input(event: InputEvent) -> void:
 	if not option_enabled:
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		accept_event()
+	if event.is_action_pressed("ui_accept"):
 		_play_pressed_feedback()
 		dialogue_option_clicked.emit(self)
-	elif event.is_action_pressed("ui_accept"):
-		accept_event()
+
+
+func _on_button_down() -> void:
+	if option_enabled:
 		_play_pressed_feedback()
+
+
+func _on_button_up() -> void:
+	if option_enabled:
 		dialogue_option_clicked.emit(self)
 
 

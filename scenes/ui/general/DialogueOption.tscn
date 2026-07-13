@@ -3,7 +3,7 @@
 [ext_resource type="Theme" uid="uid://2714jm71pkv4" path="res://themes/keyword_tooltip_theme.tres" id="1_ggi2k"]
 [ext_resource type="Script" uid="uid://4eigvngvl3f6" path="res://scripts/ui/general/DialogueOption.gd" id="2_8yv2b"]
 
-[node name="DialogueOption" type="PanelContainer"]
+[node name="DialogueOption" type="Button"]
 self_modulate = Color(1, 1, 1, 1)
 custom_minimum_size = Vector2(240, 0)
 offset_left = 384.0
@@ -11,10 +11,21 @@ offset_top = 320.0
 offset_right = 624.0
 offset_bottom = 357.0
 theme = ExtResource("1_ggi2k")
+text = ""
+flat = false
 script = ExtResource("2_8yv2b")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("1_ggi2k")
 bbcode_enabled = true
