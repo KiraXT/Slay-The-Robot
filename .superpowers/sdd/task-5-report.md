@@ -21,6 +21,8 @@
 - 更新 `scripts/ui/menus/TitleScreen.gd`：
   - 响应 `character_changed` 时刷新 `CharacterPortrait`、背景、舞台环和角色光。
   - 立绘缺失时回退到头像，再回退到 `icon_menu.png`。
+- 更新 `scripts/ui/menus/NewRunMenu.gd`：
+  - 将详情、难度、种子、自定义规则、开始和返回按钮引用迁移到新的 `InfoPanel` / `RunConfigPanel` 节点路径。
 - 更新 `CharacterSelectionButton` 场景和脚本：
   - 按 72x72 稳定尺寸呈现头像。
   - 使用内部头像、焦点轮廓和选中装饰，避免选中/聚焦改变布局尺寸。

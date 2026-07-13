@@ -6,22 +6,22 @@ signal back_requested
 
 @onready var title_screen: Control = get_parent()
 
-@onready var character_name_label = $CharacterNameLabel
-@onready var character_health_label = $CharacterHealthLabel
-@onready var character_money_label = $CharacterMoneyLabel
-@onready var character_description_label = $CharacterDescriptionLabel
-@onready var character_artifact_texture_rect = $CharacterArtifactTextureRect
-@onready var character_artifact_name_label = $CharacterArtifactNameLabel
-@onready var character_artifact_description_label = $CharacterArtifactDescriptionLabel
+@onready var character_name_label = $InfoPanel/CharacterNameLabel
+@onready var character_health_label = $InfoPanel/CharacterHealthLabel
+@onready var character_money_label = $InfoPanel/CharacterMoneyLabel
+@onready var character_description_label = $InfoPanel/CharacterDescriptionLabel
+@onready var character_artifact_texture_rect = $InfoPanel/CharacterArtifactTextureRect
+@onready var character_artifact_name_label = $InfoPanel/CharacterArtifactNameLabel
+@onready var character_artifact_description_label = $InfoPanel/CharacterArtifactDescriptionLabel
 @onready var empty_state_label: Label = $EmptyStateLabel
-@onready var decrease_difficulty_button = $DifficultySelect/DecreaseDifficultyButton
-@onready var difficulty_label = $DifficultySelect/DifficultyLabel
-@onready var increase_difficulty_button = $DifficultySelect/IncreaseDifficultyButton
-@onready var custom_run_modifier_button_container = $CustomRunModifierButtonContainer
+@onready var decrease_difficulty_button = $RunConfigPanel/DifficultySelect/DecreaseDifficultyButton
+@onready var difficulty_label = $RunConfigPanel/DifficultySelect/DifficultyLabel
+@onready var increase_difficulty_button = $RunConfigPanel/DifficultySelect/IncreaseDifficultyButton
+@onready var custom_run_modifier_button_container = $RunConfigPanel/CustomRunModifierButtonContainer
 @onready var character_button_container = $CharacterButtonContainer
-@onready var start_run_button: Button = $StartRunButton
-@onready var seed_input: LineEdit = $SeedInput
-@onready var back_button: Button = $BackButton
+@onready var start_run_button: Button = $RunConfigPanel/StartRunButton
+@onready var seed_input: LineEdit = $RunConfigPanel/SeedInput
+@onready var back_button: Button = $RunConfigPanel/BackButton
 
 var selected_character_object_id: String = ""
 var selected_difficulty_level: int = 0
