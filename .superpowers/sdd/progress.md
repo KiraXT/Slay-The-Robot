@@ -56,5 +56,17 @@
   - 验证：`tests/ui_layout_bounds_regression.gd` 仍失败于既有战斗手牌越界 `718.0 > 688.0`，未出现标题三栏新增失败。
   - 验证：`tests/title_screen_asset_regression.gd` 因 Task 1 资产/角色背景路径仍未生成而失败。
   - Minor：`tests/title_screen_performance_regression.gd` 退出仍有资源泄漏警告，复审建议后续清理测试退出前释放帧；不阻塞任务 5。
-- Task 6：准备开始。
-- Task 7：未开始。
+- Task 6：完成，提交 `ff09f19`、`455148d`、`4b3b4fa`；最终复审通过。
+  - Brief：`.superpowers/sdd/task-6-brief.md`
+  - Report：`.superpowers/sdd/task-6-report.md`
+  - Review package：`.superpowers/sdd/review-3c72808-4b3b4fa.diff`
+  - Implementer `Arendt`，ID `019f59f4-d928-7602-9776-dd0a29fb303f`，提交 `ff09f19`。
+  - Reviewer `Lagrange`，ID `019f59fe-e7f3-74b1-b7ca-8a7347ce9978`，发现粒子节点仍为 `Control`。
+  - Fixer `Helmholtz`，ID `019f5a01-4385-7ae1-99c7-f94c17991de8`，提交 `455148d` 将粒子替换为 `CPUParticles2D` 并补断言。
+  - Reviewer `Carson`，ID `019f5a06-0a46-7e52-86a9-9435ccd59765`，发现取消离场后确认粒子未停止/重触发证据不足。
+  - Fixer `Dirac`，ID `019f5a08-616f-7611-ae3b-e928352ab65d`，提交 `4b3b4fa` 修复确认粒子取消和重触发，并补布局基线证据。
+  - Re-reviewer `Godel`，ID `019f5a0c-92c8-7951-974f-0a32e9509dcf`，复审通过，无 Critical/Important/Minor。
+  - 验证：`tests/title_screen_performance_regression.gd` 通过，输出 `ALL_TESTS_PASSED`；仍有既有 ObjectDB/resource 退出警告。
+  - 验证：`tests/ui_layout_bounds_regression.gd` 仍失败于既有战斗手牌越界 `718.0 > 688.0`，未出现标题布局失败。
+  - Minor/基线：性能测试退出资源警告保留；布局回归失败限定为既有战斗手牌问题。
+- Task 7：准备开始。
