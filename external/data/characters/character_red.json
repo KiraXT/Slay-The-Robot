@@ -1,7 +1,7 @@
 {
     "patch_data": {},
     "properties": {
-        "character_background_texture_path": "",
+        "character_background_texture_path": "external/sprites/characters/character_red/character_red_background.png",
         "character_color_id": "color_red",
         "character_description": "参加过红色角色大战",
         "character_icon_texture_path": "external/sprites/characters/character_red/character_red_icon.png",

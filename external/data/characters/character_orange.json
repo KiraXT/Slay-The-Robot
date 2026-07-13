@@ -1,7 +1,7 @@
 {
     "patch_data": {},
     "properties": {
-        "character_background_texture_path": "",
+        "character_background_texture_path": "external/sprites/characters/character_orange/character_orange_background.png",
         "character_color_id": "color_orange",
         "character_description": "有一段悲惨往事",
         "character_icon_texture_path": "external/sprites/characters/character_orange/character_orange_icon.png",

@@ -1,7 +1,7 @@
 {
     "patch_data": {},
     "properties": {
-        "character_background_texture_path": "",
+        "character_background_texture_path": "external/sprites/characters/character_green/character_green_background.png",
         "character_color_id": "color_green",
         "character_description": "披萨上会放菠萝",
         "character_icon_texture_path": "external/sprites/characters/character_green/character_green_icon.png",

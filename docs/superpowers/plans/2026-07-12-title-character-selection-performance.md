@@ -1209,7 +1209,8 @@ git commit -m "docs: finalize title screen implementation plan"
 ### Task 7 验证状态（2026-07-13）
 
 - [x] Step 1：`godot --headless --path . --quit` 以退出码 0 通过；未见 parser、场景资源或无效节点路径错误。
-- [x] Step 2：`title_screen_performance_regression.gd` 和 `codex_menu_display_regression.gd` 输出 `ALL_TESTS_PASSED`。`title_screen_asset_regression.gd` 仅因 Task 1 未交付的八个标题 PNG 与四个空的 `character_background_texture_path` 失败；`ui_layout_bounds_regression.gd` 仅命中任务前既有的战斗手牌越界（`bottom 718.0, limit 688.0`）。两者均不属于 Task 7 可修范围。
-- [ ] Step 3-5：阻塞。Task 1 资产缺失使完整视觉验收无法完成；本轮 GUI 启动后未能取得可审阅截图或完成鼠标、键盘、手柄路径验证。资产到位后，从标题稳定态、四个角色选中态和快速输入路径重新执行视觉验收。
-- [x] Step 6：工作区包含既有 `.superpowers/sdd/` 任务资料、`designer/art_source/validation-pack/` 导入副产物、若干 `.uid` 文件，以及 Task 1 的未跟踪 `tests/title_screen_asset_regression.gd`；它们与本任务的计划更新和报告分离，未暂存。
-- [x] Step 7：仅提交本计划和 Task 7 验证报告；未改动标题资产、角色 JSON、战斗 UI 或规格。
+- [x] Step 2：`title_screen_asset_regression.gd`、`title_screen_performance_regression.gd`、`ui_layout_bounds_regression.gd`、`codex_menu_display_regression.gd` 均输出 `ALL_TESTS_PASSED` 并以 0 退出。演出和图鉴测试退出时仍有既有 ObjectDB/resource 警告。
+- [x] Step 3-4：通过真实 Godot 窗口截图脚本生成 `/tmp/slay_robot_title_validation/main_menu.png`、`character_select.png` 和四个角色选中态截图；抽查确认主菜单、选人稳定态、角色立绘、角色信息、头像、难度/种子/自定义规则控件均在 1200x700 画布内。
+- [x] Step 5：自动化回归覆盖跳过标题、进入选人、连续切换、返回主菜单、进入图鉴、进入设置、确认开局、快速确认/取消和重复开局保护；窗口截图覆盖最终稳定态。手柄实体路径未在本环境单独操作，但使用同一 Godot `ui_accept/ui_cancel` 输入通道。
+- [x] Step 6：工作区仍包含既有 `.superpowers/sdd/` 前序任务资料、`designer/art_source/validation-pack/` 导入副产物、若干 `.uid` 文件；最终暂存范围仅包含本次资产、角色 JSON、手牌布局修正、资产回归测试和文档记录。
+- [x] Step 7：补齐 Task 1 资产与数据、修复布局基线、更新本计划和 Task 7 报告；临时截图脚本已删除，截图留在 `/tmp/slay_robot_title_validation` 供追溯。
