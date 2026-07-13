@@ -5,6 +5,7 @@
 - 初始实现 SHA：`c0006eb`，`refactor: isolate character selection flow`
 - 初始报告 SHA：`0f4ab0a`，`docs: add task 4 report`
 - 独立审查补修 SHA：`5f6373e`，`fix: cancel stale title run requests`
+- 第二轮审查补修 SHA：`02c8343`，`fix: bind title runs to transition generations`
 
 ## 独立审查补修
 
@@ -13,6 +14,13 @@
 - 开始运行前先消费 pending 请求，防止同步信号重入导致重复 `Global.start_run()`。
 - 标题回归在实例化场景前删除隔离测试目录的存档，避免本机继续游戏存档影响主菜单焦点断言。
 - 扩展回归覆盖按钮本地 `selected -> character_selected -> character_changed` 链、空角色列表、无初始遗物/遗物数据缺失清理、CharacterData 舞台接口、取消旧请求、规则数组快照以及重复 LEAVING 完成。
+
+## 第二轮审查补修
+
+- 每个 LEAVING 请求获得单调递增 generation；活动 tween 的完成回调绑定该 generation，`complete_leaving_request()` 仅消费当前 generation。
+- 测试在第二个 LEAVING 请求演出期间显式投递第一个 generation 的完成，验证旧回调不启动也不消费新请求；随后等待第二个 tween 自然完成。
+- TitleScreen 提供可替换的开局观察器，回归断言最终消费的实际参数包含角色、种子 `27182`、难度 `1` 和自定义规则 `pending_modifier`，并证明后续 UI 数组修改没有污染 pending 快照。
+- 回归实际调用 `_on_character_selected("missing_character")`，并断言禁用开始与空状态；在无初始遗物及遗物数据缺失时，断言备用 `icon_menu.png` 纹理已被使用。
 
 ## RED / GREEN 证据
 
@@ -36,6 +44,10 @@
 | `godot --headless --user-data-dir /tmp/slay_robot_task4_smoke --path . --quit` | 通过 |
 | `godot --headless --user-data-dir /tmp/slay_robot_task4_codex --path . --script tests/codex_menu_display_regression.gd` | 通过：`ALL_TESTS_PASSED`；退出时仍有既有 ObjectDB/资源泄漏警告 |
 | `godot --headless --user-data-dir /tmp/slay_robot_task4_layout --path . --script tests/ui_layout_bounds_regression.gd` | 已知基线失败：战斗手牌 bottom `718.0` 超过 limit `688.0` |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_green --path . --script tests/title_screen_performance_regression.gd` | 通过：`ALL_TESTS_PASSED` |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_smoke --path . --quit` | 通过 |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_codex --path . --script tests/codex_menu_display_regression.gd` | 通过：`ALL_TESTS_PASSED`；退出时仍有既有 ObjectDB/资源泄漏警告 |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_layout --path . --script tests/ui_layout_bounds_regression.gd` | 已知基线失败：战斗手牌 bottom `718.0` 超过 limit `688.0` |
 | `git diff --check` | 通过 |
 
 ## 未处理基线项
