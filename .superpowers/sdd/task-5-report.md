@@ -57,3 +57,20 @@
 - Task 1 资产生成仍阻塞，因此 `tests/title_screen_asset_regression.gd` 不能通过；任务 5 只能保证 fallback 可用。
 - `tests/ui_layout_bounds_regression.gd` 仍包含战斗手牌既有失败；标题布局本身已通过该测试新增断言。
 - 任务 5 起始实现来自两个静默中断的子 agent，已由主线程做局部审计和回归验证，但仍建议任务 5 后进行独立 review。
+
+## Review Fix（2026-07-13）
+
+### 修改
+
+- `scripts/ui/CharacterSelectionButton.gd`：头像始终接收有效图标纹理；图标和中性占位均先检查文件存在性，缺失时静默回退到 `icon_menu.png`。
+- `scripts/ui/menus/TitleScreen.gd`：立绘、头像和中性占位改为按顺序检查路径后加载，避免缺失立绘/头像调用 `FileLoader.load_texture()` 产生加载诊断。
+- `scenes/ui/CharacterSelectionButton.tscn`：为 `Avatar` 添加圆形 shader mask；72x72 外部 footprint、选中轮廓和焦点轮廓保持不变。
+- `tests/title_screen_performance_regression.gd`：有效头像路径改用真实外部资产并断言赋值，增加圆形遮罩材质回归断言。
+
+### 测试
+
+- `godot --headless --path . --script tests/title_screen_performance_regression.gd`
+  - 通过，输出 `ALL_TESTS_PASSED`。
+  - 仍有既有退出资源警告：`ObjectDB instances leaked` / `4 resources still in use`。
+- `godot --headless --path . --script tests/ui_layout_bounds_regression.gd`
+  - 失败，仅命中既有战斗手牌越界：`bottom 718.0, limit 688.0`；未修改该任务外问题。

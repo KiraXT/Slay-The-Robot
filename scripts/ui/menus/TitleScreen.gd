@@ -1,5 +1,7 @@
 extends Control
 
+const ICON_MENU_PATH := "external/sprites/ui/flipper/icon_menu.png"
+
 enum ScreenState {
 	ENTERING,
 	MAIN_MENU,
@@ -163,17 +165,30 @@ func complete_leaving_request(request_generation: int) -> void:
 
 func _on_character_changed(character_data: CharacterData) -> void:
 	current_character_data = character_data
-	var portrait := FileLoader.load_texture(character_data.character_texture_path)
-	if portrait.get_size() == Vector2.ZERO:
-		portrait = FileLoader.load_texture(character_data.character_icon_texture_path)
-	if portrait.get_size() == Vector2.ZERO:
-		portrait = FileLoader.load_texture("external/sprites/ui/flipper/icon_menu.png")
-	character_portrait.texture = portrait
+	character_portrait.texture = _load_character_portrait(character_data)
 	backdrop.set_character_background(character_data.character_background_texture_path)
 	var color_data := Global.get_color_data(character_data.character_color_id)
 	var accent := color_data.color if color_data != null else Color.WHITE
 	stage_ring.modulate = accent
 	character_glow.modulate = Color(accent, 0.35)
+
+
+func _load_character_portrait(character_data: CharacterData) -> Texture2D:
+	for path: String in [character_data.character_texture_path, character_data.character_icon_texture_path, ICON_MENU_PATH]:
+		var texture := _load_optional_texture(path)
+		if texture != null and texture.get_size() != Vector2.ZERO:
+			return texture
+	return null
+
+
+func _load_optional_texture(path: String) -> Texture2D:
+	if not _texture_file_exists(path):
+		return null
+	return FileLoader.load_texture(path)
+
+
+func _texture_file_exists(path: String) -> bool:
+	return not path.is_empty() and FileAccess.file_exists(FileLoader._get_modified_filepath(path))
 
 
 func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:

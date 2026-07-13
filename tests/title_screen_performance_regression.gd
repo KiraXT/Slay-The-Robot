@@ -2,6 +2,7 @@ extends SceneTree
 
 const TITLE_SCENE_PATH := "res://scenes/ui/menus/TitleScreen.tscn"
 const CHARACTER_BUTTON_SCENE_PATH := "res://scenes/ui/CharacterSelectionButton.tscn"
+const ICON_MENU_PATH := "external/sprites/ui/flipper/icon_menu.png"
 const REQUIRED_PATHS := [
 	"MainMenu/VBoxContainer/ContinueButton",
 	"MainMenu/VBoxContainer/ForfeitRunButton",
@@ -116,6 +117,9 @@ func _run() -> void:
 		for child_name: String in ["AvatarFrame", "FocusOutline", "SelectionDecoration"]:
 			if not character_selection_button.has_node(child_name):
 				failures.append("character selection button must provide %s" % child_name)
+		var avatar: TextureRect = character_selection_button.get_node_or_null("AvatarFrame/Avatar")
+		if avatar == null or avatar.material is not ShaderMaterial:
+			failures.append("character selection avatar must use a circular shader mask")
 		character_selection_button.queue_free()
 	var title_screen := packed.instantiate()
 	root.add_child(title_screen)
@@ -206,7 +210,7 @@ func _run() -> void:
 	var character_button: TextureButton = character_button_container.get_node("GridContainer").get_child(0)
 	var selected_button_character_data: CharacterData = game_global.get_character_data(new_run_menu.selected_character_object_id)
 	var original_icon_path := selected_button_character_data.character_icon_texture_path
-	selected_button_character_data.character_icon_texture_path = "sprites/ui/flipper/icon_menu.png"
+	selected_button_character_data.character_icon_texture_path = ICON_MENU_PATH
 	character_button.init(new_run_menu.selected_character_object_id)
 	var expected_avatar: Texture2D = file_loader.load_texture(selected_button_character_data.character_icon_texture_path)
 	_assert_equal(

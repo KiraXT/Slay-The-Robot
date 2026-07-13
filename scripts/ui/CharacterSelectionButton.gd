@@ -3,6 +3,8 @@ class_name CharacterSelectionButton
 
 signal selected(character_object_id: String)
 
+const ICON_MENU_PATH := "external/sprites/ui/flipper/icon_menu.png"
+
 var character_object_id: String = ""
 
 @onready var avatar: TextureRect = $AvatarFrame/Avatar
@@ -23,10 +25,7 @@ func init(_character_object_id: String) -> void:
 	var character_data: CharacterData = Global.get_character_data(character_object_id)
 	if character_data == null:
 		return
-	var texture := FileLoader.load_texture(character_data.character_icon_texture_path)
-	if texture.get_size() == Vector2.ZERO:
-		texture = FileLoader.load_texture("external/sprites/ui/flipper/icon_menu.png")
-	avatar.texture = texture
+	avatar.texture = _load_avatar_texture(character_data.character_icon_texture_path)
 	var color_data := Global.get_color_data(character_data.character_color_id)
 	if color_data != null:
 		selection_decoration.modulate = color_data.color
@@ -50,3 +49,20 @@ func _on_focus_exited() -> void:
 
 func _refresh_selection_decoration(is_selected: bool) -> void:
 	selection_decoration.visible = is_selected
+
+
+func _load_avatar_texture(path: String) -> Texture2D:
+	var texture := _load_optional_texture(path)
+	if texture == null or texture.get_size() == Vector2.ZERO:
+		texture = _load_optional_texture(ICON_MENU_PATH)
+	return texture
+
+
+func _load_optional_texture(path: String) -> Texture2D:
+	if not _texture_file_exists(path):
+		return null
+	return FileLoader.load_texture(path)
+
+
+func _texture_file_exists(path: String) -> bool:
+	return not path.is_empty() and FileAccess.file_exists(FileLoader._get_modified_filepath(path))
