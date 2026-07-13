@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_theme"]
 [ext_resource type="Script" uid="uid://dw0xyfu580mkb" path="res://scripts/ui/menus/TitleScreen.gd" id="2_title"]
@@ -26,6 +26,18 @@ script = ExtResource("12_damper")
 friction = 4.0
 minimum_velocity = 0.4
 rebound_strength = 7.0
+
+[sub_resource type="Gradient" id="Gradient_particles"]
+offsets = PackedFloat32Array(0, 0.7, 1)
+colors = PackedColorArray(0.694118, 0.929412, 1, 0.85, 0.545098, 0.803922, 1, 0.45, 0.545098, 0.803922, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_particles"]
+gradient = SubResource("Gradient_particles")
+width = 12
+height = 12
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
 
 [node name="TitleScreen" type="Control"]
 unique_name_in_owner = true
@@ -109,17 +121,42 @@ expand_mode = 1
 stretch_mode = 6
 mouse_filter = 2
 
-[node name="AmbientParticles" type="Control" parent="Backdrop"]
-layout_mode = 0
-offset_right = 1200.0
-offset_bottom = 700.0
-mouse_filter = 2
+[node name="AmbientParticles" type="CPUParticles2D" parent="Backdrop"]
+position = Vector2(600, 480)
+emitting = false
+amount = 24
+lifetime = 8.0
+preprocess = 8.0
+texture = SubResource("GradientTexture2D_particles")
+direction = Vector2(0, -1)
+spread = 28.0
+gravity = Vector2(0, -4)
+initial_velocity_min = 6.0
+initial_velocity_max = 14.0
+scale_amount_min = 0.6
+scale_amount_max = 1.2
+color = Color(0.8, 0.94, 1, 0.7)
+emission_shape = 3
+emission_rect_extents = Vector2(600, 280)
 
-[node name="ConfirmParticles" type="Control" parent="Backdrop"]
-layout_mode = 0
-offset_right = 1200.0
-offset_bottom = 700.0
-mouse_filter = 2
+[node name="ConfirmParticles" type="CPUParticles2D" parent="Backdrop"]
+position = Vector2(600, 450)
+emitting = false
+amount = 16
+lifetime = 0.65
+one_shot = true
+explosiveness = 1.0
+texture = SubResource("GradientTexture2D_particles")
+direction = Vector2(0, -1)
+spread = 80.0
+gravity = Vector2(0, 240)
+initial_velocity_min = 220.0
+initial_velocity_max = 340.0
+scale_amount_min = 0.7
+scale_amount_max = 1.4
+color = Color(0.85, 0.97, 1, 0.9)
+emission_shape = 3
+emission_rect_extents = Vector2(180, 80)
 
 [node name="TitleOrnament" type="TextureRect" parent="."]
 unique_name_in_owner = true

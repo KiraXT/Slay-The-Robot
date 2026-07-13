@@ -55,6 +55,14 @@ func _assert_visual_state(control: Control, expected_visible: bool, expected_alp
 		failures.append("%s mouse filter did not settle" % label)
 
 
+func _assert_particle_state(node: Node, expected_amount: int, expected_emitting: bool, label: String) -> void:
+	if node is not CPUParticles2D and node is not GPUParticles2D:
+		failures.append("%s must be a 2D particle node" % label)
+		return
+	_assert_equal(node.amount, expected_amount, "%s amount" % label)
+	_assert_equal(node.emitting, expected_emitting, "%s emitting" % label)
+
+
 func _assert_main_menu_final_state(title_screen: Control, performance_controller: Node, main_menu_rest_position: Vector2) -> void:
 	_assert_stable_control(title_screen.get_node("MainMenu"), true, main_menu_rest_position, Control.MOUSE_FILTER_STOP, "main menu")
 	_assert_visual_state(title_screen.get_node("NewRunMenu"), false, 1.0, Control.MOUSE_FILTER_IGNORE, "main menu new run")
@@ -148,6 +156,14 @@ func _run() -> void:
 	for method: String in ["set_character_background", "preload_character_backgrounds", "start_idle_motion", "stop_idle_motion"]:
 		if not backdrop.has_method(method):
 			failures.append("Backdrop must expose %s" % method)
+	var ambient_particles: Node = backdrop.get_node("AmbientParticles")
+	var confirm_particles: Node = backdrop.get_node("ConfirmParticles")
+	_assert_particle_state(ambient_particles, 24, true, "ambient particles")
+	backdrop.stop_idle_motion()
+	_assert_particle_state(ambient_particles, 24, false, "stopped ambient particles")
+	backdrop.start_idle_motion()
+	_assert_particle_state(ambient_particles, 24, true, "restarted ambient particles")
+	_assert_particle_state(confirm_particles, 16, false, "idle confirm particles")
 	for path: String in MENU_PATHS:
 		var menu: Control = title_screen.get_node(path)
 		if menu.title_screen != title_screen:
@@ -341,6 +357,7 @@ func _run() -> void:
 	new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append(custom_modifier_id)
 	start_run_button.button_up.emit()
 	_assert_equal(title_screen.get_screen_state_name(), "LEAVING", "run request enters leaving state")
+	_assert_particle_state(confirm_particles, 16, true, "confirm particles")
 	var first_generation: int = 0
 	if title_screen.has_method("get_pending_run_request_generation"):
 		first_generation = title_screen.call("get_pending_run_request_generation")

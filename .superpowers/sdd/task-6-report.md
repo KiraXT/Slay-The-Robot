@@ -31,6 +31,20 @@
 
 ## Concerns
 
-- Task 5 当前场景中的 `AmbientParticles`/`ConfirmParticles` 是 `Control` 占位节点，不是 Godot 粒子节点；任务 6 脚本已在节点为粒子时固定设置 24/16 数量和发射状态，但在当前场景结构下不会产生粒子视觉。按任务写入范围未改动 `TitleScreen.tscn`。
+- 初始实现中的 `AmbientParticles`/`ConfirmParticles` 为 `Control` 占位节点，已在后续 review fix 中替换为可渲染的 `CPUParticles2D`。
 - 标题性能回归通过后仍有既有资源清理警告；以 `--verbose` 复查时 Godot 因受限环境无法创建 `user://logs` 而启动崩溃，未对无关资源生命周期扩大修复范围。
 - 布局回归仍只剩任务说明已知的战斗手牌越界；未改动战斗 UI。
+
+## Review Fix: Title Particles
+
+- 将 `Backdrop/AmbientParticles` 和 `Backdrop/ConfirmParticles` 从 `Control` 占位节点替换为带径向渐变纹理的 `CPUParticles2D`；两者保持在 `Backdrop` 内，不参与 Control 布局或鼠标命中。
+- 空闲粒子固定 `amount = 24`，确认粒子固定 `amount = 16`；场景以关闭发射初始化，`start_idle_motion()`、`stop_idle_motion()` 和确认演出通过既有 `MenuBackdrop._set_particle_state()` 切换 `emitting`。
+- `tests/title_screen_performance_regression.gd` 新增节点类型、固定数量、空闲启停及确认演出发射状态断言。
+
+### 修复测试
+
+1. `godot --headless --path . --script tests/title_screen_performance_regression.gd`
+   - 结果：通过，输出 `ALL_TESTS_PASSED`。
+   - 退出仍输出既有 `ObjectDB instances leaked` 和 `4 resources still in use` 警告。
+2. `godot --headless --path . --script tests/ui_layout_bounds_regression.gd`
+   - 结果：失败，仅剩已知的战斗手牌越界：`bottom 718.0, limit 688.0`；未改动战斗 UI。
