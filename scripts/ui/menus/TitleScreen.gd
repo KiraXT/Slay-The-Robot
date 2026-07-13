@@ -17,7 +17,6 @@ var pending_run_request: Dictionary = {}
 var pending_run_request_generation := 0
 var next_run_request_generation := 0
 var current_character_data: CharacterData
-var run_start_handler: Callable
 
 @onready var main_menu = $MainMenu
 @onready var new_run_menu = $NewRunMenu
@@ -140,10 +139,6 @@ func get_current_character_data() -> CharacterData:
 	return current_character_data
 
 
-func set_run_start_handler(handler: Callable) -> void:
-	run_start_handler = handler
-
-
 func get_pending_run_request_generation() -> int:
 	return pending_run_request_generation
 
@@ -154,14 +149,6 @@ func complete_leaving_request(request_generation: int) -> void:
 	var run_request := pending_run_request
 	pending_run_request = {}
 	pending_run_request_generation = 0
-	if run_start_handler.is_valid():
-		run_start_handler.call(
-			run_request["character_object_id"],
-			run_request["run_seed"],
-			run_request["difficulty_level"],
-			run_request["custom_modifier_ids"],
-		)
-		return
 	Global.start_run(
 		run_request["character_object_id"],
 		run_request["run_seed"],

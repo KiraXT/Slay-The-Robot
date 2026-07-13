@@ -244,21 +244,26 @@ func _run() -> void:
 	await process_frame
 
 	var requests: Array = []
-	var started_runs: Array = []
 	new_run_menu.run_requested.connect(func(character_id: String, seed: int, difficulty: int, modifiers: Array[String]) -> void:
 		requests.append([character_id, seed, difficulty, modifiers])
 	)
-	var supports_generation := title_screen.has_method("set_run_start_handler") and title_screen.has_method("get_pending_run_request_generation") and title_screen.has_method("complete_leaving_request")
+	if title_screen.has_method("set_run_start_handler"):
+		failures.append("title screen must call Global.start_run directly without a test handler")
+	var supports_generation := title_screen.has_method("get_pending_run_request_generation") and title_screen.has_method("complete_leaving_request")
 	if not supports_generation:
 		failures.append("title screen must expose generation-aware leaving completion")
-	else:
-		title_screen.call("set_run_start_handler", func(character_id: String, seed: int, difficulty: int, modifiers: Array[String]) -> void:
-			started_runs.append([character_id, seed, difficulty, modifiers.duplicate()])
-		)
+	var custom_modifier_id := ""
+	for run_modifier_id: String in game_global._id_to_run_modifier_data:
+		var run_modifier_data = game_global.get_run_modifier_data(run_modifier_id)
+		if run_modifier_data != null and run_modifier_data.run_modifier_is_custom:
+			custom_modifier_id = run_modifier_id
+			break
+	if custom_modifier_id.is_empty():
+		failures.append("test data must provide a custom run modifier")
 	new_run_menu.seed_input.text = "31415"
 	new_run_menu.selected_difficulty_level = 2
 	new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
-	new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("cancelled_modifier")
+	new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append(custom_modifier_id)
 	start_run_button.button_up.emit()
 	_assert_equal(title_screen.get_screen_state_name(), "LEAVING", "run request enters leaving state")
 	var first_generation: int = 0
@@ -276,23 +281,32 @@ func _run() -> void:
 		new_run_menu.seed_input.text = "27182"
 		new_run_menu.selected_difficulty_level = 1
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
-		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("pending_modifier")
+		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append(custom_modifier_id)
 		var confirmed_character_id: String = new_run_menu.selected_character_object_id
 		start_run_button.button_up.emit()
 		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.clear()
-		new_run_menu.custom_run_modifier_button_container.selected_custom_run_modififers.append("mutated_modifier")
-		_assert_equal(title_screen.pending_run_request["custom_modifier_ids"], ["pending_modifier"], "pending request keeps modifier snapshot")
+		_assert_equal(title_screen.pending_run_request["custom_modifier_ids"], [custom_modifier_id], "pending request keeps modifier snapshot")
 		var second_generation: int = title_screen.call("get_pending_run_request_generation")
 		if second_generation <= first_generation:
 			failures.append("new leaving request must receive a newer generation")
 		title_screen.call("complete_leaving_request", first_generation)
-		_assert_equal(started_runs.size(), 0, "stale leaving completion must not start the newer request")
+		_assert_equal(run_started_counts[0], 0, "stale leaving completion must not start the newer request")
+		if game_global.is_run:
+			failures.append("stale leaving completion must not call Global.start_run")
 		_assert_equal(title_screen.call("get_pending_run_request_generation"), second_generation, "stale completion must preserve newer pending request")
 		await create_timer(0.70).timeout
-		_assert_equal(started_runs, [[confirmed_character_id, 27182, 1, ["pending_modifier"]]], "completed run receives full request payload")
+		_assert_equal(run_started_counts[0], 1, "natural leaving completion must call Global.start_run exactly once")
+		if not game_global.is_run:
+			failures.append("natural leaving completion must start a real Global run")
+		_assert_equal(game_global.player_data.player_character_object_id, confirmed_character_id, "Global.start_run receives character")
+		_assert_equal(game_global.player_data.player_run_seed, 27182, "Global.start_run receives seed")
+		_assert_equal(game_global.player_data.player_run_difficulty_level, 1, "Global.start_run receives difficulty")
+		_assert_equal(game_global.player_data.player_run_modifier_object_ids, ["run_modifier_difficulty_1", custom_modifier_id], "Global.start_run receives exact custom modifier payload")
 		title_screen.call("complete_leaving_request", second_generation)
-		_assert_equal(started_runs.size(), 1, "duplicate leaving completion starts exactly one run")
+		_assert_equal(run_started_counts[0], 1, "duplicate leaving completion starts exactly one run")
 		_assert_equal(requests.size(), 2, "each new run confirmation emits one request")
+		game_global.end_run()
+		file_loader.delete_save()
 	signals.run_started.disconnect(run_started_callback)
 	title_screen.queue_free()
 	if failures.is_empty():

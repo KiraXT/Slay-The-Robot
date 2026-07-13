@@ -22,6 +22,12 @@
 - TitleScreen 提供可替换的开局观察器，回归断言最终消费的实际参数包含角色、种子 `27182`、难度 `1` 和自定义规则 `pending_modifier`，并证明后续 UI 数组修改没有污染 pending 快照。
 - 回归实际调用 `_on_character_selected("missing_character")`，并断言禁用开始与空状态；在无初始遗物及遗物数据缺失时，断言备用 `icon_menu.png` 纹理已被使用。
 
+## 最终复审补修
+
+- 删除 `TitleScreen.set_run_start_handler()` 和 `run_start_handler`，LEAVING 请求完成后只能调用实际 `Global.start_run()`。
+- 标题回归不再替换启动行为：保留 generation 竞态顺序（旧 generation 在新请求 LEAVING 期间到达），通过真实 `Signals.run_started`、`Global.is_run` 和 `Global.player_data` 断言旧回调未启动，新请求自然完成后实际收到角色、种子 `27182`、难度 `1` 及完整规则数组 `["run_modifier_difficulty_1", <真实 custom modifier>]`。
+- 测试使用运行时加载的真实 custom modifier ID，并在启动请求后清空 UI 选择数组，证明 `pending_run_request` 的规则快照未被后续修改污染；测试结束后调用真实 `Global.end_run()` 并删除隔离存档。
+
 ## RED / GREEN 证据
 
 - RED: 新增标题回归后运行 `godot --headless --path . --script tests/title_screen_performance_regression.gd`，失败于缺少 `character_changed`、`run_requested`，且无效角色未禁用开始按钮。
@@ -48,6 +54,11 @@
 | `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_smoke --path . --quit` | 通过 |
 | `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_codex --path . --script tests/codex_menu_display_regression.gd` | 通过：`ALL_TESTS_PASSED`；退出时仍有既有 ObjectDB/资源泄漏警告 |
 | `godot --headless --user-data-dir /tmp/slay_robot_task4_round2_layout --path . --script tests/ui_layout_bounds_regression.gd` | 已知基线失败：战斗手牌 bottom `718.0` 超过 limit `688.0` |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_final_review_red2 --path . --script tests/title_screen_performance_regression.gd` | RED：仅失败于旧 `set_run_start_handler` 仍存在，证明新测试不依赖替身 |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_final_review_green --path . --script tests/title_screen_performance_regression.gd` | 通过：`ALL_TESTS_PASSED`；实际开局后仍有既有退出资源警告 |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_final_review_smoke --path . --quit` | 通过 |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_final_review_codex --path . --script tests/codex_menu_display_regression.gd` | 通过：`ALL_TESTS_PASSED`；退出时仍有既有 ObjectDB/资源泄漏警告 |
+| `godot --headless --user-data-dir /tmp/slay_robot_task4_final_review_layout --path . --script tests/ui_layout_bounds_regression.gd` | 已知基线失败：战斗手牌 bottom `718.0` 超过 limit `688.0` |
 | `git diff --check` | 通过 |
 
 ## 未处理基线项
