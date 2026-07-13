@@ -42,5 +42,16 @@
   - 完成局部角色信号、完整开局请求、空/无效角色、遗物清理、取消收敛与 generation 保护。
   - 最终回归直接验证真实 `Global.start_run()` 的角色、种子、难度和自定义规则，以及旧 generation 回调无法消费新请求。
   - 标题、smoke、Codex 回归通过；布局回归仍复现基线手牌越界 `718 > 688`，Codex 退出仍有既有资源警告。
-- Task 5：执行中。Brief：`.superpowers/sdd/task-5-brief.md`
+- Task 5：实现已提交，独立审查阻塞。
+  - Brief：`.superpowers/sdd/task-5-brief.md`
+  - Report：`.superpowers/sdd/task-5-report.md`
+  - Commits：`82f457d`、`d6ae5ee`（base `38028d2`）。
+  - Review package：`.superpowers/sdd/review-38028d2-d6ae5ee.diff`
+  - Implementer `Bacon`，ID `019f59c4-8b44-73b3-9986-b6555eff574c`，写入半成品后长时间无响应，已关闭。
+  - 收敛 implementer `Noether`，ID `019f59cf-0c2b-7da0-981e-77a10dc71a24`，接手后长时间无响应，已关闭。
+  - Reviewer `Carver`，ID `019f59d6-aca5-75c3-b8b0-aa83a7cd3912`，读取审查包后长时间无响应，已关闭；未返回审查结论。
+  - 验证：补修后 `tests/title_screen_performance_regression.gd` 通过，输出 `ALL_TESTS_PASSED`；仍有既有 ObjectDB/resource 退出警告。
+  - 验证：`tests/ui_layout_bounds_regression.gd` 仍失败于既有战斗手牌越界 `718.0 > 688.0`，未出现标题三栏新增失败。
+  - 验证：`tests/title_screen_asset_regression.gd` 因 Task 1 资产/角色背景路径仍未生成而失败。
+  - 后续恢复点：先重新派发或人工执行 Task 5 独立 review；通过后才能标记完成并进入 Task 6。
 - Task 6-7：未开始。
