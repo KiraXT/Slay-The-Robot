@@ -37,12 +37,24 @@ func _run() -> void:
 			failures.append("Run start option %s must be a native Button" % child.name)
 	
 	if failures.is_empty():
-		var first_option = container.get_child(0)
-		first_option.button_down.emit()
-		first_option.button_up.emit()
+		var first_option: DialogueOption = container.get_child(0)
+		var signal_counts := {"button_down": 0, "button_up": 0, "pressed": 0, "option_clicked": 0}
+		first_option.button_down.connect(func() -> void: signal_counts.button_down += 1)
+		first_option.button_up.connect(func() -> void: signal_counts.button_up += 1)
+		first_option.pressed.connect(func() -> void: signal_counts.pressed += 1)
+		first_option.dialogue_option_clicked.connect(func(_option) -> void: signal_counts.option_clicked += 1)
+		var click_position: Vector2 = first_option.get_global_rect().get_center()
+		var input_position: Vector2 = root.get_viewport().get_final_transform() * click_position
+		Input.parse_input_event(_create_mouse_motion(input_position))
+		await process_frame
+		Input.parse_input_event(_create_mouse_button(input_position, true))
+		await process_frame
+		Input.parse_input_event(_create_mouse_button(input_position, false))
 		await _wait_frames(2)
+		if signal_counts.option_clicked != 1:
+			failures.append("A routed mouse click must activate the selected option exactly once (signals=%s)" % signal_counts)
 		if run_start_options.visible:
-			failures.append("Clicking a run start option must close RunStartOptions")
+			failures.append("A routed mouse click must close RunStartOptions (signals=%s)" % signal_counts)
 	
 	root_scene.queue_free()
 	await _wait_frames(2)
@@ -59,3 +71,20 @@ func _run() -> void:
 func _wait_frames(count: int) -> void:
 	for index in count:
 		await process_frame
+
+
+func _create_mouse_motion(position: Vector2) -> InputEventMouseMotion:
+	var event := InputEventMouseMotion.new()
+	event.position = position
+	event.global_position = position
+	return event
+
+
+func _create_mouse_button(position: Vector2, pressed: bool) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.position = position
+	event.global_position = position
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
+	event.pressed = pressed
+	return event
