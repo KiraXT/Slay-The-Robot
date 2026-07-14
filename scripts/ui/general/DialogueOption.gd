@@ -54,14 +54,6 @@ func validate_dialogue_option() -> bool:
 func set_dialogue_bb_code(bb_code: String) -> void:
 	rich_text_label.parse_bbcode(bb_code)
 
-func _on_gui_input(event: InputEvent) -> void:
-	if not option_enabled:
-		return
-	if event.is_action_pressed("ui_accept"):
-		_play_pressed_feedback()
-		dialogue_option_clicked.emit(self)
-
-
 func _on_button_down() -> void:
 	if option_enabled:
 		_play_pressed_feedback()
