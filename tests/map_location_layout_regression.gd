@@ -107,6 +107,8 @@ func _check_map_content(root_scene: Node) -> void:
 				_count_route_segments(locations),
 				route_segments.size(),
 			])
+		else:
+			_assert_route_layer_uses_bent_paths(route_layer, route_segments)
 
 	if _find_map_location(location_container, LOCATION_TYPES.STARTING) == null:
 		failures.append("Map should display the generated starting location")
@@ -134,6 +136,39 @@ func _count_route_segments(locations: Array) -> int:
 	for location in locations:
 		route_count += location.location_next_location_ids.size()
 	return route_count
+
+
+func _assert_route_layer_uses_bent_paths(route_layer: Control, route_segments: Array) -> void:
+	if not route_layer.has_method("get_route_points"):
+		failures.append("RouteLayer should expose get_route_points for bent route drawing")
+		return
+	for segment in route_segments:
+		var from_position: Vector2 = segment.get("from", Vector2.ZERO)
+		var to_position: Vector2 = segment.get("to", Vector2.ZERO)
+		if from_position.distance_to(to_position) <= 0.0:
+			continue
+		var points: Variant = route_layer.call("get_route_points", from_position, to_position)
+		if not points is Array:
+			failures.append("RouteLayer.get_route_points should return an Array")
+			return
+		if points.size() < 3:
+			failures.append("Bent route should contain at least 3 sampled points, got %s" % points.size())
+			return
+		if _has_point_off_straight_line(points, from_position, to_position):
+			return
+	failures.append("Expected at least one rendered route to bend away from a straight line")
+
+
+func _has_point_off_straight_line(points: Array, from_position: Vector2, to_position: Vector2) -> bool:
+	var line_delta := to_position - from_position
+	var line_length := line_delta.length()
+	if line_length <= 0.0:
+		return false
+	for point in points:
+		var distance: float = abs(line_delta.cross(point - from_position)) / line_length
+		if distance > 2.0:
+			return true
+	return false
 
 
 func _find_map_location(location_container: Control, location_type: int):

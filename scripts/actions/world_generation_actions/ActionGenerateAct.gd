@@ -6,9 +6,16 @@
 extends BaseAction
 
 const MAP_CENTER_X := 400.0
-const GRID_SPACING := 100.0
-const DEFAULT_MIN_LOCATIONS_PER_FLOOR := 3
-const DEFAULT_MAX_LOCATIONS_PER_FLOOR := 5
+const GRID_SPACING := 140.0
+const MAP_MIN_X := 120.0
+const MAP_MAX_X := 680.0
+const MAP_MIN_Y := 80.0
+const LOCATION_X_JITTER := GRID_SPACING * 0.16
+const LOCATION_Y_JITTER := GRID_SPACING * 0.10
+const DEFAULT_MIN_LOCATIONS_PER_FLOOR := 2
+const DEFAULT_MAX_LOCATIONS_PER_FLOOR := 4
+const STARTING_ROUTE_COUNT := 2
+const MAX_ROUTES_PER_LOCATION := 2
 const START_FLOOR_INDEX := -1
 
 
@@ -90,16 +97,12 @@ func perform_action() -> void:
 		
 		### generate each floor
 		var location_id: String = ""
-		var previous_floor_count: int = -1
 		for k in floors_per_act:
 			var current_floor: Array[LocationData] = []
 			floor_counter += 1
 			var current_floor_count: int = rng_world_generation.randi_range(min_locations_per_floor, max_locations_per_floor)
-			if k > 0 and min_locations_per_floor < max_locations_per_floor and current_floor_count == previous_floor_count:
-				current_floor_count += 1
-				if current_floor_count > max_locations_per_floor:
-					current_floor_count = min_locations_per_floor
-			previous_floor_count = current_floor_count
+			if k == 0:
+				current_floor_count = min(current_floor_count, STARTING_ROUTE_COUNT)
 
 			### generate each node in a floor
 			for i in current_floor_count:
@@ -113,7 +116,7 @@ func perform_action() -> void:
 				# positioning and act
 				location.location_act = act_number
 				location.location_index = Vector2(i, k)
-				location_position = _get_location_position(i, current_floor_count, k, bottom_y)
+				location_position = _get_location_position(i, current_floor_count, k, bottom_y, rng_world_generation, true)
 				location.location_position = location_position
 				location.location_floor = floor_counter
 				
@@ -153,6 +156,8 @@ func perform_action() -> void:
 				# add node to floor
 				current_floor.append(location)
 
+			current_floor.sort_custom(func(a: LocationData, b: LocationData): return a.location_position.x < b.location_position.x)
+
 			if len(floors):
 				var previous_floor: Array[LocationData] = floors[-1]
 				_connect_floors(previous_floor, current_floor, rng_world_generation)
@@ -190,44 +195,104 @@ func perform_action() -> void:
 		floors.append(boss_floor)
 
 
-func _get_location_position(location_index: int, floor_location_count: int, floor_index: int, bottom_y: float) -> Vector2:
+func _get_location_position(
+	location_index: int,
+	floor_location_count: int,
+	floor_index: int,
+	bottom_y: float,
+	rng_world_generation: RandomNumberGenerator = null,
+	apply_jitter: bool = false
+) -> Vector2:
 	var center_offset := (float(location_index) - (float(floor_location_count - 1) / 2.0)) * GRID_SPACING
-	return Vector2(MAP_CENTER_X + center_offset, bottom_y - (float(floor_index) * GRID_SPACING))
+	var position := Vector2(MAP_CENTER_X + center_offset, bottom_y - (float(floor_index) * GRID_SPACING))
+	if apply_jitter and rng_world_generation != null:
+		position.x += rng_world_generation.randf_range(-LOCATION_X_JITTER, LOCATION_X_JITTER)
+		position.y += rng_world_generation.randf_range(-LOCATION_Y_JITTER, LOCATION_Y_JITTER)
+	position.x = clamp(position.x, MAP_MIN_X, MAP_MAX_X)
+	position.y = max(position.y, MAP_MIN_Y)
+	return position
 
 
-func _connect_floors(previous_floor: Array[LocationData], current_floor: Array[LocationData], rng_world_generation: RandomNumberGenerator) -> void:
+func _connect_floors(previous_floor: Array[LocationData], current_floor: Array[LocationData], _rng_world_generation: RandomNumberGenerator) -> void:
 	if previous_floor.is_empty() or current_floor.is_empty():
 		return
 
+	var route_pairs: Array[Vector2i] = []
+	var outgoing_counts: Array[int] = []
+	var incoming_counts: Array[int] = []
+	outgoing_counts.resize(previous_floor.size())
+	incoming_counts.resize(current_floor.size())
+	outgoing_counts.fill(0)
+	incoming_counts.fill(0)
+
 	if previous_floor.size() == 1:
-		for location in current_floor:
-			_connect_locations(previous_floor[0], location.location_id)
+		for current_index in range(min(STARTING_ROUTE_COUNT, current_floor.size())):
+			_add_route_pair(route_pairs, outgoing_counts, incoming_counts, 0, current_index)
+		_apply_route_pairs(previous_floor, current_floor, route_pairs)
 		return
 
-	for previous_location in previous_floor:
-		var candidate_locations := _get_locations_sorted_by_horizontal_distance(previous_location.location_position.x, current_floor)
-		var route_count: int = rng_world_generation.randi_range(1, min(2, candidate_locations.size()))
-		for route_index in route_count:
-			_connect_locations(previous_location, candidate_locations[route_index].location_id)
+	for previous_index in range(previous_floor.size()):
+		var current_index := _map_index_to_floor(previous_index, previous_floor.size(), current_floor.size())
+		_add_route_pair(route_pairs, outgoing_counts, incoming_counts, previous_index, current_index)
 
-	for location in current_floor:
-		if _has_incoming_route(previous_floor, location.location_id):
+	for current_index in range(current_floor.size()):
+		if incoming_counts[current_index] > 0:
 			continue
-		var candidate_previous_locations := _get_locations_sorted_by_horizontal_distance(location.location_position.x, previous_floor)
-		_connect_locations(candidate_previous_locations[0], location.location_id)
+		var previous_index := _map_index_to_floor(current_index, current_floor.size(), previous_floor.size())
+		_add_route_pair(route_pairs, outgoing_counts, incoming_counts, previous_index, current_index)
+
+	_apply_route_pairs(previous_floor, current_floor, route_pairs)
 
 
-func _get_locations_sorted_by_horizontal_distance(origin_x: float, locations: Array[LocationData]) -> Array:
-	var sorted_locations: Array = locations.duplicate()
-	sorted_locations.sort_custom(func(a: LocationData, b: LocationData): return abs(a.location_position.x - origin_x) < abs(b.location_position.x - origin_x))
-	return sorted_locations
+func _map_index_to_floor(index: int, from_count: int, to_count: int) -> int:
+	if to_count <= 1:
+		return 0
+	if from_count <= 1:
+		return int(floor(float(to_count - 1) / 2.0))
+	var mapped_index := int(round(float(index) * float(to_count - 1) / float(from_count - 1)))
+	return clamp(mapped_index, 0, to_count - 1)
 
 
-func _has_incoming_route(previous_floor: Array[LocationData], location_id: String) -> bool:
-	for previous_location in previous_floor:
-		if previous_location.location_next_location_ids.has(location_id):
+func _add_route_pair(
+	route_pairs: Array[Vector2i],
+	outgoing_counts: Array[int],
+	incoming_counts: Array[int],
+	previous_index: int,
+	current_index: int
+) -> bool:
+	if previous_index < 0 or previous_index >= outgoing_counts.size():
+		return false
+	if current_index < 0 or current_index >= incoming_counts.size():
+		return false
+	if outgoing_counts[previous_index] >= MAX_ROUTES_PER_LOCATION:
+		return false
+	if incoming_counts[current_index] >= MAX_ROUTES_PER_LOCATION:
+		return false
+
+	var route_pair := Vector2i(previous_index, current_index)
+	if route_pairs.has(route_pair):
+		return false
+	if _route_pair_crosses_existing(route_pair, route_pairs):
+		return false
+
+	route_pairs.append(route_pair)
+	outgoing_counts[previous_index] += 1
+	incoming_counts[current_index] += 1
+	return true
+
+
+func _route_pair_crosses_existing(route_pair: Vector2i, route_pairs: Array[Vector2i]) -> bool:
+	for existing_pair in route_pairs:
+		if route_pair.x == existing_pair.x or route_pair.y == existing_pair.y:
+			continue
+		if (route_pair.x - existing_pair.x) * (route_pair.y - existing_pair.y) < 0:
 			return true
 	return false
+
+
+func _apply_route_pairs(previous_floor: Array[LocationData], current_floor: Array[LocationData], route_pairs: Array[Vector2i]) -> void:
+	for route_pair in route_pairs:
+		_connect_locations(previous_floor[route_pair.x], current_floor[route_pair.y].location_id)
 
 
 func _connect_locations(from_location: LocationData, to_location_id: String) -> void:
