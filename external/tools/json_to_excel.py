@@ -161,6 +161,15 @@ def format_dialogue_action_payload(payload: Any) -> str:
         return ""
 
 
+def populate_card_complex_json_fields(card: Dict[str, Any], row: Dict[str, Any]) -> None:
+    row["card_values_json"] = format_dialogue_action_payload(card.get("card_values", {}))
+    row["card_play_actions_json"] = format_dialogue_action_payload(card.get("card_play_actions", []))
+    row["card_draw_actions_json"] = format_dialogue_action_payload(card.get("card_draw_actions", []))
+    row["card_discard_actions_json"] = format_dialogue_action_payload(card.get("card_discard_actions", []))
+    row["card_retain_actions_json"] = format_dialogue_action_payload(card.get("card_retain_actions", []))
+    row["card_listeners_json"] = format_dialogue_action_payload(card.get("card_listeners", []))
+
+
 def flatten_event_dialogue(event: Dict[str, Any], row: Dict[str, Any]) -> None:
     dialogue = event.get("event_dialogue_data", {})
     if not isinstance(dialogue, dict):
@@ -233,6 +242,9 @@ def convert_cards() -> None:
         'upgrade_draw_count', 'upgrade_status_charge_amount',
         'upgrade_status_secondary_charge_amount', 'upgrade_damage_random',
         'upgrade_multiplier_offset', 'card_first_shuffle_priority',
+        'card_values_json', 'card_play_actions_json',
+        'card_draw_actions_json', 'card_discard_actions_json',
+        'card_retain_actions_json', 'card_listeners_json',
     ]
 
     # Instruction row
@@ -275,6 +287,7 @@ def convert_cards() -> None:
 
         actions = parse_simple_action(card.get('card_play_actions', []))
         row.update(actions)
+        populate_card_complex_json_fields(card, row)
 
         upgrades = card.get('card_upgrade_value_improvements', {})
         for key, val in upgrades.items():

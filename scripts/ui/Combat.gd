@@ -1,6 +1,8 @@
 # maintains combat UI
 extends Control
 
+const COMBAT_FEEDBACK_PRESENTER_SCRIPT := preload("res://scripts/ui/CombatFeedbackPresenter.gd")
+
 @onready var money_label: Label = $%MoneyLabel
 @onready var health_label: Label = $%HealthLabel
 
@@ -29,8 +31,13 @@ extends Control
 
 @onready var end_turn_button: Button = $EndTurnButton
 var end_turn_object: CombatEndTurn = null
+var combat_feedback_presenter: Node = null
 
 func _ready():
+	combat_feedback_presenter = COMBAT_FEEDBACK_PRESENTER_SCRIPT.new()
+	add_child(combat_feedback_presenter)
+	combat_feedback_presenter.init(self, hand, player, energy, draw_pile_button, discard_pile_button, exhaust_pile_button)
+
 	Signals.player_money_changed.connect(_on_player_money_changed)
 	Signals.player_health_changed.connect(_on_player_health_changed)
 	
@@ -234,21 +241,19 @@ func perform_enemy_turn():
 				await ActionHandler.actions_ended 
 		
 		### perform intent
-		# NOTE: remember these go in reverse order on the stack
 		if enemy.is_alive():
-			# add custom actions
 			var enemy_actions_data: Array[Dictionary] = []
-			enemy_actions_data.assign(enemy.enemy_data.get_current_attack_custom_actions())
-			
-			# add attacks
-			var enemy_attack: Array = enemy.enemy_data.get_current_attack_damages()
-			if enemy_attack[1] > 0:
-				enemy_actions_data.append(
-				{
-				Scripts.ACTION_ATTACK_GENERATOR: {"damage": enemy_attack[0], "number_of_attacks": enemy_attack[1], "time_delay": EnemyData.ENEMY_ATTACK_DELAY}
+
+			# reset block first so block gained by this intent remains visible afterward
+			enemy_actions_data.append(
+			{
+			Scripts.ACTION_RESET_BLOCK:  {
+				"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
+				"time_delay": 0.0
 				}
-				)
-			
+			}
+			)
+
 			# add block
 			var enemy_block: int = enemy.enemy_data.get_current_attack_block()
 			if enemy_block > 0:
@@ -262,16 +267,18 @@ func perform_enemy_turn():
 					}
 			)
 			
-			# add reset block action
-			enemy_actions_data.append(
-			{
-			Scripts.ACTION_RESET_BLOCK:  {
-				"target_override": BaseAction.TARGET_OVERRIDES.PARENT,
-				"time_delay": 0.0
+			# add attacks
+			var enemy_attack: Array = enemy.enemy_data.get_current_attack_damages()
+			if enemy_attack[1] > 0:
+				enemy_actions_data.append(
+				{
+				Scripts.ACTION_ATTACK_GENERATOR: {"damage": enemy_attack[0], "number_of_attacks": enemy_attack[1], "time_delay": EnemyData.ENEMY_ATTACK_DELAY}
 				}
-			}
-			)
-			
+				)
+
+			# add custom actions
+			enemy_actions_data.append_array(enemy.enemy_data.get_current_attack_custom_actions())
+
 			# perform them and wait
 			var enemy_attack_actions: Array = ActionGenerator.create_actions(enemy, null, [player], enemy_actions_data, null)
 			ActionHandler.add_actions(enemy_attack_actions)

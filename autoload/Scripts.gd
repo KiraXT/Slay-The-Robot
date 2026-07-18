@@ -43,6 +43,9 @@ const ACTION_EMIT_CUSTOM_SIGNAL: String = "res://scripts/actions/meta_actions/Ac
 const ACTION_VARIABLE_COST_MODIFIER: String = "res://scripts/actions/meta_actions/ActionVariableCostModifier.gd"
 const ACTION_VARIABLE_CARDSET_MODIFIER: String = "res://scripts/actions/meta_actions/ActionVariableCardsetModifier.gd"
 const ACTION_VARIABLE_COMBAT_STATS_MODIFIER: String = "res://scripts/actions/meta_actions/ActionVariableCombatStatsModifier.gd"
+const ACTION_TARGET_STATUS_VALUE_MODIFIER: String = "res://scripts/actions/meta_actions/ActionTargetStatusValueModifier.gd"
+const ACTION_MODIFY_CURRENT_CARD_PLAY_VALUES: String = "res://scripts/actions/meta_actions/ActionModifyCurrentCardPlayValues.gd"
+const ACTION_DUPLICATE_CURRENT_CARD_PLAY: String = "res://scripts/actions/meta_actions/ActionDuplicateCurrentCardPlay.gd"
 const ACTION_VALIDATOR: String = "res://scripts/actions/meta_actions/ActionValidator.gd"
 
 # generated actions; use their corresponding generator to make these
@@ -89,6 +92,7 @@ const ACTION_MOVE_CARDS_TO_LIMBO: String = "res://scripts/actions/cardset_action
 const ACTION_ADD_CARDS_TO_HAND: String = "res://scripts/actions/cardset_actions/ActionAddCardsToHand.gd"
 const ACTION_CHANGE_CARD_ENERGIES: String = "res://scripts/actions/cardset_actions/ActionChangeCardEnergies.gd"
 const ACTION_CHANGE_CARD_PROPERTIES: String = "res://scripts/actions/cardset_actions/ActionChangeCardProperties.gd"
+const ACTION_TAG_CARDS: String = "res://scripts/actions/cardset_actions/ActionTagCards.gd"
 const ACTION_RANDOMIZE_CARD_ENERGIES: String = "res://scripts/actions/cardset_actions/ActionRandomizeCardEnergies.gd"
 const ACTION_TRANSFORM_CARDS: String = "res://scripts/actions/cardset_actions/ActionTransformCards.gd"
 const ACTION_ADD_CARDS_TO_DRAW: String = "res://scripts/actions/cardset_actions/ActionAddCardsToDraw.gd"
@@ -119,6 +123,8 @@ const VALIDATOR_CARD_UPGRADEABLE: String = "res://scripts/validators/card/Valida
 const VALIDATOR_CARD_PLAY_ENEMY_ATTACKING: String = "res://scripts/validators/card_plays/ValidatorCardPlayEnemyAttacking.gd"
 const VALIDATOR_CARD_PLAY_ENERGY_INPUT: String = "res://scripts/validators/card_plays/ValidatorCardPlayEnergyInput.gd"
 const VALIDATOR_CARD_PLAY_IS_DUPLICATED: String = "res://scripts/validators/card_plays/ValidatorCardPlayIsDuplicated.gd"
+const VALIDATOR_PREVIOUS_CARD: String = "res://scripts/validators/card_plays/ValidatorPreviousCard.gd"
+const VALIDATOR_PREVIOUS_CARD_TYPE: String = "res://scripts/validators/card_plays/ValidatorPreviousCardType.gd"
 
 # deck/pile validators
 const VALIDATOR_DECK_HAS_REMOVEABLE_CARD: String = "res://scripts/validators/deck/ValidatorDeckHasRemovableCard.gd"

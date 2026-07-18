@@ -49,6 +49,8 @@ signal card_turn_energy_changed(card: CardData)	# special signal for when a card
 signal card_transformed(card: CardData)	# general signal for when a card is transformed. See also: card_transformed_in_deck
 signal card_hand_limit_reached	# hand is full
 signal card_queue_refunded
+signal card_energy_spent(card_play_request: CardPlayRequest, energy_amount: int)
+signal card_moved_to_pile(card_data: CardData, pile_name: String)
 
 # hand card requests
 signal card_play_requested(card_play_request: CardPlayRequest, require_energy: bool, front_of_queue: bool)	# an action is requesting to play a card
@@ -122,6 +124,7 @@ signal combatant_block_added(base_combatant: BaseCombatant)
 signal combatant_block_broken(base_combatant: BaseCombatant)	# the combatant has had their block broken through. Not emitted if bypassed damage
 signal combatant_blocked(base_combatant: BaseCombatant, damage_blocked: int)	# combatant fully blocked an attack
 signal combatant_damaged(base_combatant: BaseCombatant, unblocked_damage: int)	# a combatant has taken health damage. Cannot be 0
+signal combatant_status_applied(base_combatant: BaseCombatant, status_effect_object_id: String, charge_amount: int, secondary_charge_amount: int)
 
 signal energy_added(energy_amount: int)	# when the player gains energy not at start of turn
 

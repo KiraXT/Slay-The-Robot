@@ -29,7 +29,7 @@
 		},
 		"player_current_combat_stats": null,
 		"player_deck": [],
-		"player_energy_max": 10,
+		"player_energy_max": 3,
 		"player_event_blacklisted_ids": [],
 		"player_event_pools": {
 

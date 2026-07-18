@@ -2,7 +2,7 @@
 
 **用途：** 汇总目前已确认的四角色卡牌设计方向、已通过现有配置落地的卡牌、以及后续需要新增开发逻辑的卡牌能力。后续开发时以本文作为功能对照，设计总纲见 `docs/superpowers/specs/2026-06-29-character-card-mechanics-design.md`。
 
-**当前结论：** 已定方案为“方案 2：机制归位”。先按角色机制边界把卡池方向定清楚，再补每个角色缺口。第一批只实现可以通过现有 JSON/action/validator 组合完成的卡牌，复杂机制先列为开发项。
+**当前结论：** 已定方案为“方案 2：机制归位”。先按角色机制边界把卡池方向定清楚，再补每个角色缺口。第一批可配置卡牌和后续 Gap A/B/C 复杂机制卡牌已完成落地，当前重点转为验收、数值平衡和更大范围的美术定稿。
 
 ## 1. 角色设计边界
 
@@ -47,171 +47,65 @@
 ### 当前配置注意点
 
 - `card_discard_actions` 目前只在手动弃牌时触发，不等同于回合结束自动弃牌。
-- Excel/CSV 已作为卡牌台账更新，但当前转换器对复杂嵌套字段支持有限。复杂牌仍以 JSON 为准，Excel/CSV 记录对应 JSON 字段文本。
+- Excel/CSV 已作为卡牌台账更新，转换器已支持复杂 JSON 文本列，复杂牌仍以 JSON 为准并同步留档。
 - 新增卡牌 JSON 位于 `external/data/cards/`；该目录下 JSON 受忽略规则影响，提交时需要显式加入。
 
-## 3. 已确认但需要新增开发逻辑的卡牌能力
+## 3. 已补齐的复杂机制卡牌
 
-以下内容不建议再用临时配置硬凑，应补成通用逻辑后再配置卡牌。
+以下卡牌已按 Gap A/B/C 分批落地，均通过 JSON 配置接入通用脚本，不再是待开发项。
 
-### 3.1 上一张牌类型校验
+| 批次 | 角色 | 卡牌 ID | 中文设计名 | 已落地能力 |
+|---|---|---|---|---|
+| Gap A | 红 | `card_pursuit` | 追击 | 造成伤害；上一张牌是攻击时抽 1 张 |
+| Gap A | 绿 | `card_echo_shield` | 回声护盾 | 获得格挡；上一张牌是技能时额外获得格挡 |
+| Gap B | 绿 | `card_finale_burst` | 终场爆音 | 按目标状态层数修正伤害 |
+| Gap B | 绿 | `card_metronome` | 节拍器 | 每回合首次出牌时临时提高当前牌数值 |
+| Gap B | 橙 | `card_travel_light` | 轻装上阵 | 每回合首次消耗牌时获得能量 |
+| Gap B | 橙 | `card_last_item` | 最后一件 | 按本场战斗已消耗牌数修正伤害 |
+| Gap C | 红 | `card_combo_starter` | 连段起手 | 下一张攻击在本回合获得伤害提高；当前落地为增伤版，不是降费版 |
+| Gap C | 绿 | `card_chorus` | 副歌 | 能力牌；每回合首张攻击和首张技能各复制一次当前出牌 |
+| Gap C | 橙 | `card_bookmark_clip` | 夹好书签 | 标记一张手牌并保留，下个玩家回合临时降费，触发后清理 |
+| Gap C | 橙 | `card_pack_sorting` | 背包整理 | 标记一张手牌并放到抽牌堆顶，抽到时获得能量，触发后清理 |
+| Gap C | 橙 | `card_ready_stance` | 准备姿态 | 标记并保留手牌中所有攻击，下个玩家回合这些攻击获得伤害提高 |
 
-**对应卡牌：**
+### 当前复杂机制底座
 
-- 红 `追击`：造成伤害。若上一张牌是攻击，抽 1 张。
-- 绿 `回声护盾`：获得格挡。若上一张牌也是技能，额外获得格挡。
+- `ValidatorPreviousCard.gd` / `ValidatorPreviousCardType.gd`：上一张牌、上一张牌类型校验。
+- `ActionTargetStatusValueModifier.gd`：按目标状态层数修正子 action 数值。
+- `StatusEffectOncePerTurnTrigger.gd`：每回合一次触发状态，支持出牌、消耗等事件。
+- `ActionModifyCurrentCardPlayValues.gd`：修正当前正在结算的卡牌数值。
+- `ActionTagCards.gd`：给运行时卡牌实例附加标记、持续时间和触发动作。
+- `ActionDuplicateCurrentCardPlay.gd`：复制当前卡牌结算。
+- `StatusEffectTaggedCardTrigger.gd`：监听被标记卡牌的抽到、打出、回合开始/结束等触发点。
 
-**需要开发：**
+## 4. 数据流程同步
 
-- 新增一个“上一张已打出牌”校验器，例如 `ValidatorPreviousCardType.gd`。
-- 支持按 `card_type`、`card_id` 或标签判断。
-- 支持“必须存在上一张牌”和“反向判断”。
-- 读取战斗统计中最近打出的牌记录，避免把当前牌误算进去。
+- `external/tools/excel_to_json.py` 已支持复杂 JSON 文本列写回卡牌字段。
+- `external/tools/json_to_excel.py` 已支持复杂字段导出到卡牌台账。
+- 当前已同步字段包括 `card_values_json`、`card_play_actions_json`、`card_draw_actions_json`、`card_discard_actions_json`、`card_retain_actions_json`、`card_exhaust_actions_json`、`card_initial_combat_actions_json`、`card_listeners_json`。
+- `external/config/cards.xlsx` 和 `external/config/cards.csv` 已刷新到当前 92 张卡牌数据。
 
-**验收点：**
+## 5. 本轮美术同步
 
-- 本回合第一张牌时条件不成立。
-- 打出攻击后再打 `追击` 条件成立。
-- 打出技能后再打 `回声护盾` 条件成立。
-- 不同类型切换时条件不误触发。
+### 卡图资源
 
-### 3.2 下一张攻击/下一张牌临时修正
+| 卡牌 ID | 资源路径 |
+|---|---|
+| `card_combo_starter` | `external/sprites/cards/red/card_combo_starter.png` |
+| `card_chorus` | `external/sprites/cards/green/card_chorus.png` |
+| `card_bookmark_clip` | `external/sprites/cards/orange/card_bookmark_clip.png` |
+| `card_pack_sorting` | `external/sprites/cards/orange/card_pack_sorting.png` |
+| `card_ready_stance` | `external/sprites/cards/orange/card_ready_stance.png` |
 
-**对应卡牌：**
+### 状态图标资源
 
-- 红 `连段起手`：下一张攻击费用降低，或下一张攻击伤害提高。
-- 橙 `准备姿态` 的一部分：保留攻击并让这些攻击下回合更强。
-
-**需要开发：**
-
-- 新增“下一张符合条件的牌”监听或状态效果。
-- 需要能限定牌类型，例如只影响攻击。
-- 需要能在效果触发后消耗层数。
-- 若涉及费用，需要明确是在手牌 UI 中直接降费，还是打出时返还能量。
-
-**验收点：**
-
-- 只影响下一张符合条件的牌。
-- 非目标类型牌不会消耗效果。
-- 同类效果叠加时行为明确。
-- 回合结束时是否清除由配置控制。
-
-### 3.3 每回合首次触发型能力
-
-**对应卡牌：**
-
-- 绿 `节拍器`：能力牌。每回合第一张牌数值提高。
-- 橙 `轻装上阵`：能力牌。每回合第一次消耗牌时获得能量。
-
-**需要开发：**
-
-- 通用“每回合一次”触发状态或监听器。
-- 支持监听出牌、抽牌、弃牌、消耗等事件。
-- 支持每回合自动重置触发标记。
-- 触发后执行一组配置化 actions。
-
-**验收点：**
-
-- 每回合只触发一次。
-- 新回合正确重置。
-- 多个同名状态叠加时，按层数或独立实例的规则明确。
-- 能复用到后续类似能力牌。
-
-### 3.4 按目标状态层数缩放伤害或数值
-
-**对应卡牌：**
-
-- 绿 `终场爆音`：按目标身上的腐蚀或炸弹层数造成额外伤害。
-
-**需要开发：**
-
-- 新增按目标状态层数读取数值的 action 或 meta action。
-- 支持读取指定状态 ID。
-- 支持选择读取主层数或副层数。
-- 支持把读取结果乘以倍率后写入子 action 的伤害/格挡/状态数值。
-
-**验收点：**
-
-- 目标没有对应状态时结果为 0 或使用配置默认值。
-- 多个敌人目标时读取各自目标状态，而不是读取全局值。
-- 腐蚀、炸弹等不同状态可通过配置复用。
-
-### 3.5 给任意选中牌临时附加触发
-
-**对应卡牌：**
-
-- 橙 `背包整理`：把一张手牌放到抽牌堆顶；抽到那张牌时获得能量。
-- 橙 `夹好书签`：保留一张牌；那张牌下回合费用降低。
-
-**需要开发：**
-
-- 需要能给运行时选中的具体牌实例附加临时标记、监听器或触发 actions。
-- 需要能通过牌实例唯一标识追踪同一张牌在手牌、牌库、弃牌堆之间移动。
-- 触发后应能自动移除附加效果，或按配置决定持续到何时。
-
-**验收点：**
-
-- 只影响被选中的那一张牌，不影响同名其他牌。
-- 牌移动到抽牌堆、抽回手牌后仍能识别。
-- 触发后清除，避免重复获得能量或永久降费。
-
-### 3.6 精确“下回合限定”过期
-
-**对应卡牌：**
-
-- 橙 `夹好书签`：保留目标牌，目标牌下回合降费。
-- 橙 `准备姿态`：保留所有攻击，这些攻击下回合伤害提高。
-
-**需要开发：**
-
-- 新增更精确的持续时间类型：只在下一个玩家回合有效。
-- 或新增状态/监听器，在下个回合开始应用、下个回合结束清除。
-- 需要和当前 `until_turn`、`until_played`、`until_combat` 等持续方式区分清楚。
-
-**验收点：**
-
-- 当回合不提前生效。
-- 下回合生效。
-- 下回合结束后清除。
-- 被保留牌、被抽回牌、被打出牌都能正确清理。
-
-## 4. 数据流程需要补强的开发项
-
-### 4.1 Excel 到 JSON 转换器支持复杂字段
-
-**背景：**
-
-卡牌规范流程是先填 Excel，再转换为 JSON。但第一批新增牌涉及复杂嵌套 actions、draw/discard/retain 触发字段和监听器，当前转换器表达能力不足，所以采用了“JSON 实现，Excel/CSV 留档”的折中流程。
-
-**需要开发：**
-
-- 扩展 `external/tools/excel_to_json.py`。
-- 支持读取以下 JSON 文本列，并优先写入对应卡牌字段：
-  - `card_values_json`
-  - `card_play_actions_json`
-  - `card_draw_actions_json`
-  - `card_discard_actions_json`
-  - `card_retain_actions_json`
-  - `card_listeners_json`
-- 转换前校验 JSON 文本是否合法。
-- 转换后保证不覆盖复杂字段或把复杂字段降级为空。
-
-**验收点：**
-
-- 从 Excel 重新生成第一批 15 张新增牌后，关键字段仍存在。
-- `card_sports_drink` 保留 `card_draw_actions`。
-- `card_something_fell_out` 保留 `card_discard_actions`。
-- `card_warmup` 保留 `card_retain_actions`。
-- `card_quick_search` 等复杂 play actions 不丢失嵌套结构。
-
-## 5. 建议开发顺序
-
-1. 先补 Excel 转 JSON 的复杂字段支持，恢复数据源规范性。
-2. 新增“上一张牌类型校验”，成本低，能解锁红 `追击` 和绿 `回声护盾`。
-3. 新增“按目标状态层数缩放”action，解锁绿 `终场爆音`，也利于后续状态流派扩展。
-4. 新增“每回合首次触发”状态/监听器，解锁绿 `节拍器` 和橙 `轻装上阵`。
-5. 新增“下一张牌临时修正”和“下回合限定过期”，解锁红 `连段起手` 与橙准备牌。
-6. 最后处理“给任意选中牌附加触发”，这是对牌实例追踪要求最高的一类能力。
+| 状态 ID | 资源路径 |
+|---|---|
+| `status_effect_combo_starter` | `external/sprites/status_effects/status_effect_combo_starter.png` |
+| `status_effect_chorus` | `external/sprites/status_effects/status_effect_chorus.png` |
+| `status_effect_bookmark_clip` | `external/sprites/status_effects/status_effect_bookmark_clip.png` |
+| `status_effect_pack_sorting` | `external/sprites/status_effects/status_effect_pack_sorting.png` |
+| `status_effect_ready_stance` | `external/sprites/status_effects/status_effect_ready_stance.png` |
 
 ## 6. 后续实现验收清单
 
@@ -224,10 +118,10 @@
 - Godot headless 启动能正常加载项目。
 - 涉及手牌、抽牌、弃牌、消耗、保留的逻辑，需要在实战或自动测试中确认触发时机。
 
-## 7. 本轮不处理的内容
+## 7. 本轮后仍不处理的内容
 
 - 最终数值平衡。
-- 卡牌美术逐张定稿。
+- 除本轮 5 张 Gap C 卡图外，历史卡牌美术逐张定稿仍未纳入。
 - 新角色资源条或新 UI。
 - 卡池整体重排和起始牌组调整。
 - 把所有紫色/白色牌一次性归位。

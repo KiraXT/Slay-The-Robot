@@ -15,13 +15,15 @@ func _run() -> void:
 	if (
 		not root_scene.has_method("_is_left_mouse_pressed")
 		or not root_scene.has_method("_track_fallback_button")
+		or not root_scene.has_method("_complete_fallback_press")
 		or not root_scene.has_method("_complete_fallback_click")
 	):
-		failures.append("Root must provide a mouse polling fallback for missing native button release events")
+		failures.append("Root must provide a mouse polling fallback for missing native button press and release events")
 	else:
 		var mouse_pressed_state: Variant = root_scene.call("_is_left_mouse_pressed")
 		if not mouse_pressed_state is bool:
 			failures.append("Mouse polling fallback must return a boolean state")
+		_test_missing_native_press_starts_button_down(root_scene)
 		_test_missing_native_release(root_scene)
 		_test_native_release_is_not_duplicated(root_scene)
 		_test_native_pressed_is_not_duplicated(root_scene)
@@ -41,6 +43,26 @@ func _run() -> void:
 	for failure: String in failures:
 		push_error(failure)
 	quit(1)
+
+
+func _test_missing_native_press_starts_button_down(root_scene: Node) -> void:
+	var button := Button.new()
+	root_scene.add_child(button)
+	var counts := {"button_down": 0, "button_up": 0, "pressed": 0}
+	button.button_down.connect(func() -> void: counts.button_down += 1)
+	button.button_up.connect(func() -> void: counts.button_up += 1)
+	button.pressed.connect(func() -> void: counts.pressed += 1)
+
+	root_scene.call("_track_fallback_button", button)
+	var press_id: int = root_scene.get("_fallback_press_id")
+	root_scene.call("_complete_fallback_press", button, press_id)
+	root_scene.call("_complete_fallback_click", button, press_id)
+	if counts.button_down != 1 or counts.button_up != 1 or counts.pressed != 1:
+		failures.append(
+			"Fallback must emit button_down before fallback release when native press is missing (counts=%s)"
+			% counts
+		)
+	button.queue_free()
 
 
 func _test_missing_native_release(root_scene: Node) -> void:

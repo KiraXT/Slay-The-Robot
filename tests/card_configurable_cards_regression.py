@@ -26,6 +26,17 @@ EXPECTED = {
     "card_sprint_start": "color_orange",
     "card_opening_strike": "color_red",
     "card_finisher": "color_red",
+    "card_pursuit": "color_red",
+    "card_echo_shield": "color_green",
+    "card_finale_burst": "color_green",
+    "card_metronome": "color_green",
+    "card_travel_light": "color_orange",
+    "card_last_item": "color_orange",
+    "card_combo_starter": "color_red",
+    "card_chorus": "color_green",
+    "card_bookmark_clip": "color_orange",
+    "card_pack_sorting": "color_orange",
+    "card_ready_stance": "color_orange",
 }
 
 REQUIRED_ACTIONS = {
@@ -33,6 +44,17 @@ REQUIRED_ACTIONS = {
     "card_sports_drink": ["card_draw_actions"],
     "card_warmup": ["card_retain_actions"],
     "card_sprint_start": ["card_draw_actions"],
+    "card_pursuit": ["card_play_actions"],
+    "card_echo_shield": ["card_play_actions"],
+    "card_finale_burst": ["card_play_actions"],
+    "card_metronome": ["card_play_actions"],
+    "card_travel_light": ["card_play_actions"],
+    "card_last_item": ["card_play_actions"],
+    "card_combo_starter": ["card_play_actions"],
+    "card_chorus": ["card_play_actions"],
+    "card_bookmark_clip": ["card_play_actions"],
+    "card_pack_sorting": ["card_play_actions"],
+    "card_ready_stance": ["card_play_actions"],
 }
 
 ALLOWED_SCRIPT_PREFIXES = (

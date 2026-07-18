@@ -55,14 +55,66 @@ VALID_ACTIONS = [
     "ActionApplyStatus", "ActionReshuffle", "ActionAddConsumable",
     "ActionAddMoney", "ActionAddHealth", "ActionValidator",
     "ActionAttachCardsOntoEnemy", "ActionImproveCardValues",
-    "ActionVariableCostModifier", "ActionDirectDamage", "ActionEndTurn"
+    "ActionVariableCostModifier", "ActionTargetStatusValueModifier",
+    "ActionModifyCurrentCardPlayValues", "ActionDuplicateCurrentCardPlay",
+    "ActionTagCards", "ActionDirectDamage", "ActionEndTurn"
 ]
 
 # Valid validators
 VALID_VALIDATORS = [
     "ValidatorCardTypeInHand", "ValidatorEnemyAttacking",
-    "ValidatorCardPlayEnemyAttacking", "ValidatorPlayerTurn"
+    "ValidatorCardPlayEnemyAttacking", "ValidatorCardPlayEnergyInput",
+    "ValidatorCardPlayIsDuplicated", "ValidatorPreviousCard",
+    "ValidatorPreviousCardType",
+    "ValidatorPlayerTurn"
 ]
+
+COMPLEX_JSON_FIELD_MAP = {
+    "card_values_json": "card_values",
+    "card_play_actions_json": "card_play_actions",
+    "card_draw_actions_json": "card_draw_actions",
+    "card_discard_actions_json": "card_discard_actions",
+    "card_retain_actions_json": "card_retain_actions",
+    "card_listeners_json": "card_listeners",
+}
+
+COMPLEX_JSON_EXPECTED_TYPES = {
+    "card_values_json": dict,
+    "card_play_actions_json": list,
+    "card_draw_actions_json": list,
+    "card_discard_actions_json": list,
+    "card_retain_actions_json": list,
+    "card_listeners_json": list,
+}
+
+
+def _has_non_empty_value(row: pd.Series, field: str) -> bool:
+    if field not in row:
+        return False
+    value = row[field]
+    if isinstance(value, (dict, list)):
+        return True
+    if pd.isna(value):
+        return False
+    if isinstance(value, str):
+        text = value.strip()
+        return text != "" and text.lower() not in ("nan", "none", "null")
+    return True
+
+
+def _parse_complex_json_value(value: Any) -> Any:
+    if isinstance(value, (dict, list)):
+        return value
+    if isinstance(value, str):
+        text = value.strip()
+    else:
+        text = str(value).strip()
+    if text == "":
+        raise ValueError("complex JSON value is empty")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid JSON text: {exc.msg} at position {exc.pos}") from exc
 
 
 @dataclass
@@ -102,6 +154,7 @@ class CardValidator:
 
         # Action validation
         self._validate_actions(row, card_id)
+        self._validate_complex_json_fields(row, card_id)
 
         # Logic validation
         self._validate_logic_consistency(row, card_id)
@@ -283,6 +336,29 @@ class CardValidator:
                     severity="WARNING"
                 ))
 
+    def _validate_complex_json_fields(self, row: pd.Series, card_id: str):
+        """Validate JSON text fields before conversion so complex card data is never silently dropped."""
+        for column_name, expected_type in COMPLEX_JSON_EXPECTED_TYPES.items():
+            if not _has_non_empty_value(row, column_name):
+                continue
+            try:
+                parsed = _parse_complex_json_value(row[column_name])
+            except ValueError as exc:
+                self.errors.append(ValidationError(
+                    card_id=card_id,
+                    field=column_name,
+                    message=str(exc),
+                    severity="ERROR"
+                ))
+                continue
+            if not isinstance(parsed, expected_type):
+                self.errors.append(ValidationError(
+                    card_id=card_id,
+                    field=column_name,
+                    message=f"{column_name} must be a JSON {expected_type.__name__}",
+                    severity="ERROR"
+                ))
+
     def _validate_logic_consistency(self, row: pd.Series, card_id: str):
         """Validate logical consistency of card configuration"""
         # Check exhaust flags
@@ -332,6 +408,22 @@ class CardValidator:
 
 class CardConverter:
     """Converts Excel data to JSON format"""
+
+    VALIDATOR_PATHS = {
+        "ValidatorCardColor": "res://scripts/validators/card/ValidatorCardColor.gd",
+        "ValidatorCardEnergyCost": "res://scripts/validators/card/ValidatorCardEnergyCost.gd",
+        "ValidatorCardID": "res://scripts/validators/card/ValidatorCardID.gd",
+        "ValidatorCardRarity": "res://scripts/validators/card/ValidatorCardRarity.gd",
+        "ValidatorCardType": "res://scripts/validators/card/ValidatorCardType.gd",
+        "ValidatorCardTypeInHand": "res://scripts/validators/hand/ValidatorCardTypeInHand.gd",
+        "ValidatorEnemyAttacking": "res://scripts/validators/ValidatorEnemyAttacking.gd",
+        "ValidatorCardPlayEnemyAttacking": "res://scripts/validators/card_plays/ValidatorCardPlayEnemyAttacking.gd",
+        "ValidatorCardPlayEnergyInput": "res://scripts/validators/card_plays/ValidatorCardPlayEnergyInput.gd",
+        "ValidatorCardPlayIsDuplicated": "res://scripts/validators/card_plays/ValidatorCardPlayIsDuplicated.gd",
+        "ValidatorPreviousCard": "res://scripts/validators/card_plays/ValidatorPreviousCard.gd",
+        "ValidatorPreviousCardType": "res://scripts/validators/card_plays/ValidatorPreviousCardType.gd",
+        "ValidatorPlayerTurn": "res://scripts/validators/ValidatorPlayerTurn.gd",
+    }
 
     ACTION_PICK_CARD_PRESETS = {
         "card_draft_random_attack": {
@@ -483,9 +575,12 @@ class CardConverter:
     def _build_card_json(self, row: pd.Series) -> Dict[str, Any]:
         """Build JSON structure from Excel row"""
         card_id = str(row['object_id'])
+        complex_fields = self._parse_complex_json_fields(row)
 
         # Build card_values from known fields
-        card_values = {}
+        card_values = complex_fields.get('card_values', {})
+        if not isinstance(card_values, dict):
+            card_values = {}
         value_fields = [
             'damage', 'number_of_attacks', 'block', 'draw_count',
             'status_charge_amount', 'status_secondary_charge_amount',
@@ -496,15 +591,18 @@ class CardConverter:
             'pickable_cards_max_amount'
         ]
 
-        for field in value_fields:
-            if field in row and pd.notna(row[field]):
-                val = self._parse_literal(row[field])
-                if isinstance(val, float) and val.is_integer():
-                    val = int(val)
-                card_values[field] = val
+        if 'card_values' not in complex_fields:
+            for field in value_fields:
+                if field in row and pd.notna(row[field]):
+                    val = self._parse_literal(row[field])
+                    if isinstance(val, float) and val.is_integer():
+                        val = int(val)
+                    card_values[field] = val
 
         # Build card_play_actions
-        actions = self._parse_actions(row)
+        actions = complex_fields.get('card_play_actions')
+        if actions is None:
+            actions = self._parse_actions(row)
 
         # Build upgrade improvements
         upgrade_improvements = {}
@@ -564,7 +662,28 @@ class CardConverter:
             }
         }
 
+        for field_name in [
+            'card_draw_actions',
+            'card_discard_actions',
+            'card_retain_actions',
+            'card_listeners',
+        ]:
+            if field_name in complex_fields:
+                json_data["properties"][field_name] = complex_fields[field_name]
+
         return json_data
+
+    def _parse_complex_json_fields(self, row: pd.Series) -> Dict[str, Any]:
+        complex_fields: Dict[str, Any] = {}
+        for column_name, target_field_name in COMPLEX_JSON_FIELD_MAP.items():
+            if not _has_non_empty_value(row, column_name):
+                continue
+            parsed = _parse_complex_json_value(row[column_name])
+            expected_type = COMPLEX_JSON_EXPECTED_TYPES[column_name]
+            if not isinstance(parsed, expected_type):
+                raise ValueError(f"{column_name} must be a JSON {expected_type.__name__}")
+            complex_fields[target_field_name] = parsed
+        return complex_fields
 
     def _get_int_or_default(self, row: pd.Series, field: str, default: int) -> int:
         if field in row and pd.notna(row[field]):
@@ -605,6 +724,9 @@ class CardConverter:
         'ActionDrawGenerator': 'meta_actions',
         'ActionEmitCustomSignal': 'meta_actions',
         'ActionValidator': 'meta_actions',
+        'ActionTargetStatusValueModifier': 'meta_actions',
+        'ActionModifyCurrentCardPlayValues': 'meta_actions',
+        'ActionDuplicateCurrentCardPlay': 'meta_actions',
         'ActionVariableCardsetModifier': 'meta_actions',
         'ActionVariableCombatStatsModifier': 'meta_actions',
         'ActionVariableCostModifier': 'meta_actions',
@@ -619,6 +741,7 @@ class CardConverter:
         'ActionAttachCardToSlot': 'cardset_actions',
         'ActionChangeCardEnergies': 'cardset_actions',
         'ActionChangeCardProperties': 'cardset_actions',
+        'ActionTagCards': 'cardset_actions',
         'ActionDiscardCards': 'cardset_actions',
         'ActionExhaustCards': 'cardset_actions',
         'ActionImproveCardValues': 'cardset_actions',
@@ -680,6 +803,19 @@ class CardConverter:
             return f"res://scripts/actions/{subdir}/{action_type}.gd"
         else:
             return f"res://scripts/actions/{action_type}.gd"
+
+    def _get_validator_path(self, validator_type: str, default_subdir: str = "") -> str:
+        """Get the correct path for a validator type."""
+        if validator_type.startswith("res://"):
+            return validator_type
+
+        validator_path = self.VALIDATOR_PATHS.get(validator_type)
+        if validator_path:
+            return validator_path
+
+        if default_subdir:
+            return f"res://scripts/validators/{default_subdir}/{validator_type}.gd"
+        return f"res://scripts/validators/{validator_type}.gd"
 
     def _parse_literal(self, value: Any) -> Any:
         if pd.isna(value):
@@ -743,7 +879,7 @@ class CardConverter:
             validator_specs = preset.get("validator_data", [])
 
         for validator_type, params in validator_specs:
-            validator_data.append({f"res://scripts/validators/card/{validator_type}.gd": params})
+            validator_data.append({self._get_validator_path(validator_type, "card"): params})
 
         return validator_data
 
@@ -814,7 +950,7 @@ class CardConverter:
             # Complex validator structure
             if 'validator_type' in row and pd.notna(row['validator_type']):
                 validator_type = str(row['validator_type'])
-                params['validator_data'] = [{f"res://scripts/validators/{validator_type}.gd": {}}]
+                params['validator_data'] = [{self._get_validator_path(validator_type): {}}]
 
                 # Passed/failed actions
                 params['passed_action_data'] = []
@@ -935,6 +1071,11 @@ def create_sample_excel():
 
         # Shuffle
         'card_first_shuffle_priority',
+
+        # Complex JSON fields
+        'card_values_json', 'card_play_actions_json',
+        'card_draw_actions_json', 'card_discard_actions_json',
+        'card_retain_actions_json', 'card_listeners_json',
     ]
 
     # Sample data - 第1行为说明行（会被跳过）
