@@ -95,9 +95,3 @@ func _append_output(text: String) -> void:
 
 func _on_input_submitted(command_text: String) -> void:
 	submit_command(command_text)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
-		hide_console()
-		get_viewport().set_input_as_handled()

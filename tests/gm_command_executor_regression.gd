@@ -4,6 +4,7 @@ const GM_EXECUTOR_SCRIPT := "res://scripts/dev/GMCommandExecutor.gd"
 const COMBAT_STATS_SCRIPT := "res://data/mutable/CombatStatsData.gd"
 const LOCATION_DATA_SCRIPT := "res://data/mutable/LocationData.gd"
 const DRAW_TOP := 4
+const NORMAL_HAND_CARD_COUNT_MAX := 10
 
 var failures: Array[String] = []
 var game_global: Node
@@ -39,6 +40,7 @@ func _run() -> void:
 	_assert_error("", "ERR: empty command")
 	_assert_error("missing command", "ERR: unknown command 'missing'. Use help.")
 	_assert_ok_contains("help", "cards all")
+	_test_whitespace_tokenization()
 	_assert_clear_result()
 	_assert_requires_run()
 
@@ -47,6 +49,7 @@ func _run() -> void:
 	_test_add_all_cards_to_deck()
 	_test_combat_required_for_hand_and_draw()
 	_test_add_card_to_hand_and_draw_in_combat()
+	_test_add_all_cards_to_hand_with_gm_limit()
 	_test_add_artifact()
 	_test_add_all_artifacts()
 	_test_add_consumable()
@@ -136,6 +139,11 @@ func _assert_requires_run() -> void:
 	game_global.is_run = true
 
 
+func _test_whitespace_tokenization() -> void:
+	var result: Dictionary = executor.call("execute", "\tcard\tadd\tcard_attack_basic\tdeck   ")
+	_assert_true(result.ok, "commands should accept tabs and repeated whitespace between tokens")
+
+
 func _test_add_single_card_to_deck() -> void:
 	var before_count: int = game_global.player_data.player_deck.size()
 	var result: Dictionary = executor.call("execute", "card add card_attack_basic deck")
@@ -168,6 +176,10 @@ func _test_add_card_to_hand_and_draw_in_combat() -> void:
 	if hand_requests.size() != 1:
 		return
 	_assert_equal(hand_requests[0].cards[0].object_id, "card_attack_basic", "hand request card id")
+	_assert_true(
+		hand_requests[0].max > NORMAL_HAND_CARD_COUNT_MAX,
+		"card add hand should use a GM-specific hand limit above the normal cap"
+	)
 
 	var draw_result: Dictionary = executor.call("execute", "card add card_block_basic draw")
 	_assert_true(draw_result.ok, "card add draw should succeed in combat")
@@ -176,6 +188,21 @@ func _test_add_card_to_hand_and_draw_in_combat() -> void:
 		return
 	_assert_equal(draw_requests[0].cards[0].object_id, "card_block_basic", "draw request card id")
 	_assert_equal(draw_requests[0].destination, DRAW_TOP, "draw request destination should be draw top")
+
+
+func _test_add_all_cards_to_hand_with_gm_limit() -> void:
+	_set_combat(true)
+	hand_requests.clear()
+	var expected_count: int = game_global.get_all_cards().size()
+	var result: Dictionary = executor.call("execute", "cards all hand")
+	_assert_true(result.ok, "cards all hand should succeed in combat")
+	_assert_equal(hand_requests.size(), expected_count, "cards all hand should emit one request for every loaded card")
+	if hand_requests.is_empty():
+		return
+	_assert_true(
+		hand_requests[0].max >= expected_count,
+		"cards all hand should use a limit large enough for all requested cards"
+	)
 
 
 func _test_add_artifact() -> void:

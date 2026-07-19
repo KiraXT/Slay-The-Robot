@@ -40,6 +40,13 @@ func _run() -> void:
 
 		root_scene._input(key_event)
 		_assert_false(console.visible, "GMConsole should hide after second toggle")
+		root_scene._input(key_event)
+		_assert_true(console.visible, "GMConsole should show before Escape is tested")
+		var escape_event := InputEventKey.new()
+		escape_event.pressed = true
+		escape_event.keycode = KEY_ESCAPE
+		root_scene._input(escape_event)
+		_assert_false(console.visible, "Root input should hide a visible GMConsole before other Escape handlers")
 
 		_assert_true(root_scene.call("_is_gm_console_toggle_event", key_event), "Root should recognize KEY_QUOTELEFT as the GM toggle key")
 		var echo_event := InputEventKey.new()

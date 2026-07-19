@@ -9,6 +9,7 @@ const PILE_DECK := "deck"
 const PILE_HAND := "hand"
 const PILE_DRAW := "draw"
 const VALID_CARD_PILES := [PILE_DECK, PILE_HAND, PILE_DRAW]
+const GM_HAND_CARD_COUNT_MAX := 9999
 
 
 func is_enabled() -> bool:
@@ -63,10 +64,9 @@ func execute(command_text: String) -> Dictionary:
 
 func _tokenize(command_text: String) -> Array[String]:
 	var tokens: Array[String] = []
-	for token: String in command_text.strip_edges().split(" ", false):
-		var normalized := token.strip_edges().to_lower()
-		if not normalized.is_empty():
-			tokens.append(normalized)
+	var whitespace_regex := RegEx.create_from_string("\\S+")
+	for match_result in whitespace_regex.search_all(command_text):
+		tokens.append(match_result.get_string().to_lower())
 	return tokens
 
 
@@ -299,7 +299,7 @@ func _add_card(card_id: String, pile: String) -> Dictionary:
 			var combat_error := _require_combat()
 			if not combat_error.is_empty():
 				return combat_error
-			Signals.card_add_to_hand_requested.emit([card_data], PlayerData.PLAYER_DEFAULT_HAND_CARD_COUNT_MAX)
+			Signals.card_add_to_hand_requested.emit([card_data], GM_HAND_CARD_COUNT_MAX)
 			return _success("OK: added card %s to hand" % card_id)
 		PILE_DRAW:
 			var combat_error := _require_combat()

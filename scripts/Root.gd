@@ -40,7 +40,18 @@ func _is_gm_console_toggle_event(event: InputEvent) -> bool:
 	return key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_QUOTELEFT
 
 
+func _is_gm_console_cancel_event(event: InputEvent) -> bool:
+	if gm_console == null or not gm_console.visible or not event is InputEventKey:
+		return false
+	var key_event: InputEventKey = event
+	return key_event.pressed and not key_event.echo and key_event.is_action_pressed("ui_cancel")
+
+
 func _input(event: InputEvent) -> void:
+	if _is_gm_console_cancel_event(event):
+		gm_console.hide_console()
+		get_viewport().set_input_as_handled()
+		return
 	if _is_gm_console_toggle_event(event) and _toggle_gm_console():
 		get_viewport().set_input_as_handled()
 		return
