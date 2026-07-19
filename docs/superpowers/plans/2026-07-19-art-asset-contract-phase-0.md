@@ -521,14 +521,14 @@ func _clean_image(path: String) -> void:
 		for x in range(image.get_width()):
 			var color := image.get_pixel(x, y)
 			if _is_chroma_green_rgb_residue(color):
-				image.set_pixel(x, y, Color(color.r, color.g, color.b, 0.0))
+				image.set_pixel(x, y, Color(0.0, 0.0, 0.0, 0.0))
 				changed_pixels += 1
 
 	var result := image.save_png(absolute_path)
 	if result != OK:
 		push_error("Cannot save cleaned character image: %s" % path)
 		quit(1)
-	print("%s cleaned %s chroma pixels" % [path, changed_pixels])
+	print("%s cleaned %s chroma green RGB residue pixels" % [path, changed_pixels])
 
 
 func _is_chroma_green_rgb_residue(color: Color) -> bool:
