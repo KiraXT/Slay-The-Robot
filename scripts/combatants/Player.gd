@@ -121,7 +121,7 @@ func register_run_modifier_interceptors() -> void:
 
 func _on_run_started():
 	var character_data: CharacterData = Global.get_player_character_data()
-	set_combat_sprite_texture(character_data.character_texture_path, PLAYER_COMBAT_SPRITE_HEIGHT)
+	set_combat_sprite_texture(character_data.character_texture_path, PLAYER_COMBAT_SPRITE_HEIGHT, "character")
 
 	reset_block()
 	clear_all_status_effects()

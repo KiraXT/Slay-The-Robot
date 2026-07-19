@@ -200,13 +200,7 @@ func _load_character_portrait(character_data: CharacterData) -> Texture2D:
 
 
 func _load_optional_texture(path: String) -> Texture2D:
-	if not _texture_file_exists(path):
-		return null
-	return FileLoader.load_texture(path)
-
-
-func _texture_file_exists(path: String) -> bool:
-	return not path.is_empty() and FileAccess.file_exists(FileLoader._get_modified_filepath(path))
+	return FileLoader.load_texture_or_fallback(path, "character")
 
 
 func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:

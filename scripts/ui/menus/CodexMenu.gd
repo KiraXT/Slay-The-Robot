@@ -63,7 +63,7 @@ func _create_enemy_codex_entry(enemy_data: EnemyData) -> Control:
 	var entry := _create_base_codex_entry()
 	var content: VBoxContainer = entry.get_node("MarginContainer/VBoxContainer")
 
-	var texture_rect := _create_codex_texture(enemy_data.enemy_texture_path)
+	var texture_rect := _create_codex_texture(enemy_data.enemy_texture_path, "enemy")
 	content.add_child(texture_rect)
 	content.add_child(_create_codex_label(enemy_data.enemy_name, 16))
 	content.add_child(_create_codex_label("HP %s/%s" % [enemy_data.enemy_health, enemy_data.enemy_health_max], 13))
@@ -88,7 +88,7 @@ func _create_artifact_codex_entry(artifact_data: ArtifactData) -> Control:
 	var entry := _create_base_codex_entry()
 	var content: VBoxContainer = entry.get_node("MarginContainer/VBoxContainer")
 
-	var texture_rect := _create_codex_texture(artifact_data.artifact_texture_path)
+	var texture_rect := _create_codex_texture(artifact_data.artifact_texture_path, "icon")
 	content.add_child(texture_rect)
 	content.add_child(_create_codex_label(artifact_data.artifact_name, 16))
 
@@ -123,12 +123,12 @@ func _create_base_codex_entry() -> PanelContainer:
 
 	return panel
 
-func _create_codex_texture(texture_path: String) -> TextureRect:
+func _create_codex_texture(texture_path: String, fallback_type: String) -> TextureRect:
 	var texture_rect := TextureRect.new()
 	texture_rect.custom_minimum_size = CODEX_IMAGE_SIZE
 	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	texture_rect.texture = FileLoader.load_texture(texture_path)
+	texture_rect.texture = FileLoader.load_texture_or_fallback(texture_path, fallback_type)
 	return texture_rect
 
 func _create_codex_label(text: String, font_size: int, alignment: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER) -> Label:

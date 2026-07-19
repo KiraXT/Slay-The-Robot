@@ -15,7 +15,7 @@ func init(_consumable_slot_index: int):
 	
 	var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
 	if consumable_data != null:
-		texture_normal = FileLoader.load_texture(consumable_data.consumable_texture_path)
+		texture_normal = FileLoader.load_texture_or_fallback(consumable_data.consumable_texture_path, "icon")
 		self_modulate.a = 1.0
 		# set tooltip
 		tooltip_text = consumable_data.consumable_name

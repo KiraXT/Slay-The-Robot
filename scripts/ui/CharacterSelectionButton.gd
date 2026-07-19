@@ -77,10 +77,4 @@ func _load_avatar_texture(path: String) -> Texture2D:
 
 
 func _load_optional_texture(path: String) -> Texture2D:
-	if not _texture_file_exists(path):
-		return null
-	return FileLoader.load_texture(path)
-
-
-func _texture_file_exists(path: String) -> bool:
-	return not path.is_empty() and FileAccess.file_exists(FileLoader._get_modified_filepath(path))
+	return FileLoader.load_texture_or_fallback(path, "character")

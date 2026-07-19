@@ -126,8 +126,7 @@ func populate_reward_display() -> void:
 			
 			var consumable_reward_button: BaseRewardButton = Scenes.BASE_REWARD_BUTTON.instantiate()
 			consumable_reward_button.text = consumable_data.consumable_name
-			if consumable_data.consumable_texture_path != "":
-				consumable_reward_button.icon = FileLoader.load_texture(consumable_data.consumable_texture_path)
+			consumable_reward_button.icon = FileLoader.load_texture_or_fallback(consumable_data.consumable_texture_path, "icon")
 			consumable_reward_button.init(add_consumable_action, reward_group)
 			reward_container.add_child(consumable_reward_button)
 			# make reward group mutually exclusive
@@ -161,8 +160,7 @@ func populate_reward_display() -> void:
 					var custom_reward_button: BaseRewardButton = Scenes.BASE_REWARD_BUTTON.instantiate()
 					custom_reward_button.text = str(custom_reward_data.get("reward_button_text", custom_reward_id))
 					var reward_button_texture_path: String = custom_reward_data.get("reward_button_texture_path", "")
-					if reward_button_texture_path != "":
-						custom_reward_button.icon = FileLoader.load_texture(reward_button_texture_path)
+					custom_reward_button.icon = FileLoader.load_texture_or_fallback(reward_button_texture_path, "icon")
 					custom_reward_button.init(custom_reward_actions, reward_group)
 					reward_container.add_child(custom_reward_button)
 					# make reward group mutually exclusive

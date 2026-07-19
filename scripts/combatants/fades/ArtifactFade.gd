@@ -11,7 +11,7 @@ func _ready():
 
 func init(artifact_id: String) -> void:
 	var artifact_data: ArtifactData = Global.get_artifact_data(artifact_id)
-	sprite.texture = FileLoader.load_texture(artifact_data.artifact_texture_path)
+	sprite.texture = FileLoader.load_texture_or_fallback(artifact_data.artifact_texture_path, "icon")
 
 	animation_player.play("fade")
 

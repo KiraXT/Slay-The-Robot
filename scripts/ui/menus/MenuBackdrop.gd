@@ -49,8 +49,8 @@ func load_title_layers() -> void:
 func preload_character_backgrounds() -> void:
 	for character_id: String in Global._id_to_character_data:
 		var character_data: CharacterData = Global.get_character_data(character_id)
-		if character_data != null and _texture_file_exists(character_data.character_background_texture_path):
-			FileLoader.load_texture(character_data.character_background_texture_path)
+		if character_data != null:
+			FileLoader.load_texture_or_fallback(character_data.character_background_texture_path, "background")
 
 
 func set_character_background(path: String, immediate: bool = false) -> void:
@@ -110,10 +110,4 @@ func _finish_background_swap(target_index: int) -> void:
 
 
 func _load_optional_texture(path: String) -> Texture2D:
-	if not _texture_file_exists(path):
-		return ImageTexture.new()
-	return FileLoader.load_texture(path)
-
-
-func _texture_file_exists(path: String) -> bool:
-	return not path.is_empty() and FileAccess.file_exists(FileLoader._get_modified_filepath(path))
+	return FileLoader.load_texture_or_fallback(path, "background")

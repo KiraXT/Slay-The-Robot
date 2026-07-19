@@ -36,8 +36,8 @@ func _on_selection_button_up():
 func play_attack_animation() -> void:
 	animation_player.play("attack")
 
-func set_combat_sprite_texture(texture_path: String, target_visible_height: int) -> void:
-	var texture: Texture2D = FileLoader.load_texture(texture_path)
+func set_combat_sprite_texture(texture_path: String, target_visible_height: int, fallback_type: String = "character") -> void:
+	var texture: Texture2D = FileLoader.load_texture_or_fallback(texture_path, fallback_type)
 	sprite.texture = _create_fitted_combat_texture(texture, target_visible_height)
 	_update_selection_bounds()
 
@@ -328,8 +328,7 @@ func _create_status_effect(status_effect_object_id: String, custom_values: Dicti
 		# initialize status effect
 		status_effect.status_effect_script = status_effect_script
 		status_effect_script.status_custom_values = custom_values
-		if status_effect_data.status_effect_texture_path != "":
-			status_effect.texture = FileLoader.load_texture(status_effect_data.status_effect_texture_path)
+		status_effect.texture = FileLoader.load_texture_or_fallback(status_effect_data.status_effect_texture_path, "icon")
 		status_container.add_child(status_effect)
 		# initialize status effect script
 		status_effect_script.init(status_effect_data, self)
