@@ -8,12 +8,13 @@ func _init() -> void:
 
 
 func _run() -> void:
+	var global = root.get_node("Global")
 	var root_scene: Node = load("res://scenes/Root.tscn").instantiate()
 	root.add_child(root_scene)
 	await process_frame
 
 	_check_root_shell(root_scene)
-	_check_card_shell()
+	await _check_card_shell(global)
 
 	root_scene.queue_free()
 	await process_frame
@@ -45,7 +46,7 @@ func _check_root_shell(root_scene: Node) -> void:
 	_assert_shell_panel(root_scene, "RunScreen/Combat/HandTray")
 
 
-func _check_card_shell() -> void:
+func _check_card_shell(global: Node) -> void:
 	var card_scene: Node = load("res://scenes/ui/Card.tscn").instantiate()
 	root.add_child(card_scene)
 	await process_frame
@@ -71,6 +72,26 @@ func _check_card_shell() -> void:
 			failures.append("Card DescriptionPanel must sit behind CardDescription")
 
 	card_scene.queue_free()
+	await process_frame
+
+	var red_card = global.get_card_data("card_opening_strike")
+	if red_card == null:
+		failures.append("card_opening_strike must be available for card chrome color checks")
+		return
+	var runtime_card: Node = load("res://scenes/ui/Card.tscn").instantiate()
+	root.add_child(runtime_card)
+	runtime_card.call("init", red_card, 0, false, false)
+	await process_frame
+	var runtime_badge := runtime_card.get_node_or_null("Pivot/CardVisual/FactionBadge") as ColorRect
+	var color_data = global.get_color_data(red_card.card_color_id)
+	if runtime_badge == null:
+		failures.append("Runtime card must keep FactionBadge after init")
+	elif color_data == null:
+		failures.append("%s must resolve to ColorData" % red_card.card_color_id)
+	elif not _colors_match(runtime_badge.color, color_data.color):
+		failures.append("Runtime card FactionBadge must match card color %s, got %s" % [color_data.color, runtime_badge.color])
+	runtime_card.queue_free()
+	await process_frame
 
 
 func _assert_has_node(parent: Node, node_path: String) -> void:
@@ -88,3 +109,7 @@ func _assert_shell_panel(parent: Node, node_path: String) -> void:
 		failures.append("%s must ignore mouse input so it does not block existing interaction" % node_path)
 	if panel.get_meta("art_ui_shell_role", "") == "":
 		failures.append("%s must declare art_ui_shell_role metadata" % node_path)
+
+
+func _colors_match(actual: Color, expected: Color) -> bool:
+	return absf(actual.r - expected.r) < 0.01 and absf(actual.g - expected.g) < 0.01 and absf(actual.b - expected.b) < 0.01 and absf(actual.a - expected.a) < 0.01
