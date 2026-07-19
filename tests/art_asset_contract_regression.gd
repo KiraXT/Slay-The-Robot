@@ -4,7 +4,9 @@ const ART_ASSET_GUIDE := "designer/ART_ASSET_GUIDE.md"
 const ASSET_REPLACEMENT_GUIDE := "designer/ASSET_REPLACEMENT_GUIDE.md"
 const CONTACT_SHEET_TOOL := "tools/generate_art_asset_contact_sheet.gd"
 const CONTACT_SHEET_PATH := "designer/art_source/contact_sheets/phase-0-character-contract.png"
-const CONTACT_SHEET_SIZE := Vector2i(1040, 324)
+const CONTACT_SHEET_SIZE := Vector2i(1280, 400)
+const CONTACT_SHEET_DARK_SWATCH := Color(0.10, 0.13, 0.17, 1.0)
+const CONTACT_SHEET_LIGHT_SWATCH := Color(0.95, 0.97, 1.0, 1.0)
 
 const CHARACTER_COMBAT_PATHS := [
 	"external/sprites/characters/character_red/character_red.png",
@@ -57,7 +59,9 @@ func _run() -> void:
 	_check_character_combat_images()
 	_check_fallback_assets()
 	_check_fallback_api()
+	_check_fallback_behavior()
 	_check_character_texture_candidate_order()
+	_check_title_layer_loading()
 	_check_tool_exists(CONTACT_SHEET_TOOL)
 	_check_contact_sheet()
 
@@ -94,7 +98,11 @@ func _check_character_combat_images() -> void:
 		var chroma_green_pixels := _count_chroma_green_rgb_residue(image)
 		if chroma_green_pixels > 0:
 			failures.append("%s has %s chroma green RGB residue pixels, including transparent pixels; limit is 0" % [path, chroma_green_pixels])
+		var transparent_pixels := _count_transparent_pixels(image)
+		if transparent_pixels == 0:
+			failures.append("%s must be a real transparent PNG with at least one transparent pixel" % path)
 		_check_corners_not_chroma_green(image, path)
+		_check_corners_transparent(image, path)
 
 
 func _check_corners_not_chroma_green(image: Image, path: String) -> void:
@@ -109,6 +117,20 @@ func _check_corners_not_chroma_green(image: Image, path: String) -> void:
 	for corner: Vector2i in corners:
 		if _is_chroma_green_rgb_residue(image.get_pixel(corner.x, corner.y)):
 			failures.append("%s corner %s still contains chroma green RGB residue" % [path, corner])
+
+
+func _check_corners_transparent(image: Image, path: String) -> void:
+	var max_x := image.get_width() - 1
+	var max_y := image.get_height() - 1
+	var corners := [
+		Vector2i(0, 0),
+		Vector2i(max_x, 0),
+		Vector2i(0, max_y),
+		Vector2i(max_x, max_y),
+	]
+	for corner: Vector2i in corners:
+		if image.get_pixel(corner.x, corner.y).a > 0.05:
+			failures.append("%s corner %s must be transparent enough for the combat sprite contract" % [path, corner])
 
 
 func _check_fallback_assets() -> void:
@@ -128,6 +150,39 @@ func _check_fallback_api() -> void:
 	for fallback_type: String in ["card", "character", "enemy", "icon", "background"]:
 		if not file_loader_source.contains("\"%s\"" % fallback_type):
 			failures.append("FileLoader fallback map must include `%s`" % fallback_type)
+
+
+func _check_fallback_behavior() -> void:
+	var file_loader := root.get_node_or_null("FileLoader")
+	if file_loader == null:
+		var file_loader_script := load("res://autoload/FileLoader.gd")
+		if file_loader_script == null:
+			failures.append("FileLoader must be loadable for fallback behavior checks")
+			return
+		file_loader = file_loader_script.new()
+	file_loader.set("_cached_textures", {})
+	var real_path := "external/sprites/fallback/fallback_card.png"
+	var real_texture = file_loader.call("load_texture_or_fallback", real_path, "character")
+	if real_texture.get_size() == Vector2.ZERO:
+		failures.append("FileLoader must load a non-empty texture from an existing resource path")
+	var cached_real_texture = file_loader.call("load_texture_or_fallback", real_path, "character")
+	if real_texture.get_instance_id() != cached_real_texture.get_instance_id():
+		failures.append("FileLoader must cache repeated real texture loads")
+
+	var expected_fallback_path := "external/sprites/fallback/fallback_character.png"
+	var fallback_texture = file_loader.call("load_texture_or_fallback", "", "character")
+	if fallback_texture.get_size() == Vector2.ZERO:
+		failures.append("FileLoader must return a non-empty typed fallback for an empty path")
+	var direct_fallback_texture = file_loader.call("load_texture", expected_fallback_path)
+	if fallback_texture.get_instance_id() != direct_fallback_texture.get_instance_id():
+		failures.append("FileLoader must return the configured typed fallback texture")
+	var cached_fallback_texture = file_loader.call("load_texture_or_fallback", "external/sprites/missing/character.png", "character")
+	if fallback_texture.get_instance_id() != cached_fallback_texture.get_instance_id():
+		failures.append("FileLoader must cache repeated typed fallback texture loads")
+
+	var unknown_fallback = file_loader.call("load_texture_or_fallback", "external/sprites/missing/unknown.png", "unknown")
+	if unknown_fallback.get_size() != Vector2.ZERO:
+		failures.append("FileLoader must return an empty texture for a missing path with an unknown fallback type")
 
 
 func _check_character_texture_candidate_order() -> void:
@@ -151,6 +206,16 @@ func _check_character_texture_candidate_order() -> void:
 		failures.append("Title screen must use the typed character fallback only after portrait candidates fail")
 
 
+func _check_title_layer_loading() -> void:
+	if not FileAccess.file_exists(_project_path("scripts/ui/menus/MenuBackdrop.gd")):
+		return
+	var menu_backdrop_source := _read_project_text("scripts/ui/menus/MenuBackdrop.gd")
+	if not menu_backdrop_source.contains("return FileLoader.load_texture(path)"):
+		failures.append("MenuBackdrop optional title layers must load existing textures directly")
+	if menu_backdrop_source.contains("return FileLoader.load_texture_or_fallback(path, \"background\")"):
+		failures.append("MenuBackdrop optional title layers must not use the background typed fallback")
+
+
 func _check_tool_exists(path: String) -> void:
 	if not FileAccess.file_exists(_project_path(path)):
 		failures.append("Missing tool: %s" % path)
@@ -165,6 +230,18 @@ func _check_contact_sheet() -> void:
 	var transparent_pixels := _count_transparent_pixels(image)
 	if transparent_pixels > 0:
 		failures.append("%s must be opaque; found %s transparent pixels" % [CONTACT_SHEET_PATH, transparent_pixels])
+	_check_contact_sheet_swatch(image, Vector2i(20, 20), CONTACT_SHEET_DARK_SWATCH, "dark")
+	_check_contact_sheet_swatch(image, Vector2i(172, 20), CONTACT_SHEET_LIGHT_SWATCH, "light")
+
+
+func _check_contact_sheet_swatch(image: Image, position: Vector2i, expected: Color, name: String) -> void:
+	var actual := image.get_pixel(position.x, position.y)
+	if not _colors_are_close(actual, expected):
+		failures.append("%s must include the %s transparency-check swatch" % [CONTACT_SHEET_PATH, name])
+
+
+func _colors_are_close(first: Color, second: Color) -> bool:
+	return absf(first.r - second.r) <= 0.01 and absf(first.g - second.g) <= 0.01 and absf(first.b - second.b) <= 0.01 and absf(first.a - second.a) <= 0.01
 
 
 func _count_transparent_pixels(image: Image) -> int:

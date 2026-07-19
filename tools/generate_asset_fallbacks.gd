@@ -15,23 +15,28 @@ func _init() -> void:
 
 
 func _run() -> void:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://%s" % OUTPUT_DIR))
+	var directory_result := DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://%s" % OUTPUT_DIR))
+	if directory_result != OK:
+		push_error("Failed to create fallback directory: %s" % OUTPUT_DIR)
+		quit(1)
+		return
 	for spec: Dictionary in SPECS:
-		_generate_fallback(spec)
+		var result := _generate_fallback(spec)
+		if result != OK:
+			push_error("Failed to write fallback: %s" % spec["path"])
+			quit(1)
+			return
 	print("ALL_FALLBACK_ASSETS_GENERATED")
 	quit(0)
 
 
-func _generate_fallback(spec: Dictionary) -> void:
+func _generate_fallback(spec: Dictionary) -> Error:
 	var size: Vector2i = spec["size"]
 	var image := Image.create(size.x, size.y, false, Image.FORMAT_RGBA8)
 	image.fill(spec["bg"])
 	_draw_border(image, spec["border"], max(3, int(min(size.x, size.y) * 0.04)))
 	_draw_missing_mark(image, spec["mark"])
-	var result: Error = image.save_png(ProjectSettings.globalize_path("res://%s" % spec["path"]))
-	if result != OK:
-		push_error("Failed to write fallback: %s" % spec["path"])
-		quit(1)
+	return image.save_png(ProjectSettings.globalize_path("res://%s" % spec["path"]))
 
 
 func _draw_border(image: Image, color: Color, width: int) -> void:
