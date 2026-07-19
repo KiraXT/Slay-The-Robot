@@ -50,6 +50,7 @@ func _run() -> void:
 	_test_add_all_artifacts()
 	_test_add_consumable()
 	_test_add_consumable_full_slots_errors()
+	_test_invalid_commands_and_energy_clamp()
 	_test_money_hp_energy()
 	_test_actions_clear()
 	_test_enemy_spawn_and_combat_win_require_combat()
@@ -208,6 +209,40 @@ func _test_add_consumable_full_slots_errors() -> void:
 	var result: Dictionary = executor.call("execute", "consumable add consumable_heal")
 	_assert_false(result.ok, "consumable add should fail when slots are full")
 	_assert_equal(result.message, "ERR: no empty consumable slots", "full consumable slot error")
+
+
+func _test_invalid_commands_and_energy_clamp() -> void:
+	_assert_error("card add missing_card deck", "ERR: card not found: missing_card")
+	_assert_error("card add card_attack_basic invalid", "ERR: invalid card pile 'invalid'")
+	_assert_error("artifact add missing_artifact", "ERR: artifact not found: missing_artifact")
+	_assert_error("consumable add missing_consumable", "ERR: consumable not found: missing_consumable")
+	_assert_error("money set nope", "ERR: invalid integer: nope")
+	_assert_error("hp heal nope", "ERR: invalid integer: nope")
+	_assert_error("energy add nope", "ERR: invalid integer: nope")
+
+	_set_combat(true)
+	_assert_error("enemy spawn missing_enemy 1", "ERR: enemy not found: missing_enemy")
+	_assert_error("enemy spawn enemy_1 nope", "ERR: invalid integer: nope")
+
+	game_global.player_data.player_energy = 3
+	var add_result: Dictionary = executor.call("execute", "energy add -4")
+	_assert_true(add_result.ok, "energy add -4 should succeed with clamping")
+	_assert_equal(game_global.player_data.player_energy, 0, "energy add should clamp to zero")
+	_assert_equal(add_result.message, "OK: energy changed by -3", "energy add should report actual delta")
+	if energy_signal_amounts.size() < 1:
+		failures.append("energy add should emit an energy_added signal")
+		return
+	_assert_equal(energy_signal_amounts.back(), -3, "energy add should emit actual delta")
+
+	game_global.player_data.player_energy = 3
+	var set_result: Dictionary = executor.call("execute", "energy set -1")
+	_assert_true(set_result.ok, "energy set -1 should succeed with clamping")
+	_assert_equal(game_global.player_data.player_energy, 0, "energy set should clamp to zero")
+	_assert_equal(set_result.message, "OK: energy set to 0 (changed by -3)", "energy set should report actual delta")
+	if energy_signal_amounts.size() < 2:
+		failures.append("energy set should emit an energy_added signal")
+		return
+	_assert_equal(energy_signal_amounts.back(), -3, "energy set should emit actual delta")
 
 
 func _test_money_hp_energy() -> void:

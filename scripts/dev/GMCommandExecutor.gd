@@ -210,14 +210,19 @@ func _execute_energy(tokens: Array[String]) -> Dictionary:
 		return _error("ERR: invalid integer: %s" % tokens[2])
 	match tokens[1]:
 		"set":
-			var delta: int = parsed.value - Global.player_data.player_energy
-			Global.player_data.player_energy = max(parsed.value, 0)
-			Signals.energy_added.emit(delta)
-			return _success("OK: energy set to %d" % Global.player_data.player_energy)
+			var old_energy: int = Global.player_data.player_energy
+			var new_energy: int = max(parsed.value, 0)
+			var actual_delta: int = new_energy - old_energy
+			Global.player_data.player_energy = new_energy
+			Signals.energy_added.emit(actual_delta)
+			return _success("OK: energy set to %d (changed by %d)" % [new_energy, actual_delta])
 		"add":
-			Global.player_data.player_energy = max(Global.player_data.player_energy + parsed.value, 0)
-			Signals.energy_added.emit(parsed.value)
-			return _success("OK: energy changed by %d" % parsed.value)
+			var old_energy: int = Global.player_data.player_energy
+			var new_energy: int = max(old_energy + parsed.value, 0)
+			var actual_delta: int = new_energy - old_energy
+			Global.player_data.player_energy = new_energy
+			Signals.energy_added.emit(actual_delta)
+			return _success("OK: energy changed by %d" % actual_delta)
 	return _error("ERR: usage: energy set/add <amount>")
 
 
