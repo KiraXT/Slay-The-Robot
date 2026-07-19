@@ -109,7 +109,7 @@ func _execute_cards(tokens: Array[String]) -> Dictionary:
 			return combat_error
 
 	var count := 0
-	for card_data: CardData in Global.get_all_cards():
+	for card_data in Global.get_all_cards():
 		var result := _add_card(card_data.object_id, pile)
 		if not result.ok:
 			return result
@@ -134,7 +134,7 @@ func _execute_artifacts(tokens: Array[String]) -> Dictionary:
 		return _error("ERR: usage: artifacts all")
 
 	var count := 0
-	for artifact_data: ArtifactData in Global.get_all_artifacts():
+	for artifact_data in Global.get_all_artifacts():
 		var result := _add_artifact(artifact_data.object_id)
 		if not result.ok:
 			return result
@@ -272,7 +272,7 @@ func _add_card(card_id: String, pile: String) -> Dictionary:
 		return _error("ERR: invalid card pile '%s'" % pile)
 	if Global.get_card_data(card_id) == null:
 		return _error("ERR: card not found: %s" % card_id)
-	var card_data: CardData = Global.get_card_data_from_prototype(card_id)
+	var card_data = Global.get_card_data_from_prototype(card_id)
 	match pile:
 		PILE_DECK:
 			Global.player_data.add_card_to_deck(card_data)
