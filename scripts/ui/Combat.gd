@@ -154,6 +154,9 @@ func set_combat_display_visibility(display_visibility: bool) -> void:
 	var right_pile_dock := get_node_or_null("RightPileDock") as CanvasItem
 	if right_pile_dock != null:
 		right_pile_dock.visible = display_visibility
+	var hand_tray := get_node_or_null("HandTray") as CanvasItem
+	if hand_tray != null:
+		hand_tray.visible = display_visibility
 
 func _on_card_played(_card_play_request: CardPlayRequest):
 	update_combat_display()
@@ -184,10 +187,10 @@ func _on_player_health_changed():
 
 
 func _apply_combat_shell() -> void:
-	ArtUIShellScript.ensure_color_panel(self, "TopResourceBar", Rect2(184, 6, 316, 54), "top_resource_bar")
-	ArtUIShellScript.ensure_color_panel(self, "LeftPileDock", Rect2(14, 548, 78, 128), "left_pile_dock")
-	ArtUIShellScript.ensure_color_panel(self, "RightPileDock", Rect2(1064, 548, 130, 128), "right_pile_dock")
-	ArtUIShellScript.ensure_color_panel(self, "HandTray", Rect2(152, 612, 912, 84), "hand_tray", Color(1.0, 1.0, 1.0, 0.72))
+	ArtUIShellScript.ensure_color_panel(self, "TopResourceBar", Rect2(184, 6, 316, 54), "top_resource_bar", ArtUIShellScript.SURFACE, "BackgroundButton")
+	ArtUIShellScript.ensure_color_panel(self, "LeftPileDock", Rect2(14, 548, 78, 128), "left_pile_dock", ArtUIShellScript.SURFACE, "BackgroundButton")
+	ArtUIShellScript.ensure_color_panel(self, "RightPileDock", Rect2(1064, 548, 130, 128), "right_pile_dock", ArtUIShellScript.SURFACE, "BackgroundButton")
+	ArtUIShellScript.ensure_color_panel(self, "HandTray", Rect2(152, 612, 912, 84), "hand_tray", Color(1.0, 1.0, 1.0, 0.72), "BackgroundButton")
 
 	for label in [money_label, health_label, energy_count, draw_count, discard_count, exhaust_count]:
 		ArtUIShellScript.apply_label_capsule(label, "combat_resource")

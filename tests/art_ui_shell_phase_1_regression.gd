@@ -44,6 +44,14 @@ func _check_root_shell(root_scene: Node) -> void:
 	_assert_shell_panel(root_scene, "TitleScreen/NewRunMenu/CharacterInfoPanel")
 	_assert_shell_panel(root_scene, "RunScreen/Combat/TopResourceBar")
 	_assert_shell_panel(root_scene, "RunScreen/Combat/HandTray")
+	_assert_drawn_after(root_scene, "RunScreen/Combat/TopResourceBar", "RunScreen/Combat/BackgroundButton")
+	_assert_drawn_after(root_scene, "RunScreen/Combat/LeftPileDock", "RunScreen/Combat/BackgroundButton")
+	_assert_drawn_after(root_scene, "RunScreen/Combat/RightPileDock", "RunScreen/Combat/BackgroundButton")
+	_assert_drawn_after(root_scene, "RunScreen/Combat/HandTray", "RunScreen/Combat/BackgroundButton")
+
+	var combat := root_scene.get_node("RunScreen/Combat")
+	combat.call("set_combat_display_visibility", false)
+	_assert_hidden(root_scene, "RunScreen/Combat/HandTray")
 
 
 func _check_card_shell(global: Node) -> void:
@@ -58,18 +66,21 @@ func _check_card_shell(global: Node) -> void:
 	var faction_badge := card_scene.get_node_or_null("Pivot/CardVisual/FactionBadge") as ColorRect
 	if faction_badge != null and faction_badge.color.a < 0.95:
 		failures.append("Card FactionBadge must be opaque enough to read at hand size")
+	_assert_drawn_after(card_scene, "Pivot/CardVisual/FactionBadge", "Pivot/CardVisual/Background")
 
 	var art_frame := card_scene.get_node_or_null("Pivot/CardVisual/ArtFrame") as Control
 	var card_texture := card_scene.get_node_or_null("Pivot/CardVisual/CardTexture") as Control
 	if art_frame != null and card_texture != null:
 		if art_frame.get_index() > card_texture.get_index():
 			failures.append("Card ArtFrame must sit behind CardTexture")
+	_assert_drawn_after(card_scene, "Pivot/CardVisual/ArtFrame", "Pivot/CardVisual/Background")
 
 	var description_panel := card_scene.get_node_or_null("Pivot/CardVisual/DescriptionPanel") as Control
 	var description := card_scene.get_node_or_null("Pivot/CardVisual/CardDescription") as Control
 	if description_panel != null and description != null:
 		if description_panel.get_index() > description.get_index():
 			failures.append("Card DescriptionPanel must sit behind CardDescription")
+	_assert_drawn_after(card_scene, "Pivot/CardVisual/DescriptionPanel", "Pivot/CardVisual/Background")
 
 	card_scene.queue_free()
 	await process_frame
@@ -109,6 +120,26 @@ func _assert_shell_panel(parent: Node, node_path: String) -> void:
 		failures.append("%s must ignore mouse input so it does not block existing interaction" % node_path)
 	if panel.get_meta("art_ui_shell_role", "") == "":
 		failures.append("%s must declare art_ui_shell_role metadata" % node_path)
+
+
+func _assert_drawn_after(parent: Node, front_path: String, back_path: String) -> void:
+	var front := parent.get_node_or_null(front_path)
+	var back := parent.get_node_or_null(back_path)
+	if front == null or back == null:
+		return
+	if front.get_parent() != back.get_parent():
+		failures.append("%s and %s must share a parent for draw order checks" % [front_path, back_path])
+		return
+	if front.get_index() <= back.get_index():
+		failures.append("%s must be drawn after %s" % [front_path, back_path])
+
+
+func _assert_hidden(parent: Node, node_path: String) -> void:
+	var node := parent.get_node_or_null(node_path) as CanvasItem
+	if node == null:
+		return
+	if node.visible:
+		failures.append("%s must hide when combat display is hidden" % node_path)
 
 
 func _colors_match(actual: Color, expected: Color) -> bool:

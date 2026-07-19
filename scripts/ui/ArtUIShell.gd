@@ -13,13 +13,13 @@ const ORANGE_DEEP := Color(1.0, 0.32, 0.26, 1.0)
 const TEXT := Color(0.12, 0.16, 0.21, 1.0)
 
 
-static func ensure_color_panel(parent: Control, node_name: String, rect: Rect2, role: String, color: Color = SURFACE, border_color: Color = CYAN) -> ColorRect:
+static func ensure_color_panel(parent: Control, node_name: String, rect: Rect2, role: String, color: Color = SURFACE, insert_after_node_name: String = "") -> ColorRect:
 	var panel := parent.get_node_or_null(node_name) as ColorRect
 	if panel == null:
 		panel = ColorRect.new()
 		panel.name = node_name
 		parent.add_child(panel)
-		parent.move_child(panel, 0)
+	_move_panel(parent, panel, insert_after_node_name)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.set_meta(ROLE_META, role)
 	panel.position = rect.position
@@ -30,7 +30,7 @@ static func ensure_color_panel(parent: Control, node_name: String, rect: Rect2, 
 
 
 static func ensure_label_badge(parent: Control, node_name: String, rect: Rect2, role: String, color: Color = ORANGE) -> ColorRect:
-	var badge := ensure_color_panel(parent, node_name, rect, role, color, ORANGE_DEEP)
+	var badge := ensure_color_panel(parent, node_name, rect, role, color)
 	badge.color = color
 	return badge
 
@@ -90,3 +90,12 @@ static func _button_box(role: String, active: bool) -> StyleBoxFlat:
 	box.content_margin_top = 8
 	box.content_margin_bottom = 8
 	return box
+
+
+static func _move_panel(parent: Control, panel: CanvasItem, insert_after_node_name: String) -> void:
+	if insert_after_node_name != "":
+		var reference := parent.get_node_or_null(insert_after_node_name)
+		if reference != null:
+			parent.move_child(panel, reference.get_index() + 1)
+			return
+	parent.move_child(panel, 0)
