@@ -62,6 +62,7 @@ func _run() -> void:
 	_check_fallback_behavior()
 	_check_character_texture_candidate_order()
 	_check_title_layer_loading()
+	_check_menu_backdrop_texture_behavior()
 	_check_tool_exists(CONTACT_SHEET_TOOL)
 	_check_contact_sheet()
 
@@ -212,6 +213,51 @@ func _check_title_layer_loading() -> void:
 		failures.append("MenuBackdrop optional title layers must load existing textures directly")
 	if menu_backdrop_source.contains("return FileLoader.load_texture_or_fallback(path, \"background\")"):
 		failures.append("MenuBackdrop optional title layers must not use the background typed fallback")
+
+
+func _check_menu_backdrop_texture_behavior() -> void:
+	var backdrop_script := load("res://scripts/ui/menus/MenuBackdrop.gd")
+	if backdrop_script == null:
+		failures.append("MenuBackdrop must be loadable for texture behavior checks")
+		return
+	var file_loader := root.get_node_or_null("FileLoader")
+	if file_loader == null:
+		failures.append("FileLoader must be available for MenuBackdrop texture behavior checks")
+		return
+	var backdrop = backdrop_script.new()
+	for method_name: String in ["_load_optional_title_layer", "_load_first_available_texture", "_load_character_background"]:
+		if not backdrop.has_method(method_name):
+			failures.append("MenuBackdrop must expose %s for texture behavior checks" % method_name)
+	if not failures.is_empty():
+		return
+	var first_path := "external/sprites/fallback/fallback_card.png"
+	var second_path := "external/sprites/fallback/fallback_character.png"
+	var background_fallback_path := "external/sprites/fallback/fallback_background.png"
+	var first_texture = file_loader.call("load_texture", first_path)
+	var second_texture = file_loader.call("load_texture", second_path)
+	var background_fallback = file_loader.call("load_texture", background_fallback_path)
+
+	var first_candidates: Array[String] = [first_path, second_path]
+	var first_candidate = backdrop.call("_load_first_available_texture", first_candidates, "background")
+	if first_candidate.get_instance_id() != first_texture.get_instance_id():
+		failures.append("MenuBackdrop must keep the first real texture candidate over later candidates and typed fallback")
+
+	var second_candidates: Array[String] = ["external/sprites/missing/first.png", second_path]
+	var second_candidate = backdrop.call("_load_first_available_texture", second_candidates, "background")
+	if second_candidate.get_instance_id() != second_texture.get_instance_id():
+		failures.append("MenuBackdrop must use the second real texture candidate when the first is missing")
+
+	var missing_candidates: Array[String] = ["external/sprites/missing/first.png", "external/sprites/missing/second.png"]
+	var typed_fallback = backdrop.call("_load_first_available_texture", missing_candidates, "background")
+	if typed_fallback.get_instance_id() != background_fallback.get_instance_id():
+		failures.append("MenuBackdrop must return the typed background fallback when all candidates are missing")
+
+	var optional_title_layer = backdrop.call("_load_optional_title_layer", "")
+	if optional_title_layer.get_size() != Vector2.ZERO:
+		failures.append("MenuBackdrop missing optional title layers must remain empty")
+	var character_background = backdrop.call("_load_character_background", "")
+	if character_background.get_instance_id() != background_fallback.get_instance_id():
+		failures.append("MenuBackdrop missing character backgrounds must use the typed background fallback")
 
 
 func _check_tool_exists(path: String) -> void:
