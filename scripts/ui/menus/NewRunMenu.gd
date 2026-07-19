@@ -1,5 +1,7 @@
 extends Control
 
+const ArtUIShellScript := preload("res://scripts/ui/ArtUIShell.gd")
+
 @onready var title_screen: Control = $%TitleScreen
 
 @onready var character_name_label = $CharacterNameLabel
@@ -27,6 +29,7 @@ var selected_character_object_id: String = ""
 var selected_difficulty_level: int = 0
 
 func _ready():
+	_apply_new_run_shell()
 	start_run_button.button_up.connect(_on_start_run_button_up)
 	back_button.button_up.connect(_on_back_button_up)
 	
@@ -74,6 +77,18 @@ func populate_character_info(character_object_id: String) -> void:
 				character_artifact_texture_rect.texture = FileLoader.load_texture_or_fallback(artifact_data.artifact_texture_path, "icon")
 				character_artifact_name_label.text = artifact_data.artifact_name
 				character_artifact_description_label.text = artifact_data.artifact_description
+
+
+func _apply_new_run_shell() -> void:
+	ArtUIShellScript.apply_button(start_run_button, "primary")
+	ArtUIShellScript.apply_button(back_button, "secondary")
+	ArtUIShellScript.apply_button(decrease_difficulty_button, "secondary")
+	ArtUIShellScript.apply_button(increase_difficulty_button, "secondary")
+	ArtUIShellScript.apply_label_capsule(character_health_label, "character_stat")
+	ArtUIShellScript.apply_label_capsule(character_money_label, "character_stat")
+	difficulty_label.add_theme_color_override("font_color", ArtUIShellScript.TEXT)
+	seed_input.add_theme_color_override("font_color", ArtUIShellScript.TEXT)
+	seed_input.add_theme_color_override("font_placeholder_color", Color(0.41, 0.49, 0.53, 1.0))
 
 func _on_start_run_button_up():
 	# get the seed and start the run

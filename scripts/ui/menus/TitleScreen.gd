@@ -4,13 +4,18 @@
 extends Control
 
 const ICON_MENU_PATH := "external/sprites/ui/flipper/icon_menu.png"
+const TITLE_BACKGROUND_PATH := "external/sprites/ui/flipper/background_soft_cyan.png"
+const ArtUIShellScript := preload("res://scripts/ui/ArtUIShell.gd")
 
+@onready var background_art: TextureRect = $BackgroundArt
 @onready var main_menu = $MainMenu
 @onready var new_run_menu = $NewRunMenu
 @onready var codex_menu = $CodexMenu
 @onready var settings_menu = $SettingsMenu
 
 func _ready():
+	background_art.texture = FileLoader.load_texture_or_fallback(TITLE_BACKGROUND_PATH, "background")
+	_apply_title_shell()
 	Signals.run_started.connect(_on_run_started)
 	Signals.run_ended.connect(_on_run_ended)
 
@@ -57,6 +62,22 @@ func _load_optional_texture(path: String) -> Texture2D:
 	if not FileLoader._texture_file_exists(path):
 		return ImageTexture.new()
 	return FileLoader.load_texture(path)
+
+
+func _apply_title_shell() -> void:
+	ArtUIShellScript.ensure_color_panel(main_menu, "ShellPanel", Rect2(24, 498, 424, 184), "main_menu_shell")
+	ArtUIShellScript.ensure_label_badge(main_menu, "HeroBadge", Rect2(340, 76, 520, 14), "title_hero_badge")
+
+	var main_menu_buttons := main_menu.get_node_or_null("VBoxContainer")
+	if main_menu_buttons != null:
+		for child in main_menu_buttons.get_children():
+			var button := child as Button
+			if button != null:
+				ArtUIShellScript.apply_button(button, "primary" if button.name == "NewRunButton" else "secondary")
+
+	ArtUIShellScript.ensure_color_panel(new_run_menu, "CharacterInfoPanel", Rect2(40, 112, 344, 584), "character_info_panel")
+	ArtUIShellScript.ensure_color_panel(new_run_menu, "RunSetupPanel", Rect2(384, 536, 416, 160), "run_setup_panel")
+	ArtUIShellScript.ensure_color_panel(new_run_menu, "ModifierPanel", Rect2(808, 112, 376, 584), "modifier_panel")
 
 func _on_run_started():
 	visible = false

@@ -2,6 +2,8 @@
 extends Control
 class_name Card
 
+const ArtUIShellScript := preload("res://scripts/ui/ArtUIShell.gd")
+
 var card_data: CardData = null
 var card_listeners: Array[BaseCardListener] = []
 
@@ -24,6 +26,7 @@ const ENERGY_ICON_KEYWORD: String = "[energy_icon]"	# tells description to displ
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var card_glow: ColorRect = %CardGlow
+@onready var card_visual: Control = $Pivot/CardVisual
 
 @onready var keyword_container = $Pivot/KeywordContainer
 @onready var keyword_timer = $KeywordTimer
@@ -39,9 +42,14 @@ signal card_drag_started(Card)
 signal card_drag_ended(Card)
 signal card_drag_cancelled(Card)
 
+func _ready() -> void:
+	_ensure_card_shell()
+
+
 func init(_card_data: CardData, angular_offset: float, connect_combat_signals: bool = false, connect_ui_signals: bool = true):
 	card_data = _card_data
 	pivot.rotation_degrees = angular_offset
+	_ensure_card_shell()
 	
 	# signals used for cards in player's hand
 	if connect_combat_signals:
@@ -92,6 +100,11 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
 	if color_data != null:
 		card_color.color = color_data.color
+		var faction_badge := card_visual.get_node_or_null("FactionBadge") as ColorRect
+		var art_frame := card_visual.get_node_or_null("ArtFrame") as ColorRect
+		var description_panel := card_visual.get_node_or_null("DescriptionPanel") as ColorRect
+		if faction_badge != null and art_frame != null and description_panel != null:
+			ArtUIShellScript.style_card_shell($Pivot/CardVisual/Background, art_frame, description_panel, faction_badge, color_data.color)
 	
 	$Pivot/CardVisual/EnergySprite.visible = card_data.card_is_playable
 	
@@ -101,6 +114,43 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 			card_energy_cost.text = "X-" + str(card_data.card_energy_cost_variable_upper_bound)
 	else:
 		card_energy_cost.text = str(card_data.get_card_energy_cost())
+
+
+func _ensure_card_shell() -> void:
+	if not is_inside_tree():
+		return
+	var faction_badge := card_visual.get_node_or_null("FactionBadge") as ColorRect
+	if faction_badge == null:
+		faction_badge = ColorRect.new()
+		faction_badge.name = "FactionBadge"
+		card_visual.add_child(faction_badge)
+		card_visual.move_child(faction_badge, 2)
+	faction_badge.position = Vector2(116, 8)
+	faction_badge.size = Vector2(18, 34)
+	faction_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	faction_badge.color = Color(0.13, 0.83, 0.84, 1.0)
+
+	var art_frame := card_visual.get_node_or_null("ArtFrame") as ColorRect
+	if art_frame == null:
+		art_frame = ColorRect.new()
+		art_frame.name = "ArtFrame"
+		card_visual.add_child(art_frame)
+		card_visual.move_child(art_frame, card_texture.get_index())
+	art_frame.position = Vector2(18, 8)
+	art_frame.size = Vector2(108, 104)
+	art_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	art_frame.color = Color(0.89, 0.98, 1.0, 1.0)
+
+	var description_panel := card_visual.get_node_or_null("DescriptionPanel") as ColorRect
+	if description_panel == null:
+		description_panel = ColorRect.new()
+		description_panel.name = "DescriptionPanel"
+		card_visual.add_child(description_panel)
+		card_visual.move_child(description_panel, card_description.get_index())
+	description_panel.position = Vector2(6, 110)
+	description_panel.size = Vector2(132, 70)
+	description_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	description_panel.color = Color(1.0, 1.0, 1.0, 0.92)
 
 func set_card_glow(_visible: bool) -> void:
 	card_glow.visible = _visible

@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://bg7gmq537qyn5"]
+[gd_scene load_steps=50 format=3 uid="uid://bg7gmq537qyn5"]
 
 [ext_resource type="Script" uid="uid://ckfi22o2jit0b" path="res://scripts/Root.gd" id="1_ak6de"]
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="2_bi5lp"]
@@ -6,18 +6,6 @@
 [ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="2_k6r9m"]
 [ext_resource type="Script" uid="uid://dw0xyfu580mkb" path="res://scripts/ui/menus/TitleScreen.gd" id="2_m6atk"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="3_8ax2e"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_pause.png" id="31_pause"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_map.png" id="32_map"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_deck.png" id="33_deck"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_energy.png" id="34_energy"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_draw.png" id="35_draw"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_discard.png" id="36_discard"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_exhaust.png" id="37_exhaust"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_chest.png" id="38_chest"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_shop.png" id="39_shop"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_menu.png" id="40_menu"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/icon_swords.png" id="41_swords"]
-[ext_resource type="Texture2D" path="res://external/sprites/ui/flipper/background_soft_cyan.png" id="42_bg"]
 [ext_resource type="Script" uid="uid://dao05mln2rw4g" path="res://scripts/ui/Combat.gd" id="3_h4evn"]
 [ext_resource type="Script" uid="uid://cg1kj2nrg24jw" path="res://scripts/ui/menus/MainMenu.gd" id="3_jd5n0"]
 [ext_resource type="Script" uid="uid://dlwowe1wugkh4" path="res://scripts/ui/Hand.gd" id="4_i2yfj"]
@@ -246,7 +234,6 @@ layout_mode = 0
 offset_right = 1200.0
 offset_bottom = 700.0
 mouse_filter = 2
-texture = ExtResource("42_bg")
 expand_mode = 1
 
 [node name="MainMenu" type="Control" parent="TitleScreen"]
@@ -718,7 +705,6 @@ layout_mode = 0
 offset_right = 1200.0
 offset_bottom = 700.0
 mouse_filter = 2
-texture = ExtResource("42_bg")
 expand_mode = 1
 
 [node name="BackgroundButton" type="TextureButton" parent="RunScreen/Combat"]
@@ -743,7 +729,6 @@ offset_bottom = 58.0
 shortcut = SubResource("Shortcut_i7igs")
 shortcut_feedback = false
 shortcut_in_tooltip = false
-texture_normal = ExtResource("31_pause")
 ignore_texture_size = true
 stretch_mode = 0
 script = ExtResource("13_i7igs")
@@ -755,7 +740,6 @@ offset_left = 72.0
 offset_top = 8.0
 offset_right = 122.0
 offset_bottom = 58.0
-texture_normal = ExtResource("32_map")
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -765,7 +749,6 @@ offset_left = 128.0
 offset_top = 8.0
 offset_right = 178.0
 offset_bottom = 58.0
-texture_normal = ExtResource("33_deck")
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -889,7 +872,6 @@ offset_left = 768.0
 offset_top = 256.0
 offset_right = 960.0
 offset_bottom = 448.0
-texture_normal = ExtResource("38_chest")
 ignore_texture_size = true
 stretch_mode = 0
 script = ExtResource("11_1uvyw")
@@ -910,7 +892,6 @@ offset_left = 768.0
 offset_top = 256.0
 offset_right = 960.0
 offset_bottom = 448.0
-texture_normal = ExtResource("39_shop")
 ignore_texture_size = true
 stretch_mode = 0
 script = ExtResource("13_w8i8k")
@@ -932,7 +913,6 @@ offset_top = 560.0
 offset_right = 74.0
 offset_bottom = 610.0
 tooltip_text = "Energy"
-texture_normal = ExtResource("34_energy")
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -954,7 +934,6 @@ offset_top = 616.0
 offset_right = 74.0
 offset_bottom = 666.0
 tooltip_text = "Draw Pile"
-texture_normal = ExtResource("35_draw")
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -976,7 +955,6 @@ offset_top = 560.0
 offset_right = 1186.0
 offset_bottom = 610.0
 tooltip_text = "Discard Pile"
-texture_normal = ExtResource("36_discard")
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -998,7 +976,6 @@ offset_top = 560.0
 offset_right = 1130.0
 offset_bottom = 610.0
 tooltip_text = "Exhaust Pile"
-texture_normal = ExtResource("37_exhaust")
 ignore_texture_size = true
 stretch_mode = 0
 
