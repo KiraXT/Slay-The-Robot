@@ -9,7 +9,7 @@ const CHARACTER_COMBAT_PATHS := [
 	"external/sprites/characters/character_orange/character_orange.png",
 ]
 
-const TILE_SIZE := Vector2i(260, 300)
+const TILE_SIZE := Vector2i(260, 324)
 const DISPLAY_SIZE := Vector2i(160, 220)
 const THUMB_64 := Vector2i(64, 64)
 const THUMB_32 := Vector2i(32, 32)
