@@ -13,7 +13,7 @@
 - Documentation language is Chinese.
 - Do not change card combat logic, enemy behavior, map generation, reward rules, or the JSON data-driven architecture.
 - Do not introduce a frame animation system; Phase 0 uses static PNG assets and existing loading code.
-- All character combat sprites must be real transparent PNGs with no opaque chroma green background.
+- All character combat sprites must be real transparent PNGs with no chroma green RGB residue, including fully transparent pixels.
 - All new fallback assets must live under `external/sprites/fallback/`.
 - All image validation and generation must run through Godot headless scripts, not Python image libraries.
 - Preserve existing paths and filenames for character runtime assets so current JSON does not need migration.
@@ -139,10 +139,9 @@ func _check_character_combat_images() -> void:
 		var image_size := image.get_size()
 		if image_size.y < 500 or image_size.y > 620:
 			failures.append("%s combat image height must stay in the current 500-620px range" % path)
-		var green_pixels := _count_opaque_chroma_green_pixels(image)
-		var allowed_green_pixels := max(4, int(image_size.x * image_size.y * 0.001))
-		if green_pixels > allowed_green_pixels:
-			failures.append("%s has %s opaque chroma green pixels; limit is %s" % [path, green_pixels, allowed_green_pixels])
+		var chroma_green_pixels := _count_chroma_green_rgb_residue(image)
+		if chroma_green_pixels > 0:
+			failures.append("%s has %s chroma green RGB residue pixels, including transparent pixels; limit is 0" % [path, chroma_green_pixels])
 		_check_corners_not_chroma_green(image, path)
 
 
@@ -156,8 +155,8 @@ func _check_corners_not_chroma_green(image: Image, path: String) -> void:
 		Vector2i(max_x, max_y),
 	]
 	for corner: Vector2i in corners:
-		if _is_opaque_chroma_green(image.get_pixel(corner.x, corner.y)):
-			failures.append("%s corner %s is still opaque chroma green" % [path, corner])
+		if _is_chroma_green_rgb_residue(image.get_pixel(corner.x, corner.y)):
+			failures.append("%s corner %s still contains chroma green RGB residue" % [path, corner])
 
 
 func _check_fallback_assets() -> void:
@@ -175,17 +174,17 @@ func _check_tool_exists(path: String) -> void:
 		failures.append("Missing tool: %s" % path)
 
 
-func _count_opaque_chroma_green_pixels(image: Image) -> int:
+func _count_chroma_green_rgb_residue(image: Image) -> int:
 	var count := 0
 	for y in range(image.get_height()):
 		for x in range(image.get_width()):
-			if _is_opaque_chroma_green(image.get_pixel(x, y)):
+			if _is_chroma_green_rgb_residue(image.get_pixel(x, y)):
 				count += 1
 	return count
 
 
-func _is_opaque_chroma_green(color: Color) -> bool:
-	return color.a > 0.80 and color.g > 0.92 and color.r < 0.12 and color.b < 0.12
+func _is_chroma_green_rgb_residue(color: Color) -> bool:
+	return color.g > 0.92 and color.r < 0.12 and color.b < 0.12
 
 
 func _load_project_image(path: String) -> Image:
@@ -222,7 +221,7 @@ Run:
 godot --headless --path . -s tests/art_asset_contract_regression.gd
 ```
 
-Expected: exit code `1`. The failure list must include missing fallback files and remaining chroma green in at least one character combat image. It may also report stale text in `designer/ART_ASSET_GUIDE.md`.
+Expected: exit code `1`. The failure list must include missing fallback files and chroma green RGB residue in at least one character combat image, including residue found in fully transparent pixels. It may also report stale text in `designer/ART_ASSET_GUIDE.md`.
 
 - [ ] **Step 3: Commit the failing regression**
 
@@ -274,8 +273,8 @@ In `designer/ART_ASSET_GUIDE.md`, replace the old card, character, enemy, and ev
 
 验收标准：
 
-1. 角色战斗立绘四角不能是 opaque chroma green。
-2. 角色战斗立绘中 opaque chroma green 像素数量不得超过总像素的 `0.1%`。
+1. 角色战斗立绘四角不能包含 chroma green RGB residue，即使这些像素的 alpha 为 `0`。
+2. 角色战斗立绘中不得存在 chroma green RGB residue；清理工具必须检查所有像素的 RGB，不得只检查 opaque 像素。
 3. 角色脚底、头发、武器和外轮廓必须完整可见。
 4. 角色缩放到战斗显示高度约 `200px` 后仍能辨认主体。
 
@@ -455,7 +454,7 @@ Run:
 godot --headless --path . -s tests/art_asset_contract_regression.gd
 ```
 
-Expected: still fails because character combat images still contain chroma green and the contact-sheet tool has not been created. It must no longer report missing fallback assets.
+Expected: still fails because character combat images still contain chroma green RGB residue, including fully transparent pixels, and the contact-sheet tool has not been created. It must no longer report missing fallback assets.
 
 - [ ] **Step 4: Commit fallback generation**
 
@@ -521,7 +520,7 @@ func _clean_image(path: String) -> void:
 	for y in range(image.get_height()):
 		for x in range(image.get_width()):
 			var color := image.get_pixel(x, y)
-			if _is_chroma_green(color):
+			if _is_chroma_green_rgb_residue(color):
 				image.set_pixel(x, y, Color(color.r, color.g, color.b, 0.0))
 				changed_pixels += 1
 
@@ -532,8 +531,8 @@ func _clean_image(path: String) -> void:
 	print("%s cleaned %s chroma pixels" % [path, changed_pixels])
 
 
-func _is_chroma_green(color: Color) -> bool:
-	return color.a > 0.50 and color.g > 0.86 and color.r < 0.22 and color.b < 0.22
+func _is_chroma_green_rgb_residue(color: Color) -> bool:
+	return color.g > 0.86 and color.r < 0.22 and color.b < 0.22
 ```
 
 - [ ] **Step 2: Create the contact sheet generator**

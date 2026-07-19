@@ -1,3 +1,17 @@
+### Task 1: Add Failing Asset Contract Regression
+
+**Files:**
+- Create: `tests/art_asset_contract_regression.gd`
+
+**Interfaces:**
+- Consumes: existing docs and PNG paths.
+- Produces: one headless regression entrypoint: `godot --headless --path . -s tests/art_asset_contract_regression.gd`.
+
+- [ ] **Step 1: Write the failing regression**
+
+Create `tests/art_asset_contract_regression.gd` with this content:
+
+```gdscript
 extends SceneTree
 
 const ART_ASSET_GUIDE := "designer/ART_ASSET_GUIDE.md"
@@ -158,3 +172,25 @@ func _read_project_text(path: String) -> String:
 
 func _project_path(path: String) -> String:
 	return ProjectSettings.globalize_path("res://%s" % path)
+```
+
+- [ ] **Step 2: Run the regression to verify it fails**
+
+Run:
+
+```bash
+godot --headless --path . -s tests/art_asset_contract_regression.gd
+```
+
+Expected: exit code `1`. The failure list must include missing fallback files and chroma green RGB residue in at least one character combat image, including residue found in fully transparent pixels. It may also report stale text in `designer/ART_ASSET_GUIDE.md`.
+
+- [ ] **Step 3: Commit the failing regression**
+
+Run:
+
+```bash
+git add tests/art_asset_contract_regression.gd
+git commit -m "test: add art asset contract regression"
+```
+
+---
