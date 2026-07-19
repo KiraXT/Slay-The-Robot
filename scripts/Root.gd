@@ -26,10 +26,11 @@ func _create_gm_console() -> void:
 	add_child(gm_console)
 
 
-func _toggle_gm_console() -> void:
-	if gm_console == null:
-		return
+func _toggle_gm_console() -> bool:
+	if gm_console == null or not gm_console.is_enabled():
+		return false
 	gm_console.toggle()
+	return true
 
 
 func _is_gm_console_toggle_event(event: InputEvent) -> bool:
@@ -40,8 +41,7 @@ func _is_gm_console_toggle_event(event: InputEvent) -> bool:
 
 
 func _input(event: InputEvent) -> void:
-	if _is_gm_console_toggle_event(event):
-		_toggle_gm_console()
+	if _is_gm_console_toggle_event(event) and _toggle_gm_console():
 		get_viewport().set_input_as_handled()
 		return
 	if not event is InputEventMouseButton:
