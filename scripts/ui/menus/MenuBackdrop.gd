@@ -110,4 +110,10 @@ func _finish_background_swap(target_index: int) -> void:
 
 
 func _load_optional_texture(path: String) -> Texture2D:
-	return FileLoader.load_texture_or_fallback(path, "background")
+	if not _texture_file_exists(path):
+		return ImageTexture.new()
+	return FileLoader.load_texture(path)
+
+
+func _texture_file_exists(path: String) -> bool:
+	return not path.strip_edges().is_empty() and FileAccess.file_exists(FileLoader._get_modified_filepath(path))
