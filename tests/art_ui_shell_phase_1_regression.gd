@@ -94,6 +94,10 @@ func _check_card_shell(global: Node) -> void:
 	runtime_card.call("init", red_card, 0, false, false)
 	await process_frame
 	var runtime_badge := runtime_card.get_node_or_null("Pivot/CardVisual/FactionBadge") as ColorRect
+	var runtime_art_frame := runtime_card.get_node_or_null("Pivot/CardVisual/ArtFrame") as Control
+	var runtime_card_texture := runtime_card.get_node_or_null("Pivot/CardVisual/CardTexture") as Control
+	var runtime_description_panel := runtime_card.get_node_or_null("Pivot/CardVisual/DescriptionPanel") as Control
+	var runtime_description := runtime_card.get_node_or_null("Pivot/CardVisual/CardDescription") as Control
 	var color_data = global.get_color_data(red_card.card_color_id)
 	if runtime_badge == null:
 		failures.append("Runtime card must keep FactionBadge after init")
@@ -101,6 +105,13 @@ func _check_card_shell(global: Node) -> void:
 		failures.append("%s must resolve to ColorData" % red_card.card_color_id)
 	elif not _colors_match(runtime_badge.color, color_data.color):
 		failures.append("Runtime card FactionBadge must match card color %s, got %s" % [color_data.color, runtime_badge.color])
+	_assert_drawn_after(runtime_card, "Pivot/CardVisual/FactionBadge", "Pivot/CardVisual/Background")
+	if runtime_art_frame != null and runtime_card_texture != null:
+		if runtime_art_frame.get_index() > runtime_card_texture.get_index():
+			failures.append("Runtime card ArtFrame must sit behind CardTexture after init")
+	if runtime_description_panel != null and runtime_description != null:
+		if runtime_description_panel.get_index() > runtime_description.get_index():
+			failures.append("Runtime card DescriptionPanel must sit behind CardDescription after init")
 	runtime_card.queue_free()
 	await process_frame
 

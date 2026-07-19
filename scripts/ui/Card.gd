@@ -139,7 +139,8 @@ func _ensure_card_shell() -> void:
 	art_frame.size = Vector2(108, 104)
 	art_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	art_frame.color = Color(0.89, 0.98, 1.0, 1.0)
-	card_visual.move_child(art_frame, background.get_index() + 1)
+	_move_after(art_frame, background)
+	_move_before(art_frame, card_texture)
 
 	var description_panel := card_visual.get_node_or_null("DescriptionPanel") as ColorRect
 	if description_panel == null:
@@ -150,8 +151,26 @@ func _ensure_card_shell() -> void:
 	description_panel.size = Vector2(132, 70)
 	description_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	description_panel.color = Color(1.0, 1.0, 1.0, 0.92)
-	card_visual.move_child(description_panel, card_description.get_index())
-	card_visual.move_child(faction_badge, card_texture.get_index() + 1)
+	_move_after(description_panel, background)
+	_move_before(description_panel, card_description)
+	_move_after(faction_badge, background)
+	_move_after(faction_badge, card_texture)
+
+
+func _move_before(node: CanvasItem, reference: CanvasItem) -> void:
+	if node.get_parent() != reference.get_parent():
+		return
+	if node.get_index() < reference.get_index():
+		return
+	node.get_parent().move_child(node, reference.get_index())
+
+
+func _move_after(node: CanvasItem, reference: CanvasItem) -> void:
+	if node.get_parent() != reference.get_parent():
+		return
+	if node.get_index() > reference.get_index():
+		return
+	node.get_parent().move_child(node, reference.get_index() + 1)
 
 func set_card_glow(_visible: bool) -> void:
 	card_glow.visible = _visible
