@@ -192,7 +192,15 @@ func _apply_pending_character_visual() -> void:
 
 
 func _load_character_portrait(character_data: CharacterData) -> Texture2D:
-	for path: String in [character_data.character_texture_path, character_data.character_icon_texture_path, ICON_MENU_PATH]:
+	return _load_first_available_character_portrait([
+		character_data.character_texture_path,
+		character_data.character_icon_texture_path,
+		ICON_MENU_PATH,
+	])
+
+
+func _load_first_available_character_portrait(paths: Array[String]) -> Texture2D:
+	for path: String in paths:
 		var texture := _load_optional_texture(path)
 		if texture != null and texture.get_size() != Vector2.ZERO:
 			return texture

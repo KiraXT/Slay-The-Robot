@@ -203,8 +203,10 @@ func _check_character_texture_candidate_order() -> void:
 			failures.append("%s optional texture helper must load existing candidates directly" % source_path)
 	if not character_selection_source.contains("return FileLoader.load_texture_or_fallback(\"\", \"character\")"):
 		failures.append("Character selection must use the typed character fallback only after icon candidates fail")
-	if not title_screen_source.contains("return FileLoader.load_texture_or_fallback(\"\", \"character\")"):
-		failures.append("Title screen must use the typed character fallback only after portrait candidates fail")
+		if not title_screen_source.contains("return FileLoader.load_texture_or_fallback(\"\", \"character\")"):
+			failures.append("Title screen must use the typed character fallback only after portrait candidates fail")
+	_check_character_selection_texture_behavior()
+	_check_title_screen_texture_behavior()
 
 
 func _check_title_layer_loading() -> void:
@@ -213,6 +215,66 @@ func _check_title_layer_loading() -> void:
 		failures.append("MenuBackdrop optional title layers must load existing textures directly")
 	if menu_backdrop_source.contains("return FileLoader.load_texture_or_fallback(path, \"background\")"):
 		failures.append("MenuBackdrop optional title layers must not use the background typed fallback")
+
+
+func _check_character_selection_texture_behavior() -> void:
+	var selection_script := load("res://scripts/ui/CharacterSelectionButton.gd")
+	if selection_script == null:
+		failures.append("CharacterSelectionButton must be loadable for texture behavior checks")
+		return
+	var selection_button = selection_script.new()
+	if not selection_button.has_method("_load_first_available_avatar_texture"):
+		failures.append("CharacterSelectionButton must expose _load_first_available_avatar_texture for behavior checks")
+		return
+	_check_character_candidate_loader(
+		selection_button,
+		"_load_first_available_avatar_texture",
+		"CharacterSelectionButton"
+	)
+
+
+func _check_title_screen_texture_behavior() -> void:
+	var title_script := load("res://scripts/ui/menus/TitleScreen.gd")
+	if title_script == null:
+		failures.append("TitleScreen must be loadable for texture behavior checks")
+		return
+	var title_screen = title_script.new()
+	if not title_screen.has_method("_load_first_available_character_portrait"):
+		failures.append("TitleScreen must expose _load_first_available_character_portrait for behavior checks")
+		return
+	_check_character_candidate_loader(
+		title_screen,
+		"_load_first_available_character_portrait",
+		"TitleScreen"
+	)
+
+
+func _check_character_candidate_loader(target: Object, method_name: String, label: String) -> void:
+	var file_loader := root.get_node_or_null("FileLoader")
+	if file_loader == null:
+		failures.append("FileLoader must be available for %s texture behavior checks" % label)
+		return
+	var first_path := "external/sprites/fallback/fallback_card.png"
+	var second_path := "external/sprites/fallback/fallback_character.png"
+	var character_fallback_path := "external/sprites/fallback/fallback_character.png"
+	var first_texture = file_loader.call("load_texture", first_path)
+	var second_texture = file_loader.call("load_texture", second_path)
+	var character_fallback = file_loader.call("load_texture", character_fallback_path)
+
+	var first_candidates: Array[String] = [first_path, second_path]
+	var first_candidate = target.call(method_name, first_candidates)
+	if first_candidate.get_instance_id() != first_texture.get_instance_id():
+		failures.append("%s must keep the first real texture candidate over later candidates and typed fallback" % label)
+
+	var second_candidates: Array[String] = ["external/sprites/missing/first.png", second_path]
+	var second_candidate = target.call(method_name, second_candidates)
+	if second_candidate.get_instance_id() != second_texture.get_instance_id():
+		failures.append("%s must use the second real texture candidate when the first is missing" % label)
+
+	var missing_candidates: Array[String] = ["external/sprites/missing/first.png", "external/sprites/missing/second.png"]
+	var typed_fallback = target.call(method_name, missing_candidates)
+	if typed_fallback.get_instance_id() != character_fallback.get_instance_id():
+		failures.append("%s must return the typed character fallback when all candidates are missing" % label)
 
 
 func _check_menu_backdrop_texture_behavior() -> void:

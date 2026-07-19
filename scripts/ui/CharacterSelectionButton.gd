@@ -70,12 +70,15 @@ func _animate_avatar_focus(focused: bool) -> void:
 
 
 func _load_avatar_texture(path: String) -> Texture2D:
-	var texture := _load_optional_texture(path)
-	if texture == null or texture.get_size() == Vector2.ZERO:
-		texture = _load_optional_texture(ICON_MENU_PATH)
-	if texture == null or texture.get_size() == Vector2.ZERO:
-		return FileLoader.load_texture_or_fallback("", "character")
-	return texture
+	return _load_first_available_avatar_texture([path, ICON_MENU_PATH])
+
+
+func _load_first_available_avatar_texture(paths: Array[String]) -> Texture2D:
+	for path: String in paths:
+		var texture := _load_optional_texture(path)
+		if texture != null and texture.get_size() != Vector2.ZERO:
+			return texture
+	return FileLoader.load_texture_or_fallback("", "character")
 
 
 func _load_optional_texture(path: String) -> Texture2D:
