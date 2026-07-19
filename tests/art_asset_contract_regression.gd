@@ -61,6 +61,8 @@ func _run() -> void:
 	_check_fallback_api()
 	_check_fallback_behavior()
 	_check_character_texture_candidate_order()
+	_check_character_selection_texture_behavior()
+	_check_title_screen_texture_behavior()
 	_check_title_layer_loading()
 	_check_menu_backdrop_texture_behavior()
 	_check_tool_exists(CONTACT_SHEET_TOOL)
