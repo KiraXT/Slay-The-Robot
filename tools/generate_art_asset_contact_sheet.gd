@@ -50,12 +50,12 @@ func _draw_character_tile(sheet: Image, source: Image, index: int) -> void:
 	var cropped := _crop_to_used_rect(source)
 	var display := _fit_image(cropped, DISPLAY_SIZE)
 	var display_pos := tile_origin + Vector2i((TILE_SIZE.x - display.get_width()) / 2, 24)
-	sheet.blit_rect(display, Rect2i(Vector2i.ZERO, display.get_size()), display_pos)
+	_draw_image_alpha(sheet, display, display_pos)
 
 	var thumb64 := _fit_image(cropped, THUMB_64)
 	var thumb32 := _fit_image(cropped, THUMB_32)
-	sheet.blit_rect(thumb64, Rect2i(Vector2i.ZERO, thumb64.get_size()), tile_origin + Vector2i(72, 252))
-	sheet.blit_rect(thumb32, Rect2i(Vector2i.ZERO, thumb32.get_size()), tile_origin + Vector2i(154, 268))
+	_draw_image_alpha(sheet, thumb64, tile_origin + Vector2i(72, 252))
+	_draw_image_alpha(sheet, thumb32, tile_origin + Vector2i(154, 268))
 
 
 func _crop_to_used_rect(image: Image) -> Image:
@@ -78,3 +78,23 @@ func _draw_rect(image: Image, rect: Rect2i, color: Color) -> void:
 		for x in range(rect.position.x, rect.position.x + rect.size.x):
 			if x >= 0 and y >= 0 and x < image.get_width() and y < image.get_height():
 				image.set_pixel(x, y, color)
+
+
+func _draw_image_alpha(target: Image, source: Image, position: Vector2i) -> void:
+	for y in range(source.get_height()):
+		for x in range(source.get_width()):
+			var target_position := position + Vector2i(x, y)
+			if target_position.x < 0 or target_position.y < 0 or target_position.x >= target.get_width() or target_position.y >= target.get_height():
+				continue
+			var source_color := source.get_pixel(x, y)
+			if source_color.a <= 0.001:
+				continue
+			var base_color := target.get_pixel(target_position.x, target_position.y)
+			var alpha := source_color.a
+			var blended := Color(
+				source_color.r * alpha + base_color.r * (1.0 - alpha),
+				source_color.g * alpha + base_color.g * (1.0 - alpha),
+				source_color.b * alpha + base_color.b * (1.0 - alpha),
+				1.0
+			)
+			target.set_pixel(target_position.x, target_position.y, blended)
