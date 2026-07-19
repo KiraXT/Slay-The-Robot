@@ -8,11 +8,11 @@
 | --- | --- | --- | --- | --- | --- |
 | 战斗主背景 | 战斗场景整屏背景 | `act_background_texture_path` / `location_background_texture_path` / `event_background_texture_path` | `1200 x 700` 显示区 | `PNG` | 不透明 |
 | 事件插图 | 事件面板左侧大图 | `dialogue_state_dialogue_texture_path` | `768 x 768` | `PNG` | 可不透明 |
-| 玩家战斗立绘 | 玩家角色战斗显示 | `character_texture_path` | `512 x 512` | `PNG` | 透明底 |
+| 玩家战斗立绘 | 玩家角色战斗显示 | `character_texture_path` | 当前高约 `512-600` | `PNG` | 真实透明 PNG，无绿底 |
 | 角色选择头像 | 新开局角色按钮图 | `character_icon_texture_path` | `256 x 256` | `PNG` | 透明底 |
 | 角色能量小图标 | 卡牌文本内嵌图标 | `character_text_energy_texture_path` | `128 x 128` | `PNG` | 透明底 |
-| 敌人战斗立绘 | 敌人战斗显示 | `enemy_texture_path` | 小 `64` / 中 `96` / Boss `512` | `PNG` | 透明底 |
-| 卡牌插图 | 卡牌中央插图 | `card_texture_path` | `512 x 512` | `PNG` | 透明底 |
+| 敌人战斗立绘 | 敌人战斗显示 | `enemy_texture_path` | 小怪约 `64-128`，Boss 可到 `512` | `PNG` | 透明 PNG |
+| 卡牌插图 | 卡牌中央插图 | `card_texture_path` | `512 x 512` | `PNG` | 透明 PNG，允许无透明背景的语义图 |
 | 遗物图标 | HUD / 商店 / 奖励遗物图标 | `artifact_texture_path` | `128 x 128` 建议统一 | `PNG` | 透明底 |
 | 消耗品图标 | 消耗品按钮 / 商店图标 | `consumable_texture_path` | `128 x 128` | `PNG` | 透明底 |
 | 状态效果图标 | 战斗状态图标 | `status_effect_texture_path` | `128 x 128` | `PNG` | 透明底 |

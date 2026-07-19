@@ -70,11 +70,11 @@ Phase 0 的角色验收图输出到：
 
 | 类型 | 文件 |
 | --- | --- |
-| 卡牌插画 fallback | `fallback_card.png` |
-| 角色 fallback | `fallback_character.png` |
-| 敌人 fallback | `fallback_enemy.png` |
-| 通用图标 fallback | `fallback_icon.png` |
-| 背景 fallback | `fallback_background.png` |
+| 卡牌插画 fallback | `external/sprites/fallback/fallback_card.png` |
+| 角色 fallback | `external/sprites/fallback/fallback_character.png` |
+| 敌人 fallback | `external/sprites/fallback/fallback_enemy.png` |
+| 通用图标 fallback | `external/sprites/fallback/fallback_icon.png` |
+| 背景 fallback | `external/sprites/fallback/fallback_background.png` |
 
 新增 UI 或资源加载点时，应优先使用 `FileLoader.load_texture_or_fallback(path, fallback_type)`，不要直接把缺图显示成空纹理或无语义图标。
 
