@@ -1,5 +1,7 @@
 extends Node2D
 
+const GM_CONSOLE_SCRIPT := preload("res://scripts/dev/GMConsole.gd")
+
 # macOS debug windows can retain hover events while dropping GUI button events.
 # Raw input is the primary path; display-state polling only repairs missing edges.
 var _left_mouse_was_pressed := false
@@ -8,13 +10,40 @@ var _native_button_down_seen := false
 var _native_button_up_seen := false
 var _native_pressed_seen := false
 var _fallback_press_id := 0
+var gm_console: GM_CONSOLE_SCRIPT
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_create_gm_console()
+
+
+func _create_gm_console() -> void:
+	if gm_console != null:
+		return
+	gm_console = GM_CONSOLE_SCRIPT.new()
+	gm_console.name = "GMConsole"
+	add_child(gm_console)
+
+
+func _toggle_gm_console() -> void:
+	if gm_console == null:
+		return
+	gm_console.toggle()
+
+
+func _is_gm_console_toggle_event(event: InputEvent) -> bool:
+	if not event is InputEventKey:
+		return false
+	var key_event: InputEventKey = event
+	return key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_QUOTELEFT
 
 
 func _input(event: InputEvent) -> void:
+	if _is_gm_console_toggle_event(event):
+		_toggle_gm_console()
+		get_viewport().set_input_as_handled()
+		return
 	if not event is InputEventMouseButton:
 		return
 	var mouse_button_event: InputEventMouseButton = event
