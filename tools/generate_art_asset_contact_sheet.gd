@@ -37,6 +37,7 @@ func _run() -> void:
 	if result != OK:
 		push_error("Cannot save contact sheet: %s" % OUTPUT_PATH)
 		quit(1)
+		return
 	print("CONTACT_SHEET_GENERATED:%s" % OUTPUT_PATH)
 	quit(0)
 
