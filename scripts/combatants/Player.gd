@@ -6,6 +6,7 @@ class_name Player
 @onready var incoming_damage_amount_text: Label = $Visible/IncomingDamage/IncomingDamageAmount
 
 const INTENT_UPDATES_LAZILY: bool = true	# batches intent updates
+const PLAYER_COMBAT_SPRITE_HEIGHT: int = 200
 var _intent_is_updating: bool = false
 
 func _ready():
@@ -128,8 +129,8 @@ func register_run_modifier_interceptors() -> void:
 
 func _on_run_started():
 	var character_data: CharacterData = Global.get_player_character_data()
-	sprite.texture = FileLoader.load_texture(character_data.character_texture_path)
-	
+	set_combat_sprite_texture(character_data.character_texture_path, PLAYER_COMBAT_SPRITE_HEIGHT, "character")
+
 	reset_block()
 	clear_all_status_effects()
 	unregister_all_custom_ui()

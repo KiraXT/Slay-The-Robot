@@ -12,4 +12,4 @@ func init(_action_on_click: BaseAction) -> void:
 	var artifact_data: ArtifactData = Global.get_artifact_data(artifact_id)
 	if artifact_data != null:
 		button.text = artifact_data.artifact_name
-		button.icon = FileLoader.load_texture(artifact_data.artifact_texture_path)
+		button.icon = FileLoader.load_texture_or_fallback(artifact_data.artifact_texture_path, "icon")

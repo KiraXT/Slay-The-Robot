@@ -54,6 +54,7 @@ func _run() -> void:
 	_check_docs()
 	_check_character_combat_images()
 	_check_fallback_assets()
+	_check_fallback_api()
 	_check_tool_exists(CONTACT_SHEET_TOOL)
 
 	if failures.is_empty():
@@ -114,6 +115,15 @@ func _check_fallback_assets() -> void:
 		var expected_size: Vector2i = FALLBACK_ASSETS[path]
 		if image.get_size() != expected_size:
 			failures.append("%s must be %s but is %s" % [path, expected_size, image.get_size()])
+
+
+func _check_fallback_api() -> void:
+	var file_loader_source := _read_project_text("autoload/FileLoader.gd")
+	if not file_loader_source.contains("func load_texture_or_fallback("):
+		failures.append("FileLoader must expose load_texture_or_fallback")
+	for fallback_type: String in ["card", "character", "enemy", "icon", "background"]:
+		if not file_loader_source.contains("\"%s\"" % fallback_type):
+			failures.append("FileLoader fallback map must include `%s`" % fallback_type)
 
 
 func _check_tool_exists(path: String) -> void:

@@ -16,6 +16,9 @@ class_name BaseCombatant
 @onready var status_container: GridContainer = $Visible/StatusContainer
 @onready var custom_ui_container = $Visible/CustomUIContainer
 
+const COMBAT_SPRITE_FOOT_Y: float = 64.0
+const COMBAT_SPRITE_MIN_CANVAS_HEIGHT: int = 128
+
 var status_id_to_status_effects: Dictionary = {}	# maps status id to the array of ui element(s) it matches
 var custom_ui_object_id_to_custom_ui: Dictionary = {} # maps a custom ui id to the ui component it matches. Duplicate registrations will be ignored
 
@@ -32,6 +35,52 @@ func _on_selection_button_up():
 
 func play_attack_animation() -> void:
 	animation_player.play("attack")
+
+func set_combat_sprite_texture(texture_path: String, target_visible_height: int, fallback_type: String = "character") -> void:
+	var texture: Texture2D = FileLoader.load_texture_or_fallback(texture_path, fallback_type)
+	sprite.texture = _create_fitted_combat_texture(texture, target_visible_height)
+	_update_selection_bounds()
+
+func _create_fitted_combat_texture(texture: Texture2D, target_visible_height: int) -> Texture2D:
+	if texture == null:
+		return texture
+
+	var source_image: Image = texture.get_image()
+	if source_image == null or source_image.is_empty():
+		return texture
+
+	var visible_rect: Rect2i = source_image.get_used_rect()
+	if visible_rect.size.x <= 0 or visible_rect.size.y <= 0:
+		return texture
+
+	var visible_image: Image = source_image.get_region(visible_rect)
+	if visible_image.get_height() > target_visible_height:
+		var scale_ratio: float = float(target_visible_height) / float(visible_image.get_height())
+		var scaled_width: int = max(1, roundi(float(visible_image.get_width()) * scale_ratio))
+		visible_image.resize(scaled_width, target_visible_height, Image.INTERPOLATE_LANCZOS)
+
+	var canvas_width: int = visible_image.get_width()
+	var canvas_height: int = max(
+		COMBAT_SPRITE_MIN_CANVAS_HEIGHT,
+		ceili(2.0 * (float(visible_image.get_height()) - COMBAT_SPRITE_FOOT_Y))
+	)
+	var canvas := Image.create(canvas_width, canvas_height, false, Image.FORMAT_RGBA8)
+	canvas.fill(Color.TRANSPARENT)
+	var paste_y: int = roundi(COMBAT_SPRITE_FOOT_Y + float(canvas_height) * 0.5 - float(visible_image.get_height()))
+	canvas.blit_rect(visible_image, Rect2i(Vector2i.ZERO, visible_image.get_size()), Vector2i(0, paste_y))
+
+	return ImageTexture.create_from_image(canvas)
+
+func _update_selection_bounds() -> void:
+	if sprite.texture == null:
+		return
+
+	var half_width: float = max(67.0, float(sprite.texture.get_width()) * 0.5)
+	var half_height: float = max(64.0, float(sprite.texture.get_height()) * 0.5)
+	selection_button.offset_left = -half_width
+	selection_button.offset_top = -half_height
+	selection_button.offset_right = half_width
+	selection_button.offset_bottom = half_height
 
 #region Block
 func set_block(_amount: int) -> void:
@@ -284,6 +333,7 @@ func _create_status_effect(status_effect_object_id: String, custom_values: Dicti
 		# initialize status effect
 		status_effect.status_effect_script = status_effect_script
 		status_effect_script.status_custom_values = custom_values
+		status_effect.texture = FileLoader.load_texture_or_fallback(status_effect_data.status_effect_texture_path, "icon")
 		status_container.add_child(status_effect)
 		# initialize status effect script
 		status_effect_script.init(status_effect_data, self)

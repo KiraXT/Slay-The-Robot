@@ -51,8 +51,7 @@ func populate_dialogue_options() -> void:
 	dialogue_prompt_label.parse_bbcode(current_dialogue_state.dialogue_state_prompt_bbcode)
 	
 	# set prompt image
-	if current_dialogue_state.dialogue_state_dialogue_texture_path != "":
-		dialogue_texture_rect.texture = FileLoader.load_texture(current_dialogue_state.dialogue_state_dialogue_texture_path)
+	dialogue_texture_rect.texture = FileLoader.load_texture_or_fallback(current_dialogue_state.dialogue_state_dialogue_texture_path, "background")
 	
 	# create and validate dialogue option buttons
 	# keep track of how many are actually clickable

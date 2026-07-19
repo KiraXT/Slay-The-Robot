@@ -9,6 +9,8 @@ class_name Enemy
 var enemy_data: EnemyData
 var enemy_slot: int = 0 # the spawn slot the enemy is in
 
+const ENEMY_COMBAT_SPRITE_HEIGHT: int = 170
+
 var enemy_intent_attack_damage: int = 0
 var enemy_intent_number_of_attacks: int = 0
 
@@ -18,7 +20,7 @@ func init(_enemy_data: EnemyData):
 	selection_button.mouse_entered.connect(_on_mouse_entered)
 	selection_button.mouse_exited.connect(_on_mouse_exited)
 	
-	sprite.texture = FileLoader.load_texture(enemy_data.enemy_texture_path)
+	set_combat_sprite_texture(enemy_data.enemy_texture_path, ENEMY_COMBAT_SPRITE_HEIGHT, "enemy")
 	
 	# apply initial effects
 	for status_effect_object_id in enemy_data.enemy_initial_status_effects.keys():
