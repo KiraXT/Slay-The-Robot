@@ -16,6 +16,7 @@ var reward_data: Dictionary = {
 		#{
 		#"reward_money": 0,
 		#"reward_artifact_ids": [],
+		#"reward_consumable_ids": [],
 		#"reward_card_drafts": [],
 		#"reward_custom_action_data": [],
 		#}
@@ -103,6 +104,69 @@ func populate_reward_display() -> void:
 			reward_container.add_child(artifact_reward_button)
 			# make reward group mutually exclusive
 			artifact_reward_button.button_up.connect(_on_reward_group_selected.bind(reward_group))
+		
+		# consumable rewards
+		var consumable_reward_ids: Array[String] = []
+		consumable_reward_ids.assign(reward_group_data.get("reward_consumable_ids", []))
+		
+		for consumable_id: String in consumable_reward_ids:
+			var consumable_data: ConsumableData = Global.get_consumable_data(consumable_id)
+			if consumable_data == null:
+				continue
+			
+			var add_consumable_action_data: Array[Dictionary] = [
+				{
+				Scripts.ACTION_ADD_CONSUMABLE: {
+					"consumable_object_id": consumable_id
+					}
+				}
+			]
+			
+			var add_consumable_action: BaseAction = ActionGenerator.create_actions(null, null, [], add_consumable_action_data, null)[0]
+			
+			var consumable_reward_button: BaseRewardButton = Scenes.BASE_REWARD_BUTTON.instantiate()
+			consumable_reward_button.text = consumable_data.consumable_name
+			if consumable_data.consumable_texture_path != "":
+				consumable_reward_button.icon = FileLoader.load_texture(consumable_data.consumable_texture_path)
+			consumable_reward_button.init(add_consumable_action, reward_group)
+			reward_container.add_child(consumable_reward_button)
+			# make reward group mutually exclusive
+			consumable_reward_button.button_up.connect(_on_reward_group_selected.bind(reward_group))
+		
+		# custom action rewards
+		var reward_custom_action_data: Array = []
+		reward_custom_action_data.assign(reward_group_data.get("reward_custom_action_data", []))
+		for custom_reward_group_variant: Variant in reward_custom_action_data:
+			var custom_reward_groups: Array = []
+			if custom_reward_group_variant is Dictionary:
+				custom_reward_groups.append(custom_reward_group_variant)
+			elif custom_reward_group_variant is Array:
+				custom_reward_groups.assign(custom_reward_group_variant)
+			
+			for custom_reward_group_variant_inner: Variant in custom_reward_groups:
+				if not custom_reward_group_variant_inner is Dictionary:
+					continue
+				var custom_reward_group: Dictionary = custom_reward_group_variant_inner
+				for custom_reward_id: Variant in custom_reward_group.keys():
+					var custom_reward_data_variant: Variant = custom_reward_group[custom_reward_id]
+					if not custom_reward_data_variant is Dictionary:
+						continue
+					var custom_reward_data: Dictionary = custom_reward_data_variant
+					var reward_button_actions: Array[Dictionary] = []
+					reward_button_actions.assign(custom_reward_data.get("reward_button_actions", []))
+					if reward_button_actions.is_empty():
+						continue
+					
+					var custom_reward_actions: Array[BaseAction] = ActionGenerator.create_actions(null, null, [], reward_button_actions, null)
+					var custom_reward_button: BaseRewardButton = Scenes.BASE_REWARD_BUTTON.instantiate()
+					custom_reward_button.text = str(custom_reward_data.get("reward_button_text", custom_reward_id))
+					var reward_button_texture_path: String = custom_reward_data.get("reward_button_texture_path", "")
+					if reward_button_texture_path != "":
+						custom_reward_button.icon = FileLoader.load_texture(reward_button_texture_path)
+					custom_reward_button.init(custom_reward_actions, reward_group)
+					reward_container.add_child(custom_reward_button)
+					# make reward group mutually exclusive
+					custom_reward_button.button_up.connect(_on_reward_group_selected.bind(reward_group))
 	
 	# clear reward data
 	clear_rewards()
@@ -134,7 +198,7 @@ func add_location_rewards() -> void:
 	var grant_reward_action: BaseAction = ActionGenerator.create_actions(player, null, [player], action_data, null)[0]
 	grant_reward_action.perform_action()
 
-func add_rewards(reward_group: int, money_amount: int, card_drafts: Array[Array], artifact_ids: Array[String], custom_action_data: Array[Array]):
+func add_rewards(reward_group: int, money_amount: int, card_drafts: Array[Array], artifact_ids: Array[String], consumable_ids: Array[String], custom_action_data: Array):
 	# adds rewards which can be populated into the display
 	
 	# get existing reward data generate new reward data
@@ -146,6 +210,7 @@ func add_rewards(reward_group: int, money_amount: int, card_drafts: Array[Array]
 			"reward_money": 0,
 			"reward_card_drafts": [],
 			"reward_artifact_ids": [],
+			"reward_consumable_ids": [],
 			"reward_custom_action_data": [],
 			}
 	
@@ -161,6 +226,11 @@ func add_rewards(reward_group: int, money_amount: int, card_drafts: Array[Array]
 	var reward_artifact_ids: Array = reward_group_data["reward_artifact_ids"]
 	reward_artifact_ids.assign(artifact_ids)
 	reward_group_data["reward_artifact_ids"] = reward_artifact_ids
+	
+	# consumables
+	var reward_consumable_ids: Array = reward_group_data["reward_consumable_ids"]
+	reward_consumable_ids.assign(consumable_ids)
+	reward_group_data["reward_consumable_ids"] = reward_consumable_ids
 
 	# custom actions
 	var reward_custom_action_data: Array = reward_group_data["reward_custom_action_data"]
@@ -183,8 +253,8 @@ func clear_rewards(reward_group: int = -1) -> void:
 	else:
 		reward_data.erase(reward_group)	# clear a specific reward group
 
-func _on_reward_grant_requested(reward_group: int, money_amount: int, card_drafts: Array[Array], artifact_ids: Array[String], custom_action_data: Array[Array]):
-	add_rewards(reward_group, money_amount, card_drafts, artifact_ids, custom_action_data)
+func _on_reward_grant_requested(reward_group: int, money_amount: int, card_drafts: Array[Array], artifact_ids: Array[String], consumable_ids: Array[String], custom_action_data: Array):
+	add_rewards(reward_group, money_amount, card_drafts, artifact_ids, consumable_ids, custom_action_data)
 
 func _on_reward_clear_requested(reward_group: int):
 	clear_rewards(reward_group)

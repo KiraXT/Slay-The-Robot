@@ -93,6 +93,95 @@ func generate_unweighted_card_draft_from_card_pack_id(rng: RandomNumberGenerator
 	returned_cards = Global.get_card_data_from_prototypes(card_ids)
 	return returned_cards
 
+const CARD_RARITY_KEY_TO_ID: Dictionary = {
+	"basic": CardData.CARD_RARITIES.BASIC,
+	"common": CardData.CARD_RARITIES.COMMON,
+	"uncommon": CardData.CARD_RARITIES.UNCOMMON,
+	"rare": CardData.CARD_RARITIES.RARE,
+	"generated": CardData.CARD_RARITIES.GENERATED,
+}
+
+func generate_rarity_weighted_card_draft_from_card_pack_id(rng: RandomNumberGenerator, card_pack_id: String, number_of_cards: int) -> Array[CardData]:
+	var cached_card_filter: CardFilter = Global.get_cached_card_filter(card_pack_id)
+	var card_pack_data: CardPackData = Global.get_card_pack_data(card_pack_id)
+	var loot_table: Dictionary[Variant, int] = _get_card_pack_rarity_weights(card_pack_data)
+	var rarity_to_card_ids: Dictionary = {}
+	var max_card_amount: int = number_of_cards
+	
+	if number_of_cards < 0:
+		max_card_amount = cached_card_filter.convert_to_unique_card_object_ids().size()
+	elif number_of_cards == 0:
+		return []
+	
+	for card_data: CardData in cached_card_filter.filtered_cards:
+		var card_id_bucket: Array = rarity_to_card_ids.get(card_data.card_rarity, [])
+		if not card_id_bucket.has(card_data.object_id):
+			card_id_bucket.append(card_data.object_id)
+		rarity_to_card_ids[card_data.card_rarity] = card_id_bucket
+	
+	var card_ids_in_draft: Array[String] = []
+	while card_ids_in_draft.size() < max_card_amount:
+		var available_loot_table: Dictionary[Variant, int] = {}
+		for rarity_key: Variant in loot_table.keys():
+			var card_rarity: int = int(rarity_key)
+			var card_id_bucket: Array = rarity_to_card_ids.get(card_rarity, [])
+			var rarity_weight: int = int(loot_table[rarity_key])
+			if rarity_weight > 0 and len(card_id_bucket) > 0:
+				var card_rarity_variant: Variant = card_rarity
+				available_loot_table[card_rarity_variant] = rarity_weight
+		
+		if available_loot_table.is_empty():
+			break
+		
+		var selected_card_rarity: int = int(get_weighted_selection(rng, available_loot_table))
+		var selected_card_bucket: Array = rarity_to_card_ids[selected_card_rarity]
+		shuffle_array(rng, selected_card_bucket)
+		
+		var selected_card_id: String = ""
+		while selected_card_id == "" and len(selected_card_bucket) > 0:
+			selected_card_id = selected_card_bucket.pop_back()
+			if card_ids_in_draft.has(selected_card_id):
+				selected_card_id = ""
+		
+		rarity_to_card_ids[selected_card_rarity] = selected_card_bucket
+		if selected_card_id != "":
+			card_ids_in_draft.append(selected_card_id)
+	
+	return Global.get_card_data_from_prototypes(card_ids_in_draft)
+
+func _get_card_pack_rarity_weights(card_pack_data: CardPackData) -> Dictionary[Variant, int]:
+	var normalized_weights: Dictionary[Variant, int] = {}
+	var source_weights: Dictionary = {}
+	if card_pack_data != null:
+		source_weights.assign(card_pack_data.card_pack_rarity_weights)
+	if source_weights.is_empty():
+		source_weights.assign(CARD_DRAFT_RARITY_WEIGHTS[CARD_DRAFT_TABLE_TYPES.STANDARD].duplicate(true))
+	
+	for rarity_key: Variant in source_weights.keys():
+		var card_rarity: int = _normalize_card_rarity_key(rarity_key)
+		var rarity_weight: int = max(0, int(source_weights[rarity_key]))
+		if rarity_weight > 0:
+			var card_rarity_variant: Variant = card_rarity
+			normalized_weights[card_rarity_variant] = rarity_weight
+	
+	if normalized_weights.is_empty():
+		var common_rarity: Variant = CardData.CARD_RARITIES.COMMON
+		normalized_weights[common_rarity] = 1
+	
+	return normalized_weights
+
+func _normalize_card_rarity_key(rarity_key: Variant) -> int:
+	if rarity_key is int:
+		return rarity_key
+	
+	var rarity_label: String = str(rarity_key).strip_edges().to_lower()
+	if CARD_RARITY_KEY_TO_ID.has(rarity_label):
+		return CARD_RARITY_KEY_TO_ID[rarity_label]
+	if rarity_label.is_valid_int():
+		return int(rarity_label)
+	
+	return CardData.CARD_RARITIES.COMMON
+
 enum CARD_DRAFT_TABLE_TYPES {STANDARD, MINIBOSS, BOSS, SHOP}
 
 const CARD_DRAFT_RARITY_WEIGHTS: Dictionary = {
@@ -222,6 +311,46 @@ func get_random_consumable_object_id(rng: RandomNumberGenerator, whitelisted_con
 		if not blacklisted_consumable_object_ids.has(consumable_object_id):
 			return consumable_object_id
 	return ""
+
+const CONSUMABLE_CHEST_RARITY_WEIGHTS: Dictionary[Variant, int] = {
+	ConsumableData.CONSUMABLE_RARITIES.COMMON: 70,
+	ConsumableData.CONSUMABLE_RARITIES.UNCOMMON: 25,
+	ConsumableData.CONSUMABLE_RARITIES.RARE: 5,
+}
+
+func get_location_consumable_rewards(_location_data: LocationData = Global.get_player_location_data(), consumable_count: int = 1) -> Array[String]:
+	var returned_consumable_ids: Array[String] = []
+	var rng_consumable_rewards: RandomNumberGenerator = Global.player_data.get_player_rng("rng_consumable_rewards")
+	var rarity_to_consumable_ids: Dictionary = {}
+	
+	for consumable_object_id: String in Global._id_to_consumable_data.keys():
+		var consumable_data: ConsumableData = Global.get_consumable_data(consumable_object_id)
+		if consumable_data == null:
+			continue
+		var consumable_id_bucket: Array = rarity_to_consumable_ids.get(consumable_data.consumable_rarity, [])
+		consumable_id_bucket.append(consumable_object_id)
+		rarity_to_consumable_ids[consumable_data.consumable_rarity] = consumable_id_bucket
+	
+	for _i: int in consumable_count:
+		var available_weights: Dictionary[Variant, int] = {}
+		for rarity_key: Variant in CONSUMABLE_CHEST_RARITY_WEIGHTS.keys():
+			var rarity: int = int(rarity_key)
+			var consumable_id_bucket: Array = rarity_to_consumable_ids.get(rarity, [])
+			if len(consumable_id_bucket) > 0:
+				var rarity_variant: Variant = rarity
+				available_weights[rarity_variant] = CONSUMABLE_CHEST_RARITY_WEIGHTS[rarity_key]
+		
+		if available_weights.is_empty():
+			break
+		
+		var selected_consumable_rarity: int = int(get_weighted_selection(rng_consumable_rewards, available_weights))
+		var selected_consumable_bucket: Array = rarity_to_consumable_ids[selected_consumable_rarity]
+		shuffle_array(rng_consumable_rewards, selected_consumable_bucket)
+		var selected_consumable_id: String = selected_consumable_bucket.pop_back()
+		rarity_to_consumable_ids[selected_consumable_rarity] = selected_consumable_bucket
+		returned_consumable_ids.append(selected_consumable_id)
+	
+	return returned_consumable_ids
 	
 ### Locations
 

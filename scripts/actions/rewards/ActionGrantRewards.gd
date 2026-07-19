@@ -11,8 +11,12 @@ func perform_action():
 		var reward_group: int = action_interceptor_processor.get_shadowed_action_values("reward_group", 0)
 		var money_amount: int = action_interceptor_processor.get_shadowed_action_values("money_amount", 0)
 		# array of array of CardData
-		var card_drafts: Array[Array] = action_interceptor_processor.get_shadowed_action_values("card_drafts", [])
-		var artifact_ids: Array[String] = action_interceptor_processor.get_shadowed_action_values("artifact_ids", [])
+		var card_drafts: Array[Array] = []
+		card_drafts.assign(action_interceptor_processor.get_shadowed_action_values("card_drafts", []))
+		var artifact_ids: Array[String] = []
+		artifact_ids.assign(action_interceptor_processor.get_shadowed_action_values("artifact_ids", []))
+		var consumable_ids: Array[String] = []
+		consumable_ids.assign(action_interceptor_processor.get_shadowed_action_values("consumable_ids", []))
 		# custom_action_data allows defining of unique reward actions through extensible data payloads
 		# This would allow a card, artifact, or status to define a unique reward outside the standard ones
 		# Example of a payload that adds a reward button to heal the user
@@ -28,10 +32,10 @@ func perform_action():
 		# }
 		# Note: multiple keys can define multiple butttons
 		# Each element in first array layer is a unique 
-		var custom_action_data: Array[Array] = []
+		var custom_action_data: Array = []
 		custom_action_data.assign(action_interceptor_processor.get_shadowed_action_values("custom_action_data", []))
 		
-		Signals.reward_grant_requested.emit(reward_group, money_amount, card_drafts, artifact_ids, custom_action_data)
+		Signals.reward_grant_requested.emit(reward_group, money_amount, card_drafts, artifact_ids, consumable_ids, custom_action_data)
 
 func _to_string():
 	return "Grant Reward Action"
