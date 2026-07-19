@@ -73,8 +73,12 @@ func _load_avatar_texture(path: String) -> Texture2D:
 	var texture := _load_optional_texture(path)
 	if texture == null or texture.get_size() == Vector2.ZERO:
 		texture = _load_optional_texture(ICON_MENU_PATH)
+	if texture == null or texture.get_size() == Vector2.ZERO:
+		return FileLoader.load_texture_or_fallback("", "character")
 	return texture
 
 
 func _load_optional_texture(path: String) -> Texture2D:
-	return FileLoader.load_texture_or_fallback(path, "character")
+	if not FileLoader._texture_file_exists(path):
+		return ImageTexture.new()
+	return FileLoader.load_texture(path)

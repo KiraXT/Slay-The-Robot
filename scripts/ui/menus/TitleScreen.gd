@@ -196,11 +196,13 @@ func _load_character_portrait(character_data: CharacterData) -> Texture2D:
 		var texture := _load_optional_texture(path)
 		if texture != null and texture.get_size() != Vector2.ZERO:
 			return texture
-	return null
+	return FileLoader.load_texture_or_fallback("", "character")
 
 
 func _load_optional_texture(path: String) -> Texture2D:
-	return FileLoader.load_texture_or_fallback(path, "character")
+	if not FileLoader._texture_file_exists(path):
+		return ImageTexture.new()
+	return FileLoader.load_texture(path)
 
 
 func _on_run_requested(character_object_id: String, run_seed: int, difficulty_level: int, custom_modifier_ids: Array[String]) -> void:
