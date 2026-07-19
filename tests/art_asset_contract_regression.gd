@@ -3,6 +3,8 @@ extends SceneTree
 const ART_ASSET_GUIDE := "designer/ART_ASSET_GUIDE.md"
 const ASSET_REPLACEMENT_GUIDE := "designer/ASSET_REPLACEMENT_GUIDE.md"
 const CONTACT_SHEET_TOOL := "tools/generate_art_asset_contact_sheet.gd"
+const CONTACT_SHEET_PATH := "designer/art_source/contact_sheets/phase-0-character-contract.png"
+const CONTACT_SHEET_SIZE := Vector2i(1040, 324)
 
 const CHARACTER_COMBAT_PATHS := [
 	"external/sprites/characters/character_red/character_red.png",
@@ -57,6 +59,7 @@ func _run() -> void:
 	_check_fallback_api()
 	_check_character_texture_candidate_order()
 	_check_tool_exists(CONTACT_SHEET_TOOL)
+	_check_contact_sheet()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -151,6 +154,26 @@ func _check_character_texture_candidate_order() -> void:
 func _check_tool_exists(path: String) -> void:
 	if not FileAccess.file_exists(_project_path(path)):
 		failures.append("Missing tool: %s" % path)
+
+
+func _check_contact_sheet() -> void:
+	var image := _load_project_image(CONTACT_SHEET_PATH)
+	if image == null:
+		return
+	if image.get_size() != CONTACT_SHEET_SIZE:
+		failures.append("%s must be %s but is %s" % [CONTACT_SHEET_PATH, CONTACT_SHEET_SIZE, image.get_size()])
+	var transparent_pixels := _count_transparent_pixels(image)
+	if transparent_pixels > 0:
+		failures.append("%s must be opaque; found %s transparent pixels" % [CONTACT_SHEET_PATH, transparent_pixels])
+
+
+func _count_transparent_pixels(image: Image) -> int:
+	var count := 0
+	for y in range(image.get_height()):
+		for x in range(image.get_width()):
+			if image.get_pixel(x, y).a < 0.999:
+				count += 1
+	return count
 
 
 func _count_chroma_green_rgb_residue(image: Image) -> int:
