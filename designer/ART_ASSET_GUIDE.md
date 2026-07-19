@@ -21,152 +21,62 @@ external/sprites/
 
 ---
 
-## 2. 卡牌图片
+## 2. 当前运行资产契约
 
-### 2.1 存放位置
+所有外部美术资源统一放在 `external/sprites/`。运行图以游戏实际显示为准，不再使用早期 96x96 卡图或 96x96 事件图规格。
 
-`external/sprites/cards/{color}/`
+| 类型 | 存放路径 | 运行规格 | 格式 | 透明要求 | JSON 字段 |
+| --- | --- | --- | --- | --- | --- |
+| 卡牌插画 | `external/sprites/cards/` | `512 x 512` | PNG 优先 | 透明 PNG，允许无透明背景的语义图 | `card_texture_path` |
+| 角色战斗立绘 | `external/sprites/characters/character_{color}/` | 当前高约 `512-600` | PNG | 真实透明 PNG，无绿底 | `character_texture_path` |
+| 角色选择头像 | `external/sprites/characters/character_{color}/` | `256 x 256` | PNG | 透明 PNG | `character_icon_texture_path` |
+| 角色能量图标 | `external/sprites/characters/character_{color}/` | `128 x 128` 或已验证 `16 x 16` 内嵌图 | PNG | 透明 PNG | `character_text_energy_texture_path` |
+| 角色选择背景 | `external/sprites/characters/character_{color}/` | `1200 x 700` | PNG | 可不透明 | `character_background_texture_path` |
+| 敌人战斗图 | `external/sprites/enemies/` | 小怪约 `64-128`，Boss 可到 `512` | PNG | 透明 PNG | `enemy_texture_path` |
+| 事件插画 | `external/sprites/events/` | `768 x 768` | PNG/JPG | 可不透明 | `dialogue_state_dialogue_texture_path` |
+| 战斗/章节背景 | `external/sprites/acts/`、`external/sprites/locations/` | `1200 x 700` 或 `2400 x 1400` | PNG/JPG | 不透明 | `act_background_texture_path` / `location_background_texture_path` / `event_background_texture_path` |
+| 遗物图标 | `external/sprites/artifacts/` | `128 x 128` | PNG | 透明 PNG | `artifact_texture_path` |
+| 消耗品图标 | `external/sprites/consumables/` | `128 x 128`，旧资源可为 `80 x 80` | PNG | 透明 PNG | `consumable_texture_path` |
+| 状态图标 | `external/sprites/status_effects/` | `128 x 128`，旧资源可为 `80 x 80` | PNG | 透明 PNG | `status_effect_texture_path` |
 
-按颜色分类存放：
-```
-external/sprites/cards/
-  blue/card_blue.png
-  green/card_green.png
-  orange/card_orange.png
-  red/card_red.png
-```
+## 3. 透明通道与绿底规则
 
-### 2.2 图片规格
+角色、敌人、图标和卡牌插画运行图必须使用真实 alpha 通道。不得把 `#00ff00` 或其他纯色抠像底作为运行图背景提交。
 
-| 项目 | 标准 |
-|------|------|
-| **尺寸** | **96 x 96** 像素 |
-| **格式** | PNG（8-bit RGBA，带透明通道） |
-| **命名** | `card_{color}.png` |
+验收标准：
 
-### 2.3 引用方式
+1. 角色战斗立绘四角不能包含 chroma green RGB residue，即使这些像素的 alpha 为 `0`。
+2. 角色战斗立绘中不得存在 chroma green RGB residue；清理工具必须检查所有像素的 RGB，不得只检查 opaque 像素。
+3. 角色脚底、头发、武器和外轮廓必须完整可见。
+4. 角色缩放到战斗显示高度约 `200px` 后仍能辨认主体。
 
-**配置层（JSON）：**
-在 `external/data/cards/*.json` 中，通过 `card_texture_path` 字段指定图片路径：
+## 4. Contact Sheet 验收
 
-```json
-{
-    "properties": {
-        "card_texture_path": "external/sprites/cards/red/card_red.png"
-    }
-}
-```
+所有新增或替换的内容图必须生成 contact sheet。contact sheet 至少包含：
 
-**代码层：**
-运行时由 `scripts/ui/Card.gd` 调用 `FileLoader.load_texture()` 加载：
+1. 原图预览。
+2. 游戏显示尺寸预览。
+3. `64px` 缩略图。
+4. `32px` 缩略图。
+5. 深色背景和浅色背景下的透明边检查。
 
-```gdscript
-if card_data.card_texture_path != "":
-    card_texture.texture = FileLoader.load_texture(card_data.card_texture_path)
-```
+Phase 0 的角色验收图输出到：
 
-### 2.4 UI 适配
+`designer/art_source/contact_sheets/phase-0-character-contract.png`
 
-- 卡牌场景：`scenes/ui/Card.tscn`
-- 卡牌控件总尺寸：**144 x 184**
-- 纹理显示区域（TextureRect）：**96 x 96**，在控件内居中偏上
-- 背景色通过 `ColorRect` 根据 `card_color_id` 动态渲染，**不依赖背景纹理**
+## 5. 类型化 fallback
 
----
+类型化 fallback 资源统一放在 `external/sprites/fallback/`：
 
-## 3. 角色图片
+| 类型 | 文件 |
+| --- | --- |
+| 卡牌插画 fallback | `fallback_card.png` |
+| 角色 fallback | `fallback_character.png` |
+| 敌人 fallback | `fallback_enemy.png` |
+| 通用图标 fallback | `fallback_icon.png` |
+| 背景 fallback | `fallback_background.png` |
 
-### 3.1 存放位置
-
-`external/sprites/characters/character_{color}/`
-
-```
-external/sprites/characters/
-  character_red/character_red.png                  # 角色立绘
-  character_red/character_red_icon.png             # 角色选择图标
-  character_red/character_red_text_energy.png      # 能量图标
-```
-
-### 3.2 图片规格
-
-| 用途 | 尺寸 | 格式 |
-|------|------|------|
-| 角色立绘 (`character_{color}.png`) | **96 x 96** | PNG RGBA |
-| 角色图标 (`character_{color}_icon.png`) | 约 **64 x 64** | PNG RGBA |
-| 能量图标 (`character_{color}_text_energy.png`) | 待确认 | PNG RGBA |
-
-### 3.3 引用方式
-
-**配置层（JSON）：**
-在 `external/data/characters/*.json` 中：
-
-```json
-{
-    "properties": {
-        "character_texture_path": "external/sprites/characters/character_red/character_red.png",
-        "character_icon_texture_path": "external/sprites/characters/character_red/character_red_icon.png",
-        "character_text_energy_texture_path": "external/sprites/characters/character_red/character_red_text_energy.png"
-    }
-}
-```
-
-**代码层：**
-- `Player.gd`：`sprite.texture = FileLoader.load_texture(character_data.character_texture_path)`
-- `CharacterSelectionButton.gd`：`texture_normal = FileLoader.load_texture(character_data.character_icon_texture_path)`
-
----
-
-## 4. 敌人图片
-
-### 4.1 存放位置
-
-`external/sprites/enemies/`
-
-命名规则：`enemy_{color}_{size}.png`
-
-```
-external/sprites/enemies/
-  enemy_red_large.png
-  enemy_red_medium.png
-  enemy_red_small.png
-  enemy_blue_large.png
-  ...
-```
-
-### 4.2 图片规格
-
-| 项目 | 标准 |
-|------|------|
-| **尺寸** | **128 x 128** 像素 |
-| **格式** | PNG（RGBA） |
-| **命名** | `enemy_{color}_{size}.png`（size: small, medium, large） |
-
-### 4.3 引用方式
-
-**配置层（JSON）：**
-在 `external/data/enemies/*.json` 中：
-
-```json
-{
-    "properties": {
-        "enemy_texture_path": "external/sprites/enemies/enemy_red_large.png"
-    }
-}
-```
-
-**代码层：**
-`Enemy.gd`：`sprite.texture = FileLoader.load_texture(enemy_data.enemy_texture_path)`
-
----
-
-## 5. 遗物 / 事件 / 其他图片
-
-| 类型 | 存放路径 | 规格 | JSON 引用字段 |
-|------|---------|------|--------------|
-| 遗物 | `external/sprites/artifacts/artifact_{color}.png` | **64 x 64** PNG | `artifact_texture_path` |
-| 事件背景 | `external/sprites/events/event_{id}.png` | **96 x 96** PNG | `event_background_texture_path` |
-| Act 背景 | `external/sprites/acts/...` | 视场景而定 | `act_background_texture_path` |
-| 地点背景 | `external/sprites/locations/...` | 视场景而定 | `location_background_texture_path` |
+新增 UI 或资源加载点时，应优先使用 `FileLoader.load_texture_or_fallback(path, fallback_type)`，不要直接把缺图显示成空纹理或无语义图标。
 
 ---
 

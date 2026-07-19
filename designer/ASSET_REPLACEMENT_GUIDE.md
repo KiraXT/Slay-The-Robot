@@ -17,6 +17,22 @@
 | 消耗品图标 | 消耗品按钮 / 商店图标 | `consumable_texture_path` | `128 x 128` | `PNG` | 透明底 |
 | 状态效果图标 | 战斗状态图标 | `status_effect_texture_path` | `128 x 128` | `PNG` | 透明底 |
 
+## 类型化 fallback 与验收输出
+
+缺图 fallback 统一放在 `external/sprites/fallback/`。这些文件不是最终美术，只用于让缺图在游戏内明确暴露，同时避免空纹理破坏布局。
+
+| fallback 类型 | 文件 | 尺寸 | 用途 |
+| --- | --- | --- | --- |
+| `card` | `external/sprites/fallback/fallback_card.png` | `128 x 128` | 卡牌插画缺失 |
+| `character` | `external/sprites/fallback/fallback_character.png` | `256 x 256` | 玩家角色立绘或头像缺失 |
+| `enemy` | `external/sprites/fallback/fallback_enemy.png` | `256 x 256` | 敌人战斗图缺失 |
+| `icon` | `external/sprites/fallback/fallback_icon.png` | `128 x 128` | 遗物、状态、消耗品和通用小图标缺失 |
+| `background` | `external/sprites/fallback/fallback_background.png` | `1200 x 700` | 战斗、事件或标题背景缺失 |
+
+每次替换角色、敌人、卡图、事件图或图标后，必须生成 contact sheet 并在真实游戏尺寸下验收。Phase 0 角色验收图输出到：
+
+`designer/art_source/contact_sheets/phase-0-character-contract.png`
+
 ## 详细清单
 
 ### 战斗主背景
