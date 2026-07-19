@@ -55,6 +55,7 @@ func _run() -> void:
 	_check_character_combat_images()
 	_check_fallback_assets()
 	_check_fallback_api()
+	_check_character_texture_candidate_order()
 	_check_tool_exists(CONTACT_SHEET_TOOL)
 
 	if failures.is_empty():
@@ -124,6 +125,27 @@ func _check_fallback_api() -> void:
 	for fallback_type: String in ["card", "character", "enemy", "icon", "background"]:
 		if not file_loader_source.contains("\"%s\"" % fallback_type):
 			failures.append("FileLoader fallback map must include `%s`" % fallback_type)
+
+
+func _check_character_texture_candidate_order() -> void:
+	var character_selection_source := _read_project_text("scripts/ui/CharacterSelectionButton.gd")
+	var title_screen_source := _read_project_text("scripts/ui/menus/TitleScreen.gd")
+	for source_data: Dictionary in [
+		{"path": "scripts/ui/CharacterSelectionButton.gd", "source": character_selection_source},
+		{"path": "scripts/ui/menus/TitleScreen.gd", "source": title_screen_source},
+	]:
+		var source_path: String = source_data["path"]
+		var source: String = source_data["source"]
+		if source.contains("return FileLoader.load_texture_or_fallback(path, \"character\")"):
+			failures.append("%s optional texture helper must not return the typed fallback before later candidates" % source_path)
+		if not source.contains("return ImageTexture.new()"):
+			failures.append("%s optional texture helper must return an empty texture for missing candidates" % source_path)
+		if not source.contains("return FileLoader.load_texture(path)"):
+			failures.append("%s optional texture helper must load existing candidates directly" % source_path)
+	if not character_selection_source.contains("return FileLoader.load_texture_or_fallback(\"\", \"character\")"):
+		failures.append("Character selection must use the typed character fallback only after icon candidates fail")
+	if not title_screen_source.contains("return FileLoader.load_texture_or_fallback(\"\", \"character\")"):
+		failures.append("Title screen must use the typed character fallback only after portrait candidates fail")
 
 
 func _check_tool_exists(path: String) -> void:

@@ -52,6 +52,7 @@ func _load_first_available_character_portrait(paths: Array[String]) -> Texture2D
 			return texture
 	return FileLoader.load_texture_or_fallback("", "character")
 
+
 func _load_optional_texture(path: String) -> Texture2D:
 	if not FileLoader._texture_file_exists(path):
 		return ImageTexture.new()
