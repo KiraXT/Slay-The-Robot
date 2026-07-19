@@ -3,7 +3,7 @@ class_name GMConsole
 
 const GMCommandExecutorScript := preload("res://scripts/dev/GMCommandExecutor.gd")
 
-var executor: GMCommandExecutor = GMCommandExecutorScript.new()
+var executor = GMCommandExecutorScript.new()
 var output_label: RichTextLabel
 var input_line: LineEdit
 
@@ -22,8 +22,12 @@ func toggle() -> void:
 		show_console()
 
 
+func is_enabled() -> bool:
+	return executor.is_enabled()
+
+
 func show_console() -> void:
-	if not executor.is_enabled():
+	if not is_enabled():
 		return
 	visible = true
 	input_line.grab_focus()
