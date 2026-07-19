@@ -2,6 +2,7 @@ extends SceneTree
 
 const GM_EXECUTOR_SCRIPT := "res://scripts/dev/GMCommandExecutor.gd"
 const COMBAT_STATS_SCRIPT := "res://data/mutable/CombatStatsData.gd"
+const LOCATION_DATA_SCRIPT := "res://data/mutable/LocationData.gd"
 const DRAW_TOP := 4
 
 var failures: Array[String] = []
@@ -212,6 +213,8 @@ func _test_add_consumable_full_slots_errors() -> void:
 
 
 func _test_invalid_commands_and_energy_clamp() -> void:
+	_assert_error("clear typo", "ERR: usage: clear")
+	_assert_error("money set 10 typo", "ERR: usage: money set/add <amount>")
 	_assert_error("card add missing_card deck", "ERR: card not found: missing_card")
 	_assert_error("card add card_attack_basic invalid", "ERR: invalid card pile 'invalid'")
 	_assert_error("artifact add missing_artifact", "ERR: artifact not found: missing_artifact")
@@ -223,6 +226,17 @@ func _test_invalid_commands_and_energy_clamp() -> void:
 	_set_combat(true)
 	_assert_error("enemy spawn missing_enemy 1", "ERR: enemy not found: missing_enemy")
 	_assert_error("enemy spawn enemy_1 nope", "ERR: invalid integer: nope")
+	_assert_error("enemy spawn enemy_1 0 typo", "ERR: usage: enemy spawn <enemy_id> [slot]")
+
+	game_global.player_data.player_location_id = "missing_location"
+	_assert_error("enemy spawn enemy_1 0", "ERR: current player location not found")
+	var location_data_script = load(LOCATION_DATA_SCRIPT)
+	var location_data = location_data_script.new()
+	location_data.location_event_object_id = "event_act_1_easy_combat_1"
+	game_global.player_data.player_location_id = "gm_command_test_location"
+	game_global.player_data.location_id_to_location_data["gm_command_test_location"] = location_data
+	_assert_error("enemy spawn enemy_1 -1", "ERR: enemy slot -1 out of range (0-1)")
+	_assert_error("enemy spawn enemy_1 2", "ERR: enemy slot 2 out of range (0-1)")
 
 	game_global.player_data.player_energy = 3
 	var add_result: Dictionary = executor.call("execute", "energy add -4")
@@ -282,13 +296,13 @@ func _test_enemy_spawn_and_combat_win_require_combat() -> void:
 
 func _test_enemy_spawn_and_combat_win() -> void:
 	_set_combat(true)
-	var spawn_result: Dictionary = executor.call("execute", "enemy spawn enemy_1 2")
+	var spawn_result: Dictionary = executor.call("execute", "enemy spawn enemy_1 1")
 	_assert_true(spawn_result.ok, "enemy spawn should succeed")
 	_assert_equal(enemy_spawn_requests.size(), 1, "enemy spawn should emit one request")
 	if enemy_spawn_requests.size() != 1:
 		return
 	_assert_equal(enemy_spawn_requests[0].enemy_id, "enemy_1", "enemy spawn id")
-	_assert_equal(enemy_spawn_requests[0].slot, 2, "enemy spawn slot")
+	_assert_equal(enemy_spawn_requests[0].slot, 1, "enemy spawn slot")
 
 	var win_result: Dictionary = executor.call("execute", "combat win")
 	_assert_true(win_result.ok, "combat win should succeed")

@@ -24,8 +24,12 @@ func execute(command_text: String) -> Dictionary:
 
 	match tokens[0]:
 		"help":
+			if tokens.size() != 1:
+				return _error("ERR: usage: help")
 			return _success(_get_help_text())
 		"clear":
+			if tokens.size() != 1:
+				return _error("ERR: usage: clear")
 			return {
 				RESULT_OK: true,
 				RESULT_MESSAGE: "OK: console cleared",
@@ -89,7 +93,7 @@ func _execute_card(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 3 or tokens[1] != "add":
+	if tokens.size() < 3 or tokens.size() > 4 or tokens[1] != "add":
 		return _error("ERR: usage: card add <card_id> [deck|hand|draw]")
 	return _add_card(tokens[2], _get_optional_pile(tokens, 3))
 
@@ -98,7 +102,7 @@ func _execute_cards(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 2 or tokens[1] != "all":
+	if tokens.size() < 2 or tokens.size() > 3 or tokens[1] != "all":
 		return _error("ERR: usage: cards all [deck|hand|draw]")
 	var pile := _get_optional_pile(tokens, 2)
 	if not VALID_CARD_PILES.has(pile):
@@ -121,7 +125,7 @@ func _execute_artifact(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 3 or tokens[1] != "add":
+	if tokens.size() != 3 or tokens[1] != "add":
 		return _error("ERR: usage: artifact add <artifact_id>")
 	return _add_artifact(tokens[2])
 
@@ -130,7 +134,7 @@ func _execute_artifacts(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 2 or tokens[1] != "all":
+	if tokens.size() != 2 or tokens[1] != "all":
 		return _error("ERR: usage: artifacts all")
 
 	var count := 0
@@ -146,7 +150,7 @@ func _execute_consumable(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 3 or tokens[1] != "add":
+	if tokens.size() != 3 or tokens[1] != "add":
 		return _error("ERR: usage: consumable add <consumable_id>")
 	var consumable_id := tokens[2]
 	if Global.get_consumable_data(consumable_id) == null:
@@ -161,7 +165,7 @@ func _execute_money(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 3:
+	if tokens.size() != 3:
 		return _error("ERR: usage: money set/add <amount>")
 	var parsed := _parse_int(tokens[2])
 	if not parsed.ok:
@@ -181,7 +185,7 @@ func _execute_hp(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 3:
+	if tokens.size() != 3:
 		return _error("ERR: usage: hp set/heal/max <amount>")
 	var parsed := _parse_int(tokens[2])
 	if not parsed.ok:
@@ -203,7 +207,7 @@ func _execute_energy(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() < 3:
+	if tokens.size() != 3:
 		return _error("ERR: usage: energy set/add <amount>")
 	var parsed := _parse_int(tokens[2])
 	if not parsed.ok:
@@ -233,7 +237,7 @@ func _execute_enemy(tokens: Array[String]) -> Dictionary:
 	var combat_error := _require_combat()
 	if not combat_error.is_empty():
 		return combat_error
-	if tokens.size() < 3 or tokens[1] != "spawn":
+	if tokens.size() < 3 or tokens.size() > 4 or tokens[1] != "spawn":
 		return _error("ERR: usage: enemy spawn <enemy_id> [slot]")
 	var enemy_id := tokens[2]
 	if Global.get_enemy_data(enemy_id) == null:
@@ -244,6 +248,15 @@ func _execute_enemy(tokens: Array[String]) -> Dictionary:
 		if not parsed.ok:
 			return _error("ERR: invalid integer: %s" % tokens[3])
 		slot = parsed.value
+	var player_location_data = Global.get_player_location_data()
+	if player_location_data == null:
+		return _error("ERR: current player location not found")
+	var event_data = Global.get_player_event_data()
+	if event_data == null:
+		return _error("ERR: current event not found")
+	var slot_count: int = event_data.event_enemy_placement_positions.size()
+	if slot < 0 or slot >= slot_count:
+		return _error("ERR: enemy slot %d out of range (0-%d)" % [slot, slot_count - 1])
 	Signals.enemy_spawn_requested.emit(enemy_id, slot)
 	return _success("OK: spawned enemy %s at slot %d" % [enemy_id, slot])
 
@@ -255,7 +268,7 @@ func _execute_combat(tokens: Array[String]) -> Dictionary:
 	var combat_error := _require_combat()
 	if not combat_error.is_empty():
 		return combat_error
-	if tokens.size() >= 2 and tokens[1] == "win":
+	if tokens.size() == 2 and tokens[1] == "win":
 		ActionHandler.clear_all_actions()
 		Signals.combat_ended.emit()
 		return _success("OK: combat ended")
@@ -266,7 +279,7 @@ func _execute_actions(tokens: Array[String]) -> Dictionary:
 	var run_error := _require_run()
 	if not run_error.is_empty():
 		return run_error
-	if tokens.size() >= 2 and tokens[1] == "clear":
+	if tokens.size() == 2 and tokens[1] == "clear":
 		ActionHandler.clear_all_actions()
 		return _success("OK: actions cleared")
 	return _error("ERR: usage: actions clear")
