@@ -9,7 +9,6 @@ const PILE_DECK := "deck"
 const PILE_HAND := "hand"
 const PILE_DRAW := "draw"
 const VALID_CARD_PILES := [PILE_DECK, PILE_HAND, PILE_DRAW]
-const GM_HAND_CARD_COUNT_MAX := 9999
 
 
 func is_enabled() -> bool:
@@ -112,8 +111,16 @@ func _execute_cards(tokens: Array[String]) -> Dictionary:
 		if not combat_error.is_empty():
 			return combat_error
 
+	var cards := Global.get_all_cards()
+	if pile == PILE_HAND:
+		var hand_cards: Array[CardData] = []
+		for card_data in cards:
+			hand_cards.append(Global.get_card_data_from_prototype(card_data.object_id))
+		_add_cards_to_hand(hand_cards)
+		return _success("OK: added %d cards to %s" % [hand_cards.size(), pile])
+
 	var count := 0
-	for card_data in Global.get_all_cards():
+	for card_data in cards:
 		var result := _add_card(card_data.object_id, pile)
 		if not result.ok:
 			return result
@@ -176,8 +183,10 @@ func _execute_money(tokens: Array[String]) -> Dictionary:
 			Signals.player_money_changed.emit()
 			return _success("OK: money set to %d" % Global.player_data.player_money)
 		"add":
+			var old_money: int = Global.player_data.player_money
 			Global.player_data.add_money(parsed.value)
-			return _success("OK: money changed by %d" % parsed.value)
+			var actual_delta: int = Global.player_data.player_money - old_money
+			return _success("OK: money changed by %d" % actual_delta)
 	return _error("ERR: usage: money set/add <amount>")
 
 
@@ -195,8 +204,10 @@ func _execute_hp(tokens: Array[String]) -> Dictionary:
 			Global.player_data.set_health(parsed.value)
 			return _success("OK: hp set to %d" % Global.player_data.player_health)
 		"heal":
+			var old_health: int = Global.player_data.player_health
 			Global.player_data.add_health(parsed.value)
-			return _success("OK: hp changed by %d" % parsed.value)
+			var actual_delta: int = Global.player_data.player_health - old_health
+			return _success("OK: hp changed by %d" % actual_delta)
 		"max":
 			Global.player_data.set_health(Global.player_data.player_health, parsed.value)
 			return _success("OK: max hp set to %d" % Global.player_data.player_health_max)
@@ -299,7 +310,7 @@ func _add_card(card_id: String, pile: String) -> Dictionary:
 			var combat_error := _require_combat()
 			if not combat_error.is_empty():
 				return combat_error
-			Signals.card_add_to_hand_requested.emit([card_data], GM_HAND_CARD_COUNT_MAX)
+			_add_cards_to_hand([card_data])
 			return _success("OK: added card %s to hand" % card_id)
 		PILE_DRAW:
 			var combat_error := _require_combat()
@@ -308,6 +319,11 @@ func _add_card(card_id: String, pile: String) -> Dictionary:
 			Signals.card_add_to_draw_requested.emit([card_data], CardPlayRequest.CARD_PLAY_DESTINATIONS.DRAW_TOP)
 			return _success("OK: added card %s to draw" % card_id)
 	return _error("ERR: invalid card pile '%s'" % pile)
+
+
+func _add_cards_to_hand(cards: Array[CardData]) -> void:
+	var hand_card_count_max: int = Global.player_data.player_hand.size() + cards.size()
+	Signals.card_add_to_hand_requested.emit(cards, hand_card_count_max)
 
 
 func _add_artifact(artifact_id: String) -> Dictionary:

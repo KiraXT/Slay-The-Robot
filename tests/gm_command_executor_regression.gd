@@ -170,16 +170,15 @@ func _test_combat_required_for_hand_and_draw() -> void:
 
 func _test_add_card_to_hand_and_draw_in_combat() -> void:
 	_set_combat(true)
+	game_global.player_data.player_hand.append(game_global.get_card_data_from_prototype("card_block_basic"))
+	var expected_hand_limit: int = game_global.player_data.player_hand.size() + 1
 	var hand_result: Dictionary = executor.call("execute", "card add card_attack_basic hand")
 	_assert_true(hand_result.ok, "card add hand should succeed in combat")
 	_assert_equal(hand_requests.size(), 1, "card add hand should emit one hand request")
 	if hand_requests.size() != 1:
 		return
 	_assert_equal(hand_requests[0].cards[0].object_id, "card_attack_basic", "hand request card id")
-	_assert_true(
-		hand_requests[0].max > NORMAL_HAND_CARD_COUNT_MAX,
-		"card add hand should use a GM-specific hand limit above the normal cap"
-	)
+	_assert_equal(hand_requests[0].max, expected_hand_limit, "card add hand should allow the existing hand plus the requested card")
 
 	var draw_result: Dictionary = executor.call("execute", "card add card_block_basic draw")
 	_assert_true(draw_result.ok, "card add draw should succeed in combat")
@@ -193,16 +192,17 @@ func _test_add_card_to_hand_and_draw_in_combat() -> void:
 func _test_add_all_cards_to_hand_with_gm_limit() -> void:
 	_set_combat(true)
 	hand_requests.clear()
+	game_global.player_data.player_hand.clear()
+	game_global.player_data.player_hand.append(game_global.get_card_data_from_prototype("card_attack_basic"))
+	var existing_hand_size: int = game_global.player_data.player_hand.size()
 	var expected_count: int = game_global.get_all_cards().size()
 	var result: Dictionary = executor.call("execute", "cards all hand")
 	_assert_true(result.ok, "cards all hand should succeed in combat")
-	_assert_equal(hand_requests.size(), expected_count, "cards all hand should emit one request for every loaded card")
-	if hand_requests.is_empty():
+	_assert_equal(hand_requests.size(), 1, "cards all hand should emit one batched hand request")
+	if hand_requests.size() != 1:
 		return
-	_assert_true(
-		hand_requests[0].max >= expected_count,
-		"cards all hand should use a limit large enough for all requested cards"
-	)
+	_assert_equal(hand_requests[0].cards.size(), expected_count, "cards all hand should request every loaded card in its batch")
+	_assert_equal(hand_requests[0].max, existing_hand_size + expected_count, "cards all hand should allow the existing hand plus every requested card")
 
 
 func _test_add_artifact() -> void:
@@ -291,6 +291,9 @@ func _test_money_hp_energy() -> void:
 	_assert_equal(game_global.player_data.player_money, 42, "money set value")
 	_assert_ok_contains("money add 8", "money changed by 8")
 	_assert_equal(game_global.player_data.player_money, 50, "money add value")
+	_assert_ok_contains("money set 0", "money set to 0")
+	_assert_ok_contains("money add -8", "money changed by 0")
+	_assert_equal(game_global.player_data.player_money, 0, "money add should clamp at zero")
 
 	_assert_ok_contains("hp set 21", "hp set to 21")
 	_assert_equal(game_global.player_data.player_health, 21, "hp set value")
@@ -298,6 +301,9 @@ func _test_money_hp_energy() -> void:
 	_assert_equal(game_global.player_data.player_health, 26, "hp heal value")
 	_assert_ok_contains("hp max 80", "max hp set to 80")
 	_assert_equal(game_global.player_data.player_health_max, 80, "hp max value")
+	_assert_ok_contains("hp set 80", "hp set to 80")
+	_assert_ok_contains("hp heal 5", "hp changed by 0")
+	_assert_equal(game_global.player_data.player_health, 80, "hp heal should clamp at max health")
 
 	_assert_ok_contains("energy set 9", "energy set to 9")
 	_assert_equal(game_global.player_data.player_energy, 9, "energy set value")
