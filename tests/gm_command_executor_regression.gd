@@ -139,6 +139,8 @@ func _test_add_single_card_to_deck() -> void:
 	var result: Dictionary = executor.call("execute", "card add card_attack_basic deck")
 	_assert_true(result.ok, "card add card_attack_basic deck should succeed")
 	_assert_equal(game_global.player_data.player_deck.size(), before_count + 1, "card add should append one deck card")
+	if game_global.player_data.player_deck.size() != before_count + 1:
+		return
 	_assert_equal(game_global.player_data.player_deck.back().object_id, "card_attack_basic", "added deck card id")
 
 
@@ -161,11 +163,15 @@ func _test_add_card_to_hand_and_draw_in_combat() -> void:
 	var hand_result: Dictionary = executor.call("execute", "card add card_attack_basic hand")
 	_assert_true(hand_result.ok, "card add hand should succeed in combat")
 	_assert_equal(hand_requests.size(), 1, "card add hand should emit one hand request")
+	if hand_requests.size() != 1:
+		return
 	_assert_equal(hand_requests[0].cards[0].object_id, "card_attack_basic", "hand request card id")
 
 	var draw_result: Dictionary = executor.call("execute", "card add card_block_basic draw")
 	_assert_true(draw_result.ok, "card add draw should succeed in combat")
 	_assert_equal(draw_requests.size(), 1, "card add draw should emit one draw request")
+	if draw_requests.size() != 1:
+		return
 	_assert_equal(draw_requests[0].cards[0].object_id, "card_block_basic", "draw request card id")
 	_assert_equal(draw_requests[0].destination, DRAW_TOP, "draw request destination should be draw top")
 
@@ -189,15 +195,16 @@ func _test_add_consumable() -> void:
 	var result: Dictionary = executor.call("execute", "consumable add consumable_heal")
 	_assert_true(result.ok, "consumable add should succeed")
 	_assert_equal(consumable_requests.size(), 1, "consumable add should emit add request")
+	if consumable_requests.size() != 1:
+		return
 	_assert_equal(consumable_requests[0], "consumable_heal", "consumable request id")
 
 
 func _test_add_consumable_full_slots_errors() -> void:
-	game_global.player_data.player_consumable_slot_to_consumable_object_id = {
-		"0": "consumable_heal",
-		"1": "consumable_block",
-		"2": "consumable_damaging",
-	}
+	game_global.player_data.player_consumable_slot_to_consumable_object_id.clear()
+	game_global.player_data.player_consumable_slot_to_consumable_object_id["0"] = "consumable_heal"
+	game_global.player_data.player_consumable_slot_to_consumable_object_id["1"] = "consumable_block"
+	game_global.player_data.player_consumable_slot_to_consumable_object_id["2"] = "consumable_damaging"
 	var result: Dictionary = executor.call("execute", "consumable add consumable_heal")
 	_assert_false(result.ok, "consumable add should fail when slots are full")
 	_assert_equal(result.message, "ERR: no empty consumable slots", "full consumable slot error")
@@ -243,6 +250,8 @@ func _test_enemy_spawn_and_combat_win() -> void:
 	var spawn_result: Dictionary = executor.call("execute", "enemy spawn enemy_1 2")
 	_assert_true(spawn_result.ok, "enemy spawn should succeed")
 	_assert_equal(enemy_spawn_requests.size(), 1, "enemy spawn should emit one request")
+	if enemy_spawn_requests.size() != 1:
+		return
 	_assert_equal(enemy_spawn_requests[0].enemy_id, "enemy_1", "enemy spawn id")
 	_assert_equal(enemy_spawn_requests[0].slot, 2, "enemy spawn slot")
 
@@ -270,11 +279,11 @@ func _assert_error(command: String, expected_message: String) -> void:
 	_assert_equal(result.message, expected_message, "%s error message" % command)
 
 
-func _on_card_add_to_hand_requested(cards: Array[CardData], hand_card_count_max: int) -> void:
+func _on_card_add_to_hand_requested(cards: Array, hand_card_count_max: int) -> void:
 	hand_requests.append({"cards": cards, "max": hand_card_count_max})
 
 
-func _on_card_add_to_draw_requested(cards: Array[CardData], card_destination: int) -> void:
+func _on_card_add_to_draw_requested(cards: Array, card_destination: int) -> void:
 	draw_requests.append({"cards": cards, "destination": card_destination})
 
 
