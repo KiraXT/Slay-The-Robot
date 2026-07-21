@@ -125,6 +125,7 @@ func _check_layout_bounds() -> void:
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
 	for node_name in [
+		"CardHeaderBackground",
 		"CardName",
 		"CardTexture",
 		"CardTypeBackground",
@@ -135,6 +136,12 @@ func _check_layout_bounds() -> void:
 
 	_assert_vertical_non_overlap(visual, "CardDescription", "CardTypeBackground")
 	_assert_vertical_non_overlap(visual, "CardDescription", "CardStars")
+	_assert_control_inside(
+		_find_descendant(visual, "CardHeaderBackground") as Control,
+		_find_descendant(visual, "CardName") as Control,
+		"CardName inside header"
+	)
+	_assert_vertical_non_overlap(visual, "CardName", "CardArtFrame")
 
 	card.queue_free()
 	await process_frame
@@ -154,6 +161,7 @@ func _check_card_detail_treatment() -> void:
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
 	_assert_panel_style(visual, "ColorBackground", 12, 3, "outer rounded frame")
+	_assert_panel_style(visual, "CardHeaderBackground", 5, 1, "dark title header")
 	_assert_panel_style(visual, "CardBackground", 9, 1, "inner rounded card body")
 	_assert_panel_style(visual, "CardArtFrame", 5, 2, "card art rounded frame")
 	_assert_panel_style(visual, "CardDescriptionBackground", 7, 1, "bottom description panel")
@@ -284,6 +292,21 @@ func _assert_rect_inside(parent: Control, child: Control, label: String) -> void
 		failures.append("%s exceeds card height: %s" % [label, child_rect])
 
 
+func _assert_control_inside(parent: Control, child: Control, label: String) -> void:
+	if parent == null:
+		failures.append("%s parent is missing" % label)
+		return
+	if child == null:
+		failures.append("%s is missing" % label)
+		return
+	var parent_rect := parent.get_global_rect()
+	var child_rect := child.get_global_rect()
+	if child_rect.position.x < parent_rect.position.x or child_rect.position.y < parent_rect.position.y:
+		failures.append("%s starts outside parent: %s" % [label, child_rect])
+	if child_rect.end.x > parent_rect.end.x or child_rect.end.y > parent_rect.end.y:
+		failures.append("%s exceeds parent: %s" % [label, child_rect])
+
+
 func _assert_no_visible_descendant(parent: Node, node_name: String, label: String) -> void:
 	var node := _find_descendant(parent, node_name)
 	if node == null:
@@ -346,9 +369,16 @@ func _assert_panel_style(parent: Node, node_name: String, min_corner_radius: int
 		failures.append("%s node %s is not a Panel" % [label, node.get_path()])
 		return
 
-	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	var panel_style := panel.get_theme_stylebox("panel")
+	if panel_style is StyleBoxTexture:
+		var texture_style := panel_style as StyleBoxTexture
+		if texture_style.texture == null:
+			failures.append("%s node %s has a StyleBoxTexture without texture" % [label, panel.get_path()])
+		return
+
+	var style := panel_style as StyleBoxFlat
 	if style == null:
-		failures.append("%s node %s has no StyleBoxFlat panel style" % [label, panel.get_path()])
+		failures.append("%s node %s has no StyleBoxFlat or StyleBoxTexture panel style" % [label, panel.get_path()])
 		return
 
 	for corner_radius in [
@@ -399,9 +429,13 @@ func _get_panel_style(parent: Node, node_name: String, label: String) -> StyleBo
 		failures.append("%s node %s is not a Panel" % [label, node.get_path()])
 		return null
 
-	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	var panel_style := panel.get_theme_stylebox("panel")
+	if panel_style is StyleBoxTexture:
+		return null
+
+	var style := panel_style as StyleBoxFlat
 	if style == null:
-		failures.append("%s node %s has no StyleBoxFlat panel style" % [label, panel.get_path()])
+		failures.append("%s node %s has no StyleBoxFlat or StyleBoxTexture panel style" % [label, panel.get_path()])
 	return style
 
 

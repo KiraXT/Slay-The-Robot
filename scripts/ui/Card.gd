@@ -32,6 +32,16 @@ const CARD_NEUTRAL_FRAME_COLOR: Color = Color(0.70, 0.73, 0.76, 1.0)
 const CARD_NEUTRAL_FRAME_EDGE_COLOR: Color = Color(0.46, 0.49, 0.52, 1.0)
 const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 
+const CARD_STYLE_PACK_DIR := "external/data/card_styles/"
+const CARD_STYLE_PACK_FILE := "card_style_preview.json"
+const CARD_STYLE_SHARED_PANEL_MAP := {
+	"CardHeaderBackground": "header_bar",
+	"CardArtFrame": "art_frame",
+	"CardDescriptionBackground": "description_panel",
+	"EnergySprite": "energy_badge",
+	"CardGlow": "glow",
+}
+
 @onready var card_button: Button = %CardButton
 
 @onready var pivot: Node2D = $Pivot
@@ -43,6 +53,7 @@ const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 @onready var card_energy_cost: Label = %EnergyCost
 @onready var card_color: Panel = %ColorBackground
 @onready var card_background: Panel = %CardBackground
+@onready var card_header_background: Panel = %CardHeaderBackground
 @onready var card_art_frame: Panel = %CardArtFrame
 @onready var card_description_background: Panel = %CardDescriptionBackground
 @onready var card_type_background: Panel = %CardTypeBackground
@@ -120,6 +131,7 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
 	_apply_card_palette(color_data, card_data.card_color_id)
+	_apply_card_style_pack(card_data.card_color_id, card_data.card_type)
 	
 	energy_sprite.visible = card_data.card_is_playable
 	
@@ -143,6 +155,7 @@ func _get_card_star_label(card_rarity_id: int) -> String:
 
 
 func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
+	card_background.visible = true
 	var frame_color := CARD_DEFAULT_FRAME_COLOR
 	if color_data != null:
 		frame_color = color_data.color
@@ -180,6 +193,73 @@ func _set_panel_style(panel: Panel, bg_color: Color, border_color: Color) -> voi
 	style.bg_color = bg_color
 	style.border_color = border_color
 	panel.add_theme_stylebox_override("panel", style)
+
+
+func _apply_card_style_pack(card_color_id: String, card_type_id: int) -> void:
+	var style_path := CARD_STYLE_PACK_DIR + CARD_STYLE_PACK_FILE
+	if not FileAccess.file_exists(FileLoader._get_modified_filepath(style_path)):
+		return
+	var style_data := FileLoader.load_json(CARD_STYLE_PACK_DIR, CARD_STYLE_PACK_FILE)
+	var shared_slots: Dictionary = style_data.get("shared_slots", {})
+	for panel_name: String in CARD_STYLE_SHARED_PANEL_MAP:
+		var panel := _get_card_style_panel(panel_name)
+		if panel == null:
+			continue
+		var texture_path := str(shared_slots.get(CARD_STYLE_SHARED_PANEL_MAP[panel_name], ""))
+		_apply_texture_stylebox(panel, texture_path)
+
+	var color_slots: Dictionary = style_data.get("color_slots", {})
+	var type_slots: Dictionary = style_data.get("type_slots", {})
+	_apply_texture_stylebox(card_color, _get_style_variant_path(color_slots, card_color_id))
+	_apply_texture_stylebox(card_type_background, _get_style_variant_path(type_slots, str(card_type_id)))
+	card_background.visible = false
+	card_name.add_theme_color_override("default_color", Color.WHITE)
+
+
+func _get_style_variant_path(slots: Dictionary, key: String) -> String:
+	return str(slots.get(key, slots.get("default", "")))
+
+
+func _get_card_style_panel(panel_name: String) -> Panel:
+	match panel_name:
+		"CardHeaderBackground":
+			return card_header_background
+		"ColorBackground":
+			return card_color
+		"CardBackground":
+			return card_background
+		"CardArtFrame":
+			return card_art_frame
+		"CardDescriptionBackground":
+			return card_description_background
+		"CardTypeBackground":
+			return card_type_background
+		"EnergySprite":
+			return energy_sprite
+		"CardGlow":
+			return card_glow
+		_:
+			return null
+
+
+func _apply_texture_stylebox(panel: Panel, texture_path: String) -> void:
+	if texture_path.is_empty():
+		return
+	if not FileAccess.file_exists(FileLoader._get_modified_filepath(texture_path)):
+		return
+	var texture := FileLoader.load_texture(texture_path)
+	if texture == null or texture.get_size() == Vector2.ZERO:
+		return
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = 8
+	style.texture_margin_top = 8
+	style.texture_margin_right = 8
+	style.texture_margin_bottom = 8
+	style.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	style.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	panel.add_theme_stylebox_override("panel", style)
+
 
 func set_card_glow(_visible: bool) -> void:
 	card_glow.visible = _visible

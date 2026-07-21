@@ -1,0 +1,37 @@
+{
+	"object_id": "card_style_preview",
+	"display_name": "Reference Card Style Variants",
+	"base_size": [144, 184],
+	"shared_slots": {
+		"header_bar": "external/sprites/ui/card_styles/preview/shared/header_bar.png",
+		"art_frame": "external/sprites/ui/card_styles/preview/shared/art_frame.png",
+		"description_panel": "external/sprites/ui/card_styles/preview/shared/description_panel.png",
+		"energy_badge": "external/sprites/ui/card_styles/preview/shared/energy_badge.png",
+		"glow": "external/sprites/ui/card_styles/preview/shared/glow.png"
+	},
+	"color_slots": {
+		"color_red": "external/sprites/ui/card_styles/preview/frames/frame_red.png",
+		"color_blue": "external/sprites/ui/card_styles/preview/frames/frame_blue.png",
+		"color_green": "external/sprites/ui/card_styles/preview/frames/frame_green.png",
+		"color_orange": "external/sprites/ui/card_styles/preview/frames/frame_gold.png",
+		"color_white": "external/sprites/ui/card_styles/preview/frames/frame_silver.png",
+		"default": "external/sprites/ui/card_styles/preview/frames/frame_silver.png"
+	},
+	"type_slots": {
+		"0": "external/sprites/ui/card_styles/preview/ribbons/ribbon_attack.png",
+		"1": "external/sprites/ui/card_styles/preview/ribbons/ribbon_skill.png",
+		"2": "external/sprites/ui/card_styles/preview/ribbons/ribbon_power.png",
+		"3": "external/sprites/ui/card_styles/preview/ribbons/ribbon_status.png",
+		"4": "external/sprites/ui/card_styles/preview/ribbons/ribbon_curse.png",
+		"default": "external/sprites/ui/card_styles/preview/ribbons/ribbon_status.png"
+	},
+	"layout": {
+		"name_rect": [30, 5, 102, 21],
+		"art_rect": [11, 27, 122, 75],
+		"type_rect": [20, 96, 104, 20],
+		"description_rect": [16, 125, 112, 35],
+		"stars_rect": [15, 161, 80, 16],
+		"energy_rect": [-8, -8, 38, 38]
+	}
+}
+
