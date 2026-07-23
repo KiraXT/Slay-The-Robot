@@ -2,6 +2,7 @@ extends SceneTree
 
 const CARD_SCENE_PATH := "res://scenes/ui/Card.tscn"
 const CARD_DATA_SCRIPT_PATH := "res://data/prototype/CardData.gd"
+const CARD_SHOP_SCENE_PATH := "res://scenes/ui/shop/CardShopButton.tscn"
 
 # Mirrors CardData.CARD_TYPES order from data/prototype/CardData.gd.
 # Direct static references make this script fail before the direct runner initializes global classes.
@@ -31,6 +32,7 @@ func _run() -> void:
 	await _check_card_detail_treatment()
 	await _check_white_card_neutral_frame()
 	await _check_b_mech_template_layout()
+	await _check_card_shop_layout()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -125,7 +127,7 @@ func _check_layout_bounds() -> void:
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
 	for node_name in [
-		"CardHeaderBackground",
+		"CardChrome",
 		"CardName",
 		"CardTexture",
 		"CardTypeBackground",
@@ -136,12 +138,7 @@ func _check_layout_bounds() -> void:
 
 	_assert_vertical_non_overlap(visual, "CardDescription", "CardTypeBackground")
 	_assert_vertical_non_overlap(visual, "CardDescription", "CardStars")
-	_assert_control_inside(
-		_find_descendant(visual, "CardHeaderBackground") as Control,
-		_find_descendant(visual, "CardName") as Control,
-		"CardName inside header"
-	)
-	_assert_vertical_non_overlap(visual, "CardName", "CardArtFrame")
+	_assert_vertical_non_overlap(visual, "CardName", "CardTexture")
 
 	card.queue_free()
 	await process_frame
@@ -160,16 +157,15 @@ func _check_card_detail_treatment() -> void:
 		return
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
-	_assert_panel_style(visual, "ColorBackground", 12, 3, "outer rounded frame")
-	_assert_panel_style(visual, "CardHeaderBackground", 5, 1, "dark title header")
-	_assert_panel_style(visual, "CardBackground", 9, 1, "inner rounded card body")
-	_assert_panel_style(visual, "CardArtFrame", 5, 2, "card art rounded frame")
-	_assert_panel_style(visual, "CardDescriptionBackground", 7, 1, "bottom description panel")
+	_assert_texture_rect_visible(visual, "CardChrome", "full-card master")
 	_assert_panel_style(visual, "CardTypeBackground", 6, 1, "type ribbon")
-	_assert_panel_style(visual, "EnergySprite", 17, 3, "energy badge")
-
-	_assert_rect_inside(_find_descendant(visual, "CardArtFrame") as Control, _find_descendant(visual, "CardTexture") as Control, "CardTexture inside art frame")
-	_assert_rect_inside(_find_descendant(visual, "CardDescriptionBackground") as Control, _find_descendant(visual, "CardDescription") as Control, "CardDescription inside bottom panel")
+	_assert_hidden_descendant(visual, "ColorBackground", "legacy outer frame")
+	_assert_hidden_descendant(visual, "CardHeaderBackground", "legacy title header")
+	_assert_hidden_descendant(visual, "CardArtFrame", "legacy art frame")
+	_assert_hidden_descendant(visual, "CardDescriptionBackground", "legacy description panel")
+	_assert_dynamic_layer_above_master(visual, "CardName")
+	_assert_dynamic_layer_above_master(visual, "CardDescription")
+	_assert_dynamic_layer_above_master(visual, "EnergyCost")
 
 	card.queue_free()
 	await process_frame
@@ -188,9 +184,11 @@ func _check_white_card_neutral_frame() -> void:
 		return
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
-	_assert_panel_bg_luminance_below(visual, "ColorBackground", 0.78, "white card outer frame")
-	_assert_panel_bg_luminance_below(visual, "CardTypeBackground", 0.72, "white card type ribbon")
-	_assert_panel_border_luminance_below(visual, "CardArtFrame", 0.70, "white card art border")
+	var chrome := _find_descendant(visual, "CardChrome") as TextureRect
+	if chrome == null or chrome.texture == null:
+		failures.append("white card must use a full-card master")
+	elif not chrome.texture.resource_path.ends_with("card_master_silver.png"):
+		failures.append("white card must use the silver full-card master")
 
 	card.queue_free()
 	await process_frame
@@ -209,16 +207,40 @@ func _check_b_mech_template_layout() -> void:
 		return
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
-	_assert_no_visible_descendant(visual, "CardFaction", "top faction badge")
-	_assert_no_visible_descendant(visual, "CardFactionStamp", "bottom faction stamp")
-	_assert_rect_top_at_most(visual, "CardName", 7.0, "card name")
-	_assert_rect_top_at_most(visual, "CardArtFrame", 28.0, "card art frame")
-	_assert_rect_top_at_most(visual, "CardTypeBackground", 98.0, "card type ribbon")
-	_assert_rect_top_at_most(visual, "CardDescriptionBackground", 106.0, "effect panel")
-	_assert_rect_height_at_least(visual, "CardDescriptionBackground", 74.0, "effect panel")
+	_assert_rect_height_at_least(visual, "CardVisual", 202.0, "tall card visual")
+	_assert_rect_top_at_most(visual, "CardName", 12.0, "card name")
+	_assert_rect_top_at_most(visual, "CardTexture", 38.0, "card artwork")
+	_assert_rect_height_at_least(visual, "CardTexture", 88.0, "large card artwork")
+	_assert_rect_top_at_most(visual, "CardTypeBackground", 122.0, "card type ribbon")
+	_assert_rect_width_at_most(visual, "CardTypeBackground", 65.0, "short card type ribbon")
+	_assert_rect_top_at_most(visual, "CardDescription", 142.0, "effect text")
 	_assert_label_font_size_at_most(visual, "CardStars", 10, "card stars")
+	_assert_pivot_animation_center(card, Vector2(72.0, 101.0))
 
 	card.queue_free()
+	await process_frame
+
+
+func _check_card_shop_layout() -> void:
+	var packed_scene := load(CARD_SHOP_SCENE_PATH) as PackedScene
+	if packed_scene == null:
+		failures.append("failed to load card shop scene %s" % CARD_SHOP_SCENE_PATH)
+		return
+	var shop_button := packed_scene.instantiate() as Control
+	root.add_child(shop_button)
+	await process_frame
+
+	var card := shop_button.get_node_or_null("Card") as Control
+	var price := shop_button.get_node_or_null("PriceLabel") as Control
+	if card == null or price == null:
+		failures.append("card shop must contain Card and PriceLabel controls")
+	else:
+		if card.get_global_rect().intersects(price.get_global_rect()):
+			failures.append("card shop price must not overlap the 202px card")
+		if not shop_button.get_global_rect().encloses(price.get_global_rect()):
+			failures.append("card shop price must remain inside the shop button")
+
+	shop_button.queue_free()
 	await process_frame
 
 
@@ -334,6 +356,66 @@ func _assert_rect_height_at_least(parent: Control, node_name: String, min_height
 	var height := node.get_global_rect().size.y
 	if height < min_height:
 		failures.append("%s height expected >= %.1f, got %.1f" % [label, min_height, height])
+
+
+func _assert_texture_rect_visible(parent: Control, node_name: String, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as TextureRect
+	if node == null:
+		failures.append("%s missing TextureRect %s" % [label, node_name])
+		return
+	if not node.visible or node.texture == null:
+		failures.append("%s must be visible with a texture" % label)
+
+
+func _assert_hidden_descendant(parent: Control, node_name: String, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as CanvasItem
+	if node == null:
+		failures.append("%s missing fallback node %s" % [label, node_name])
+		return
+	if node.visible:
+		failures.append("%s must be hidden by the full-card master" % label)
+
+
+func _assert_dynamic_layer_above_master(parent: Control, node_name: String) -> void:
+	var chrome := _find_descendant(parent, "CardChrome") as Control
+	var dynamic_node := _find_descendant(parent, node_name) as Control
+	if chrome == null or dynamic_node == null:
+		failures.append("%s layer-order nodes are missing" % node_name)
+		return
+	if chrome.get_parent() != parent or dynamic_node.get_parent() != parent:
+		failures.append("%s and CardChrome must be direct CardVisual children" % node_name)
+		return
+	if dynamic_node.get_index() <= chrome.get_index():
+		failures.append("%s must render above CardChrome" % node_name)
+
+
+func _assert_pivot_animation_center(card: Node, expected_center: Vector2) -> void:
+	var animation_player := card.get_node_or_null("AnimationPlayer") as AnimationPlayer
+	if animation_player == null:
+		failures.append("card animation player is missing")
+		return
+	for animation_name: StringName in [&"RESET", &"card_hover"]:
+		var animation := animation_player.get_animation(animation_name)
+		if animation == null:
+			failures.append("%s animation is missing" % animation_name)
+			continue
+		var track := animation.find_track(NodePath("Pivot:position"), Animation.TYPE_VALUE)
+		if track < 0 or animation.track_get_key_count(track) == 0:
+			failures.append("%s must animate Pivot:position" % animation_name)
+			continue
+		var start_position := animation.track_get_key_value(track, 0) as Vector2
+		if not start_position.is_equal_approx(expected_center):
+			failures.append("%s must start from card center %s, got %s" % [animation_name, expected_center, start_position])
+
+
+func _assert_rect_width_at_most(parent: Control, node_name: String, max_width: float, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Control
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return
+	var width := node.get_global_rect().size.x
+	if width > max_width:
+		failures.append("%s width expected <= %.1f, got %.1f" % [label, max_width, width])
 
 
 func _assert_label_font_size_at_most(parent: Node, node_name: String, max_size: int, label: String) -> void:

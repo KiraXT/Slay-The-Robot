@@ -34,19 +34,29 @@ const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 
 const CARD_STYLE_PACK_DIR := "external/data/card_styles/"
 const CARD_STYLE_PACK_FILE := "card_style_preview.json"
+const CARD_ART_FALLBACK_RECT := Rect2(15.0, 34.0, 116.0, 76.0)
+const CARD_ART_MASTER_RECT := Rect2(17.0, 34.0, 114.0, 94.0)
 const CARD_STYLE_SHARED_PANEL_MAP := {
-	"CardHeaderBackground": "header_bar",
-	"CardArtFrame": "art_frame",
-	"CardDescriptionBackground": "description_panel",
-	"EnergySprite": "energy_badge",
 	"CardGlow": "glow",
 }
+const CARD_STYLE_LEGACY_LAYERS := [
+	"ColorBackground",
+	"CardBackground",
+	"CardHeaderBackground",
+	"CardArtFrame",
+	"CardDescriptionBackground",
+	"CardTypeConnector",
+	"CardFactionBadge",
+	"CardFactionStamp",
+	"EnergySprite",
+]
 
 @onready var card_button: Button = %CardButton
 
 @onready var pivot: Node2D = $Pivot
 
 @onready var card_texture: TextureRect = %CardTexture
+@onready var card_chrome: TextureRect = %CardChrome
 @onready var card_name: RichLabelAutoSizer = %CardName
 @onready var card_type: Label = %CardType
 @onready var card_description: RichLabelAutoSizer = %CardDescription
@@ -57,8 +67,12 @@ const CARD_STYLE_SHARED_PANEL_MAP := {
 @onready var card_art_frame: Panel = %CardArtFrame
 @onready var card_description_background: Panel = %CardDescriptionBackground
 @onready var card_type_background: Panel = %CardTypeBackground
+@onready var card_type_connector: Panel = %CardTypeConnector
+@onready var card_faction_badge: Panel = %CardFactionBadge
+@onready var card_faction_stamp: Panel = %CardFactionStamp
 @onready var card_stars: Label = %CardStars
 @onready var energy_sprite: Panel = %EnergySprite
+var _using_full_card_master := false
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var card_glow: Panel = %CardGlow
@@ -133,7 +147,8 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	_apply_card_palette(color_data, card_data.card_color_id)
 	_apply_card_style_pack(card_data.card_color_id, card_data.card_type)
 	
-	energy_sprite.visible = card_data.card_is_playable
+	energy_sprite.visible = card_data.card_is_playable and not _using_full_card_master
+	card_energy_cost.visible = card_data.card_is_playable
 	
 	if card_data.card_energy_cost_is_variable:
 		card_energy_cost.text = "X"
@@ -155,7 +170,11 @@ func _get_card_star_label(card_rarity_id: int) -> String:
 
 
 func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
+	_using_full_card_master = false
+	card_chrome.visible = false
 	card_background.visible = true
+	_set_control_rect(card_texture, CARD_ART_FALLBACK_RECT)
+	_set_legacy_card_layers_visible(true)
 	var frame_color := CARD_DEFAULT_FRAME_COLOR
 	if color_data != null:
 		frame_color = color_data.color
@@ -182,6 +201,9 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	_set_panel_style(card_art_frame, panel_white, frame_edge)
 	_set_panel_style(card_description_background, panel_white, description_border)
 	_set_panel_style(card_type_background, type_color, panel_white)
+	_set_panel_style(card_type_connector, frame_color, frame_highlight)
+	_set_panel_style(card_faction_badge, frame_color.darkened(0.20), frame_highlight)
+	_set_panel_style(card_faction_stamp, frame_color.darkened(0.20), frame_highlight)
 	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_highlight)
 
 func _set_panel_style(panel: Panel, bg_color: Color, border_color: Color) -> void:
@@ -200,6 +222,17 @@ func _apply_card_style_pack(card_color_id: String, card_type_id: int) -> void:
 	if not FileAccess.file_exists(FileLoader._get_modified_filepath(style_path)):
 		return
 	var style_data := FileLoader.load_json(CARD_STYLE_PACK_DIR, CARD_STYLE_PACK_FILE)
+	var master_slots: Dictionary = style_data.get("master_slots", {})
+	var master_path := _get_style_variant_path(master_slots, card_color_id)
+	var type_slots: Dictionary = style_data.get("type_slots", {})
+	var type_path := _get_style_variant_path(type_slots, str(card_type_id))
+	if not _try_apply_full_card_master(master_path, type_path):
+		return
+
+	_using_full_card_master = true
+	card_chrome.visible = true
+	_set_control_rect(card_texture, CARD_ART_MASTER_RECT)
+	_set_legacy_card_layers_visible(false)
 	var shared_slots: Dictionary = style_data.get("shared_slots", {})
 	for panel_name: String in CARD_STYLE_SHARED_PANEL_MAP:
 		var panel := _get_card_style_panel(panel_name)
@@ -208,16 +241,47 @@ func _apply_card_style_pack(card_color_id: String, card_type_id: int) -> void:
 		var texture_path := str(shared_slots.get(CARD_STYLE_SHARED_PANEL_MAP[panel_name], ""))
 		_apply_texture_stylebox(panel, texture_path)
 
-	var color_slots: Dictionary = style_data.get("color_slots", {})
-	var type_slots: Dictionary = style_data.get("type_slots", {})
-	_apply_texture_stylebox(card_color, _get_style_variant_path(color_slots, card_color_id))
-	_apply_texture_stylebox(card_type_background, _get_style_variant_path(type_slots, str(card_type_id)))
-	card_background.visible = false
+	card_type_background.visible = true
 	card_name.add_theme_color_override("default_color", Color.WHITE)
+	card_name.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.04, 0.92))
+	card_name.add_theme_constant_override("outline_size", 2)
 
 
 func _get_style_variant_path(slots: Dictionary, key: String) -> String:
 	return str(slots.get(key, slots.get("default", "")))
+
+
+func _set_legacy_card_layers_visible(is_visible: bool) -> void:
+	for node_name: String in CARD_STYLE_LEGACY_LAYERS:
+		var node := get_node_or_null("%" + node_name) as CanvasItem
+		if node != null:
+			node.visible = is_visible
+
+
+func _try_apply_full_card_master(master_path: String, type_path: String) -> bool:
+	var master_texture := _load_style_texture(master_path)
+	var type_texture := _load_style_texture(type_path)
+	if master_texture == null or type_texture == null:
+		return false
+	card_chrome.texture = master_texture
+	_apply_texture_stylebox_texture(card_type_background, type_texture)
+	return true
+
+
+func _load_style_texture(texture_path: String) -> Texture2D:
+	if texture_path.is_empty():
+		return null
+	if not FileAccess.file_exists(FileLoader._get_modified_filepath(texture_path)):
+		return null
+	var texture := FileLoader.load_texture(texture_path)
+	if texture == null or texture.get_size() == Vector2.ZERO:
+		return null
+	return texture
+
+
+func _set_control_rect(control: Control, rect: Rect2) -> void:
+	control.position = rect.position
+	control.size = rect.size
 
 
 func _get_card_style_panel(panel_name: String) -> Panel:
@@ -243,13 +307,13 @@ func _get_card_style_panel(panel_name: String) -> Panel:
 
 
 func _apply_texture_stylebox(panel: Panel, texture_path: String) -> void:
-	if texture_path.is_empty():
+	var texture := _load_style_texture(texture_path)
+	if texture == null:
 		return
-	if not FileAccess.file_exists(FileLoader._get_modified_filepath(texture_path)):
-		return
-	var texture := FileLoader.load_texture(texture_path)
-	if texture == null or texture.get_size() == Vector2.ZERO:
-		return
+	_apply_texture_stylebox_texture(panel, texture)
+
+
+func _apply_texture_stylebox_texture(panel: Panel, texture: Texture2D) -> void:
 	var style := StyleBoxTexture.new()
 	style.texture = texture
 	style.texture_margin_left = 8

@@ -1,15 +1,55 @@
 extends SceneTree
 
-const STYLE_DIR := "external/data/card_styles/"
-const STYLE_FILE := "card_style_preview.json"
-const PREVIEW_PATH := "tmp/card_style_preview/card_style_reference_variants.png"
-const CARD_SIZE := Vector2i(144, 184)
+const PREVIEW_PATH := "tmp/card_style_preview/card_style_full_master_runtime.png"
+const CARD_SCENE_PATH := "res://scenes/ui/Card.tscn"
+const CARD_DATA_SCRIPT_PATH := "res://data/prototype/CardData.gd"
+const CARD_SCALE := 1.35
 const PREVIEW_CASES := [
-	{"color": "color_red", "type": "0", "name": "烈焰冲击"},
-	{"color": "color_blue", "type": "1", "name": "误打误撞"},
-	{"color": "color_green", "type": "2", "name": "生长核心"},
-	{"color": "color_orange", "type": "3", "name": "整备姿态"},
-	{"color": "color_white", "type": "4", "name": "禁忌回响"},
+	{
+		"color": "color_red",
+		"type": 0,
+		"rarity": 2,
+		"energy": 2,
+		"name": "烈焰冲击",
+		"description": "对敌人造成 10 点伤害。",
+		"art": "external/sprites/cards/card_attack_big.png",
+	},
+	{
+		"color": "color_blue",
+		"type": 1,
+		"rarity": 1,
+		"energy": 1,
+		"name": "误打误撞",
+		"description": "随机打出弃牌堆中的 1 张牌。",
+		"art": "external/sprites/cards/blue/randomize_hand_card.png",
+	},
+	{
+		"color": "color_green",
+		"type": 2,
+		"rarity": 3,
+		"energy": 2,
+		"name": "生长核心",
+		"description": "本回合获得额外力量。",
+		"art": "external/sprites/cards/green/card_chorus.png",
+	},
+	{
+		"color": "color_orange",
+		"type": 3,
+		"rarity": 0,
+		"energy": 0,
+		"name": "整备姿态",
+		"description": "保留手牌并获得格挡。",
+		"art": "external/sprites/cards/orange/card_ready_stance.png",
+	},
+	{
+		"color": "color_white",
+		"type": 4,
+		"rarity": 2,
+		"energy": 3,
+		"name": "禁忌回响",
+		"description": "触发上一张卡牌的效果。",
+		"art": "external/sprites/cards/card_draft_random_attack.png",
+	},
 ]
 
 
@@ -18,57 +58,51 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var file_loader := root.get_node("FileLoader")
-	var style_data := file_loader.call("load_json", STYLE_DIR, STYLE_FILE) as Dictionary
-	if style_data.is_empty():
-		push_error("Missing reference card style data")
+	var card_scene := load(CARD_SCENE_PATH) as PackedScene
+	var card_data_script := load(CARD_DATA_SCRIPT_PATH) as Script
+	if card_scene == null or card_data_script == null or not card_data_script.can_instantiate():
+		push_error("Unable to load runtime card preview dependencies")
 		quit(1)
 		return
 
-	var canvas := Image.create(840, 250, false, Image.FORMAT_RGBA8)
-	canvas.fill(Color(0.10, 0.12, 0.16, 1.0))
+	var viewport := SubViewport.new()
+	viewport.size = Vector2i(1100, 350)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	root.add_child(viewport)
+
+	var background := ColorRect.new()
+	background.size = Vector2(viewport.size)
+	background.color = Color(0.12, 0.15, 0.18, 1.0)
+	viewport.add_child(background)
+
 	for index in PREVIEW_CASES.size():
-		if not _draw_card(canvas, file_loader, style_data, PREVIEW_CASES[index], Vector2i(20 + index * 164, 34)):
-			quit(1)
-			return
+		var case_data: Dictionary = PREVIEW_CASES[index]
+		var data = card_data_script.new()
+		data.card_name = case_data["name"]
+		data.card_description = case_data["description"]
+		data.card_color_id = case_data["color"]
+		data.card_type = case_data["type"]
+		data.card_rarity = case_data["rarity"]
+		data.card_energy_cost = case_data["energy"]
+		data.card_requires_target = false
+		data.card_texture_path = case_data["art"]
+
+		var card := card_scene.instantiate()
+		viewport.add_child(card)
+		card.position = Vector2(20.0 + index * 215.0, 38.0)
+		card.scale = Vector2.ONE * CARD_SCALE
+		card.call("init", data, 0.0, false, false)
+
+	await process_frame
+	await process_frame
+	await process_frame
 
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://tmp/card_style_preview"))
-	var error := canvas.save_png(ProjectSettings.globalize_path("res://" + PREVIEW_PATH))
+	var image := viewport.get_texture().get_image()
+	var error := image.save_png(ProjectSettings.globalize_path("res://" + PREVIEW_PATH))
 	if error != OK:
-		push_error("Failed to save preview: %s" % error)
+		push_error("Failed to save runtime card preview: %s" % error)
 		quit(1)
 		return
-	print("CARD_STYLE_REFERENCE_PREVIEW_RENDERED: %s" % PREVIEW_PATH)
+	print("CARD_STYLE_FULL_MASTER_PREVIEW_RENDERED: %s" % PREVIEW_PATH)
 	quit(0)
-
-
-func _draw_card(canvas: Image, file_loader: Node, style_data: Dictionary, case_data: Dictionary, origin: Vector2i) -> bool:
-	var shared_slots := style_data.get("shared_slots", {}) as Dictionary
-	var color_slots := style_data.get("color_slots", {}) as Dictionary
-	var type_slots := style_data.get("type_slots", {}) as Dictionary
-	var layers := [
-		{"path": color_slots.get(case_data["color"], color_slots.get("default", "")), "rect": Rect2i(origin, CARD_SIZE)},
-		{"path": shared_slots.get("header_bar", ""), "rect": Rect2i(origin + Vector2i(29, 4), Vector2i(103, 23))},
-		{"path": shared_slots.get("art_frame", ""), "rect": Rect2i(origin + Vector2i(11, 27), Vector2i(122, 75))},
-		{"path": shared_slots.get("description_panel", ""), "rect": Rect2i(origin + Vector2i(8, 105), Vector2i(128, 75))},
-		{"path": type_slots.get(case_data["type"], type_slots.get("default", "")), "rect": Rect2i(origin + Vector2i(20, 96), Vector2i(104, 20))},
-		{"path": shared_slots.get("energy_badge", ""), "rect": Rect2i(origin + Vector2i(-8, -8), Vector2i(38, 38))},
-	]
-	for layer: Dictionary in layers:
-		if not _blend_reference_layer(canvas, str(layer["path"]), layer["rect"]):
-			push_error("Missing reference layer for %s" % case_data["color"])
-			return false
-	return true
-
-
-func _blend_reference_layer(canvas: Image, texture_path: String, target_rect: Rect2i) -> bool:
-	if texture_path.is_empty():
-		return false
-	var absolute_path := ProjectSettings.globalize_path("res://" + texture_path)
-	var layer := Image.load_from_file(absolute_path)
-	if layer == null or layer.is_empty():
-		return false
-	layer.convert(Image.FORMAT_RGBA8)
-	layer.resize(target_rect.size.x, target_rect.size.y, Image.INTERPOLATE_LANCZOS)
-	canvas.blend_rect(layer, Rect2i(Vector2i.ZERO, target_rect.size), target_rect.position)
-	return true
