@@ -30,6 +30,7 @@ func _run() -> void:
 	await _check_visual_mappings()
 	await _check_layout_bounds()
 	await _check_card_detail_treatment()
+	await _check_energy_text_sizing()
 	await _check_white_card_neutral_frame()
 	await _check_b_mech_template_layout()
 	await _check_card_shop_layout()
@@ -166,8 +167,46 @@ func _check_card_detail_treatment() -> void:
 	_assert_dynamic_layer_above_master(visual, "CardName")
 	_assert_dynamic_layer_above_master(visual, "CardDescription")
 	_assert_dynamic_layer_above_master(visual, "EnergyCost")
+	_assert_exact_rect(visual, "CardName", Rect2(34.0, 6.0, 90.0, 24.0), "card name")
+	_assert_exact_rect(visual, "EnergyCost", Rect2(2.0, 3.0, 38.0, 38.0), "energy cost")
+	_assert_centered_label(visual, "EnergyCost", "energy cost")
+	_assert_emboldened_font(visual, "EnergyCost", "font", 0.8, "energy cost")
+	_assert_emboldened_font(visual, "CardName", "normal_font", 0.65, "card name")
+	_assert_rich_text_vertical_center(visual, "CardName", "card name")
 
 	card.queue_free()
+	await process_frame
+
+
+func _check_energy_text_sizing() -> void:
+	var short_card := await _render_card({
+		"name": "short energy",
+		"color_id": "color_blue",
+		"type": CARD_TYPE_SKILL,
+		"rarity": CARD_RARITY_COMMON,
+		"energy": "2",
+	})
+	if short_card == null:
+		failures.append("short energy failed to render card")
+		return
+	_assert_label_font_size(short_card, "EnergyCost", 19, "short energy")
+	short_card.queue_free()
+	await process_frame
+
+	var long_card := await _render_card({
+		"name": "long energy",
+		"color_id": "color_blue",
+		"type": CARD_TYPE_SKILL,
+		"rarity": CARD_RARITY_COMMON,
+		"energy": "X-12",
+		"variable_upper_bound": 12,
+	})
+	if long_card == null:
+		failures.append("long energy failed to render card")
+		return
+	_assert_label(_find_descendant(long_card, "EnergyCost"), "X-12", "long energy")
+	_assert_label_font_size(long_card, "EnergyCost", 14, "long energy")
+	long_card.queue_free()
 	await process_frame
 
 
@@ -262,7 +301,8 @@ func _render_card(case_data: Dictionary) -> Node:
 	data.card_type = case_data["type"]
 	data.card_rarity = case_data["rarity"]
 	data.card_energy_cost = int(case_data.get("energy", "1")) if str(case_data.get("energy", "1")).is_valid_int() else 1
-	data.card_energy_cost_is_variable = case_data.get("energy", "") == "X"
+	data.card_energy_cost_is_variable = str(case_data.get("energy", "")).begins_with("X")
+	data.card_energy_cost_variable_upper_bound = int(case_data.get("variable_upper_bound", 0))
 	data.card_requires_target = false
 	data.card_texture_path = ""
 
@@ -426,6 +466,68 @@ func _assert_label_font_size_at_most(parent: Node, node_name: String, max_size: 
 	var font_size := node.get_theme_font_size("font_size")
 	if font_size > max_size:
 		failures.append("%s font size expected <= %d, got %d" % [label, max_size, font_size])
+
+
+func _assert_label_font_size(parent: Node, node_name: String, expected_size: int, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Label
+	if node == null:
+		failures.append("%s missing label %s" % [label, node_name])
+		return
+	var font_size := node.get_theme_font_size("font_size")
+	if font_size != expected_size:
+		failures.append("%s font size expected %d, got %d" % [label, expected_size, font_size])
+
+
+func _assert_exact_rect(parent: Control, node_name: String, expected_rect: Rect2, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Control
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return
+	var actual_rect := Rect2(node.position, node.size)
+	if not actual_rect.is_equal_approx(expected_rect):
+		failures.append("%s rect expected %s, got %s" % [label, expected_rect, actual_rect])
+
+
+func _assert_centered_label(parent: Node, node_name: String, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as Label
+	if node == null:
+		failures.append("%s missing label %s" % [label, node_name])
+		return
+	if node.horizontal_alignment != HORIZONTAL_ALIGNMENT_CENTER:
+		failures.append("%s must be horizontally centered" % label)
+	if node.vertical_alignment != VERTICAL_ALIGNMENT_CENTER:
+		failures.append("%s must be vertically centered" % label)
+
+
+func _assert_emboldened_font(
+	parent: Node,
+	node_name: String,
+	theme_key: String,
+	expected_embolden: float,
+	label: String
+) -> void:
+	var node := _find_descendant(parent, node_name) as Control
+	if node == null:
+		failures.append("%s missing node %s" % [label, node_name])
+		return
+	var font := node.get_theme_font(theme_key)
+	if not font is FontVariation:
+		failures.append("%s must use a FontVariation" % label)
+		return
+	var actual_embolden := (font as FontVariation).variation_embolden
+	if not is_equal_approx(actual_embolden, expected_embolden):
+		failures.append(
+			"%s embolden expected %.2f, got %.2f" % [label, expected_embolden, actual_embolden]
+		)
+
+
+func _assert_rich_text_vertical_center(parent: Node, node_name: String, label: String) -> void:
+	var node := _find_descendant(parent, node_name) as RichTextLabel
+	if node == null:
+		failures.append("%s missing RichTextLabel %s" % [label, node_name])
+		return
+	if node.vertical_alignment != VERTICAL_ALIGNMENT_CENTER:
+		failures.append("%s must be vertically centered" % label)
 
 
 func _assert_vertical_non_overlap(parent: Control, first_name: String, second_name: String) -> void:

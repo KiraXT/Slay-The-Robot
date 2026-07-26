@@ -55,6 +55,7 @@ const CARD_STYLE_LEGACY_LAYERS := [
 
 @onready var pivot: Node2D = $Pivot
 
+@onready var card_art_background: TextureRect = %CardArtBackground
 @onready var card_texture: TextureRect = %CardTexture
 @onready var card_chrome: TextureRect = %CardChrome
 @onready var card_name: RichLabelAutoSizer = %CardName
@@ -150,12 +151,14 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 	energy_sprite.visible = card_data.card_is_playable and not _using_full_card_master
 	card_energy_cost.visible = card_data.card_is_playable
 	
+	var energy_cost_text: String
 	if card_data.card_energy_cost_is_variable:
-		card_energy_cost.text = "X"
+		energy_cost_text = "X"
 		if card_data.card_energy_cost_variable_upper_bound >= 1:
-			card_energy_cost.text = "X-" + str(card_data.card_energy_cost_variable_upper_bound)
+			energy_cost_text = "X-" + str(card_data.card_energy_cost_variable_upper_bound)
 	else:
-		card_energy_cost.text = str(card_data.get_card_energy_cost())
+		energy_cost_text = str(card_data.get_card_energy_cost())
+	_update_energy_cost_visual(energy_cost_text)
 
 func _get_card_type_label(card_type_id: int) -> String:
 	if CARD_TYPE_LABELS.has(card_type_id):
@@ -173,7 +176,7 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	_using_full_card_master = false
 	card_chrome.visible = false
 	card_background.visible = true
-	_set_control_rect(card_texture, CARD_ART_FALLBACK_RECT)
+	_set_card_art_rect(CARD_ART_FALLBACK_RECT)
 	_set_legacy_card_layers_visible(true)
 	var frame_color := CARD_DEFAULT_FRAME_COLOR
 	if color_data != null:
@@ -196,6 +199,7 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 		description_border = CARD_NEUTRAL_FRAME_BORDER_COLOR.lightened(0.28)
 		background_color = Color(0.96, 0.97, 0.98, 0.98)
 
+	card_art_background.texture = _create_card_art_gradient(frame_color)
 	_set_panel_style(card_color, frame_color, frame_highlight)
 	_set_panel_style(card_background, background_color, panel_white)
 	_set_panel_style(card_art_frame, panel_white, frame_edge)
@@ -231,7 +235,7 @@ func _apply_card_style_pack(card_color_id: String, card_type_id: int) -> void:
 
 	_using_full_card_master = true
 	card_chrome.visible = true
-	_set_control_rect(card_texture, CARD_ART_MASTER_RECT)
+	_set_card_art_rect(CARD_ART_MASTER_RECT)
 	_set_legacy_card_layers_visible(false)
 	var shared_slots: Dictionary = style_data.get("shared_slots", {})
 	for panel_name: String in CARD_STYLE_SHARED_PANEL_MAP:
@@ -282,6 +286,31 @@ func _load_style_texture(texture_path: String) -> Texture2D:
 func _set_control_rect(control: Control, rect: Rect2) -> void:
 	control.position = rect.position
 	control.size = rect.size
+
+
+func _set_card_art_rect(rect: Rect2) -> void:
+	_set_control_rect(card_art_background, rect)
+	_set_control_rect(card_texture, rect)
+
+
+func _create_card_art_gradient(frame_color: Color) -> GradientTexture2D:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	gradient.colors = PackedColorArray([
+		frame_color.lightened(0.88),
+		frame_color.lightened(0.68),
+		frame_color.lightened(0.38),
+	])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill_from = Vector2(0.08, 0.05)
+	texture.fill_to = Vector2(0.92, 0.95)
+	return texture
+
+
+func _update_energy_cost_visual(cost_text: String) -> void:
+	card_energy_cost.text = cost_text
+	card_energy_cost.add_theme_font_size_override("font_size", 19 if cost_text.length() <= 2 else 14)
 
 
 func _get_card_style_panel(panel_name: String) -> Panel:

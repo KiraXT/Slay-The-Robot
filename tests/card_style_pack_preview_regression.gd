@@ -124,6 +124,7 @@ func _check_runtime_style_variants(style_data: Dictionary, file_loader: Node) ->
 			"%s type ribbon" % type_id
 		)
 		_assert_master_layer_order(visual, color_id)
+		_assert_card_art_gradient(visual, color_id)
 		for layer_name: String in LEGACY_STITCHED_LAYERS:
 			_assert_hidden(visual, layer_name, "%s legacy layer" % layer_name)
 		_assert_white_title(visual, color_id)
@@ -243,26 +244,54 @@ func _assert_texture_rect(visual: Control, node_name: String, expected_path: Str
 
 
 func _assert_master_layer_order(visual: Control, color_id: String) -> void:
+	var background := _find_descendant(visual, "CardArtBackground") as Control
 	var art := _find_descendant(visual, "CardTexture") as Control
 	var chrome := _find_descendant(visual, "CardChrome") as Control
 	var type_ribbon := _find_descendant(visual, "CardTypeBackground") as Control
 	var title := _find_descendant(visual, "CardName") as Control
 	var description := _find_descendant(visual, "CardDescription") as Control
 	var energy := _find_descendant(visual, "EnergyCost") as Control
-	for node: Control in [art, chrome, type_ribbon, title, description, energy]:
+	for node: Control in [background, art, chrome, type_ribbon, title, description, energy]:
 		if node == null:
 			failures.append("%s full-card stack is missing a dynamic layer" % color_id)
 			return
 		if node.get_parent() != visual:
 			failures.append("%s full-card stack layers must be direct CardVisual children" % color_id)
 			return
-	if not (art.get_index() < chrome.get_index()
+	if not (background.get_index() < art.get_index()
+			and art.get_index() < chrome.get_index()
 			and chrome.get_index() < title.get_index()
 			and chrome.get_index() < description.get_index()
 			and chrome.get_index() < energy.get_index()):
-		failures.append("%s layer order must be art, full-card master, then dynamic content" % color_id)
+		failures.append("%s layer order must be background, art, full-card master, then dynamic content" % color_id)
+	if not background.get_global_rect().is_equal_approx(art.get_global_rect()):
+		failures.append("%s art background must match the artwork rect" % color_id)
 	if type_ribbon.z_index <= chrome.z_index and type_ribbon.get_index() <= chrome.get_index():
 		failures.append("%s type ribbon must render above the full-card master" % color_id)
+
+
+func _assert_card_art_gradient(visual: Control, color_id: String) -> void:
+	var background := _find_descendant(visual, "CardArtBackground") as TextureRect
+	if background == null:
+		failures.append("%s card art background must be a TextureRect" % color_id)
+		return
+	if not background.texture is GradientTexture2D:
+		failures.append("%s card art background must use GradientTexture2D" % color_id)
+		return
+	var texture := background.texture as GradientTexture2D
+	if not texture.fill_from.is_equal_approx(Vector2(0.08, 0.05)):
+		failures.append("%s gradient fill_from is incorrect" % color_id)
+	if not texture.fill_to.is_equal_approx(Vector2(0.92, 0.95)):
+		failures.append("%s gradient fill_to is incorrect" % color_id)
+	if texture.gradient == null or texture.gradient.colors.size() != 3:
+		failures.append("%s gradient must contain three color stops" % color_id)
+		return
+	for color: Color in texture.gradient.colors:
+		if not is_equal_approx(color.a, 1.0):
+			failures.append("%s gradient colors must be opaque" % color_id)
+			return
+	if texture.gradient.colors[0].is_equal_approx(texture.gradient.colors[2]):
+		failures.append("%s gradient endpoints must differ" % color_id)
 
 
 func _assert_hidden(visual: Control, node_name: String, label: String) -> void:
