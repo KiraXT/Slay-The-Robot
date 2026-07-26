@@ -159,7 +159,7 @@ func _check_card_detail_treatment() -> void:
 
 	var visual := card.get_node("Pivot/CardVisual") as Control
 	_assert_texture_rect_visible(visual, "CardChrome", "full-card master")
-	_assert_panel_style(visual, "CardTypeBackground", 6, 1, "type ribbon")
+	_assert_texture_rect_visible(visual, "CardTypeBackground", "type ribbon")
 	_assert_hidden_descendant(visual, "ColorBackground", "legacy outer frame")
 	_assert_hidden_descendant(visual, "CardHeaderBackground", "legacy title header")
 	_assert_hidden_descendant(visual, "CardArtFrame", "legacy art frame")

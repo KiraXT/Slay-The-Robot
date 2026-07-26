@@ -77,6 +77,8 @@ func _check_style_pack(file_loader: Node) -> Dictionary:
 	_check_slot_group(style_data, "master_slots", MASTER_SLOT_BY_ID.keys(), file_loader)
 	_check_slot_group(style_data, "type_slots", TYPE_SLOT_BY_ID.keys(), file_loader)
 	_check_transparent_edge_contamination(style_data)
+	_check_master_ribbon_continuity(style_data)
+	_check_type_ribbon_geometry(style_data)
 	return style_data
 
 
@@ -117,10 +119,16 @@ func _check_runtime_style_variants(style_data: Dictionary, file_loader: Node) ->
 			str(file_loader.call("_get_modified_filepath", MASTER_SLOT_BY_ID[color_id])),
 			"%s full-card master" % color_id
 		)
-		_assert_panel_texture(
+		_assert_texture_rect(
 			visual,
 			"CardTypeBackground",
 			str(file_loader.call("_get_modified_filepath", TYPE_SLOT_BY_ID[type_id])),
+			"%s type ribbon" % type_id
+		)
+		_assert_control_rect(
+			visual,
+			"CardTypeBackground",
+			Rect2(49.0, 119.0, 48.0, 14.0),
 			"%s type ribbon" % type_id
 		)
 		_assert_master_layer_order(visual, color_id)
@@ -196,6 +204,45 @@ func _check_transparent_edge_contamination(style_data: Dictionary) -> void:
 			failures.append("%s contains %d semi-transparent chroma-green edge pixels" % [path, contaminated_pixels])
 
 
+func _check_master_ribbon_continuity(style_data: Dictionary) -> void:
+	var master_slots := style_data.get("master_slots", {}) as Dictionary
+	for color_id: String in ["color_red", "color_blue", "color_green", "color_orange", "color_white"]:
+		var path := str(master_slots.get(color_id, ""))
+		var image := Image.load_from_file(ProjectSettings.globalize_path("res://" + path))
+		if image == null or image.is_empty():
+			continue
+		image.convert(Image.FORMAT_RGBA8)
+		if image.get_pixel(288, 503).a <= 0.5:
+			failures.append("%s full-card master must retain the reference ribbon body" % color_id)
+
+
+func _check_type_ribbon_geometry(style_data: Dictionary) -> void:
+	var type_slots := style_data.get("type_slots", {}) as Dictionary
+	for type_id: String in ["0", "1", "2", "3", "4"]:
+		var path := str(type_slots.get(type_id, ""))
+		var image := Image.load_from_file(ProjectSettings.globalize_path("res://" + path))
+		if image == null or image.is_empty():
+			continue
+		image.convert(Image.FORMAT_RGBA8)
+		if image.get_size() != Vector2i(192, 56):
+			failures.append("%s type ribbon size expected (192, 56), got %s" % [type_id, image.get_size()])
+			continue
+		if image.get_pixel(96, 28).a <= 0.5:
+			failures.append("%s type ribbon must retain an opaque center" % type_id)
+		var has_transparent_corner := false
+		for point: Vector2i in [
+			Vector2i(0, 0),
+			Vector2i(191, 0),
+			Vector2i(0, 55),
+			Vector2i(191, 55),
+		]:
+			if image.get_pixelv(point).a <= 0.05:
+				has_transparent_corner = true
+				break
+		if not has_transparent_corner:
+			failures.append("%s type ribbon must retain a transparent bevel boundary" % type_id)
+
+
 func _render_style_card(case_data: Dictionary) -> Node:
 	var card_data_script := load(CARD_DATA_SCRIPT_PATH) as Script
 	var packed_scene := load(CARD_SCENE_PATH) as PackedScene
@@ -220,20 +267,6 @@ func _render_style_card(case_data: Dictionary) -> Node:
 	return card_scene
 
 
-func _assert_panel_texture(visual: Control, panel_name: String, expected_path: String, label: String) -> void:
-	var panel := _find_descendant(visual, panel_name) as Panel
-	if panel == null:
-		failures.append("%s panel must exist" % label)
-		return
-	var stylebox := panel.get_theme_stylebox("panel")
-	if not stylebox is StyleBoxTexture:
-		failures.append("%s must use a reference StyleBoxTexture" % label)
-		return
-	var texture := (stylebox as StyleBoxTexture).texture
-	if texture == null or texture.resource_path != expected_path:
-		failures.append("%s must use %s" % [label, expected_path])
-
-
 func _assert_texture_rect(visual: Control, node_name: String, expected_path: String, label: String) -> void:
 	var texture_rect := _find_descendant(visual, node_name) as TextureRect
 	if texture_rect == null:
@@ -241,6 +274,21 @@ func _assert_texture_rect(visual: Control, node_name: String, expected_path: Str
 		return
 	if texture_rect.texture == null or texture_rect.texture.resource_path != expected_path:
 		failures.append("%s must use %s" % [label, expected_path])
+
+
+func _assert_control_rect(
+	visual: Control,
+	node_name: String,
+	expected_rect: Rect2,
+	label: String
+) -> void:
+	var control := _find_descendant(visual, node_name) as Control
+	if control == null:
+		failures.append("%s control must exist" % label)
+		return
+	var actual_rect := Rect2(control.position, control.size)
+	if not actual_rect.is_equal_approx(expected_rect):
+		failures.append("%s rect expected %s, got %s" % [label, expected_rect, actual_rect])
 
 
 func _assert_master_layer_order(visual: Control, color_id: String) -> void:

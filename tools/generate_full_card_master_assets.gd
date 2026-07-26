@@ -3,8 +3,8 @@ extends SceneTree
 const SOURCE_PATH := "designer/art_source/card_styles/full_master_v1/card_master_chroma.png"
 const OUTPUT_DIR := "external/sprites/ui/card_styles/full_master"
 const MASTER_SIZE := Vector2i(576, 808)
-const RIBBON_SOURCE_RECT := Rect2i(352, 870, 370, 100)
-const RIBBON_SIZE := Vector2i(240, 64)
+const RIBBON_SOURCE_RECT := Rect2i(358, 874, 358, 94)
+const RIBBON_SIZE := Vector2i(192, 56)
 
 const MASTER_VARIANTS := {
 	"card_master_red.png": {"hue": 0.99, "saturation": 0.95},
@@ -84,9 +84,6 @@ func _remove_chroma(source: Image) -> Image:
 	for y in result.get_height():
 		for x in result.get_width():
 			var color: Color = result.get_pixel(x, y)
-			if _is_master_ribbon_body(x, y):
-				result.set_pixel(x, y, Color.TRANSPARENT)
-				continue
 			if _is_chroma_green(color):
 				color = _decontaminate_chroma(color)
 			result.set_pixel(x, y, color)
@@ -164,17 +161,6 @@ func _is_purple(color: Color) -> bool:
 	return color.s > 0.18 and color.h > 0.67 and color.h < 0.90
 
 
-func _is_master_ribbon_body(x: int, y: int) -> bool:
-	var top := 874.0
-	var bottom := 968.0
-	if y < top or y > bottom:
-		return false
-	var center_y := (top + bottom) * 0.5
-	var edge_ratio := absf(float(y) - center_y) / ((bottom - top) * 0.5)
-	var bevel := 34.0 * edge_ratio
-	return float(x) >= 358.0 + bevel and float(x) <= 716.0 - bevel
-
-
 func _validate_master_transparency(image: Image, file_name: String) -> bool:
 	for point: Vector2i in [Vector2i(4, 404), Vector2i(288, 330)]:
 		var alpha := image.get_pixelv(point).a
@@ -182,7 +168,7 @@ func _validate_master_transparency(image: Image, file_name: String) -> bool:
 			push_error("%s retained chroma at %s with alpha %.3f" % [file_name, point, alpha])
 			return false
 	var ribbon_center := image.get_pixel(288, 503).a
-	if ribbon_center > 0.05:
-		push_error("%s retained the fixed red ribbon with alpha %.3f" % [file_name, ribbon_center])
+	if ribbon_center <= 0.5:
+		push_error("%s lost the reference ribbon body with alpha %.3f" % [file_name, ribbon_center])
 		return false
 	return true

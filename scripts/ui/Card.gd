@@ -34,6 +34,7 @@ const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
 
 const CARD_STYLE_PACK_DIR := "external/data/card_styles/"
 const CARD_STYLE_PACK_FILE := "card_style_preview.json"
+const CARD_TYPE_FALLBACK_TEXTURE_PATH := "external/sprites/ui/card_styles/full_master/ribbons/ribbon_status.png"
 const CARD_ART_FALLBACK_RECT := Rect2(15.0, 34.0, 116.0, 76.0)
 const CARD_ART_MASTER_RECT := Rect2(17.0, 34.0, 114.0, 94.0)
 const CARD_STYLE_SHARED_PANEL_MAP := {
@@ -67,7 +68,7 @@ const CARD_STYLE_LEGACY_LAYERS := [
 @onready var card_header_background: Panel = %CardHeaderBackground
 @onready var card_art_frame: Panel = %CardArtFrame
 @onready var card_description_background: Panel = %CardDescriptionBackground
-@onready var card_type_background: Panel = %CardTypeBackground
+@onready var card_type_background: TextureRect = %CardTypeBackground
 @onready var card_type_connector: Panel = %CardTypeConnector
 @onready var card_faction_badge: Panel = %CardFactionBadge
 @onready var card_faction_stamp: Panel = %CardFactionStamp
@@ -204,7 +205,8 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	_set_panel_style(card_background, background_color, panel_white)
 	_set_panel_style(card_art_frame, panel_white, frame_edge)
 	_set_panel_style(card_description_background, panel_white, description_border)
-	_set_panel_style(card_type_background, type_color, panel_white)
+	card_type_background.texture = _load_style_texture(CARD_TYPE_FALLBACK_TEXTURE_PATH)
+	card_type_background.self_modulate = type_color
 	_set_panel_style(card_type_connector, frame_color, frame_highlight)
 	_set_panel_style(card_faction_badge, frame_color.darkened(0.20), frame_highlight)
 	_set_panel_style(card_faction_stamp, frame_color.darkened(0.20), frame_highlight)
@@ -268,7 +270,8 @@ func _try_apply_full_card_master(master_path: String, type_path: String) -> bool
 	if master_texture == null or type_texture == null:
 		return false
 	card_chrome.texture = master_texture
-	_apply_texture_stylebox_texture(card_type_background, type_texture)
+	card_type_background.texture = type_texture
+	card_type_background.self_modulate = Color.WHITE
 	return true
 
 
@@ -325,8 +328,6 @@ func _get_card_style_panel(panel_name: String) -> Panel:
 			return card_art_frame
 		"CardDescriptionBackground":
 			return card_description_background
-		"CardTypeBackground":
-			return card_type_background
 		"EnergySprite":
 			return energy_sprite
 		"CardGlow":
