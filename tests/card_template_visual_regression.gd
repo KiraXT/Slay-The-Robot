@@ -168,7 +168,7 @@ func _check_card_detail_treatment() -> void:
 	_assert_dynamic_layer_above_master(visual, "CardDescription")
 	_assert_dynamic_layer_above_master(visual, "EnergyCost")
 	_assert_exact_rect(visual, "CardName", Rect2(34.0, 8.0, 90.0, 24.0), "card name")
-	_assert_exact_rect(visual, "EnergyCost", Rect2(4.0, 1.0, 38.0, 38.0), "energy cost")
+	_assert_exact_rect(visual, "EnergyCost", Rect2(6.0, 1.0, 38.0, 38.0), "energy cost")
 	_assert_centered_label(visual, "EnergyCost", "energy cost")
 	_assert_emboldened_font(visual, "EnergyCost", "font", 0.8, "energy cost")
 	_assert_emboldened_font(visual, "CardName", "normal_font", 0.65, "card name")
