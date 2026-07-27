@@ -133,7 +133,8 @@ func _check_runtime_style_variants(style_data: Dictionary, file_loader: Node) ->
 		)
 		_assert_master_layer_order(visual, color_id)
 		_assert_card_art_gradient(visual, color_id)
-		_assert_clean_runtime_glow(visual, color_id)
+		card_scene.call("set_card_glow", true)
+		_assert_runtime_glow_disabled(visual, color_id)
 		for layer_name: String in LEGACY_STITCHED_LAYERS:
 			_assert_hidden(visual, layer_name, "%s legacy layer" % layer_name)
 		_assert_white_title(visual, color_id)
@@ -343,24 +344,13 @@ func _assert_card_art_gradient(visual: Control, color_id: String) -> void:
 		failures.append("%s gradient endpoints must differ" % color_id)
 
 
-func _assert_clean_runtime_glow(visual: Control, color_id: String) -> void:
+func _assert_runtime_glow_disabled(visual: Control, color_id: String) -> void:
 	var glow := _find_descendant(visual, "CardGlow") as Panel
 	if glow == null:
 		failures.append("%s card glow must exist" % color_id)
 		return
-	var style := glow.get_theme_stylebox("panel")
-	if not style is StyleBoxFlat:
-		failures.append("%s card glow must use a clean StyleBoxFlat instead of a stretched texture" % color_id)
-		return
-	var flat_style := style as StyleBoxFlat
-	if flat_style.bg_color.a > 0.12:
-		failures.append("%s card glow background must remain transparent" % color_id)
-	var minimum_border := mini(
-		mini(flat_style.border_width_left, flat_style.border_width_top),
-		mini(flat_style.border_width_right, flat_style.border_width_bottom)
-	)
-	if minimum_border < 1:
-		failures.append("%s card glow must use a continuous outline" % color_id)
+	if glow.visible:
+		failures.append("%s card glow must remain hidden when glow is requested" % color_id)
 
 
 func _assert_hidden(visual: Control, node_name: String, label: String) -> void:

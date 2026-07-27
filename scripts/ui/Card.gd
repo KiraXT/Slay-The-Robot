@@ -356,10 +356,10 @@ func _apply_texture_stylebox_texture(panel: Panel, texture: Texture2D) -> void:
 
 
 func set_card_glow(_visible: bool) -> void:
-	card_glow.visible = _visible
+	card_glow.visible = false
 
 func toggle_card_glow() -> void:
-	card_glow.visible = !card_glow.visible
+	card_glow.visible = false
 
 func can_play_card() -> bool:
 	if not card_data.card_is_playable:
