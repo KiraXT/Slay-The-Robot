@@ -11,9 +11,7 @@
 		"color_white": "external/sprites/ui/card_styles/full_master/card_master_silver.png",
 		"default": "external/sprites/ui/card_styles/full_master/card_master_silver.png"
 	},
-	"shared_slots": {
-		"glow": "external/sprites/ui/card_styles/preview/shared/glow.png"
-	},
+	"shared_slots": {},
 	"type_slots": {
 		"0": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_attack.png",
 		"1": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_skill.png",
