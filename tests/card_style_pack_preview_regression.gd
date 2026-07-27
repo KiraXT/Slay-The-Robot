@@ -77,6 +77,7 @@ func _check_style_pack(file_loader: Node) -> Dictionary:
 	_check_slot_group(style_data, "master_slots", MASTER_SLOT_BY_ID.keys(), file_loader)
 	_check_slot_group(style_data, "type_slots", TYPE_SLOT_BY_ID.keys(), file_loader)
 	_check_transparent_edge_contamination(style_data)
+	_check_glow_center_transparency(style_data)
 	_check_master_ribbon_continuity(style_data)
 	_check_type_ribbon_geometry(style_data)
 	return style_data
@@ -202,6 +203,32 @@ func _check_transparent_edge_contamination(style_data: Dictionary) -> void:
 					contaminated_pixels += 1
 		if contaminated_pixels > 0:
 			failures.append("%s contains %d semi-transparent chroma-green edge pixels" % [path, contaminated_pixels])
+
+
+func _check_glow_center_transparency(style_data: Dictionary) -> void:
+	var shared_slots := style_data.get("shared_slots", {}) as Dictionary
+	var path := str(shared_slots.get("glow", ""))
+	var image := Image.load_from_file(ProjectSettings.globalize_path("res://" + path))
+	if image == null or image.is_empty():
+		failures.append("shared glow texture must load from %s" % path)
+		return
+	image.convert(Image.FORMAT_RGBA8)
+	var center := image.get_pixel(image.get_width() / 2, image.get_height() / 2)
+	if center.a > 0.05:
+		failures.append("shared glow center must be transparent, got alpha %.3f" % center.a)
+	var chroma_pixels := 0
+	var cyan_edge_pixels := 0
+	for y in image.get_height():
+		for x in image.get_width():
+			var color := image.get_pixel(x, y)
+			if color.a <= 0.05 and color.g > maxf(color.r, color.b) + 0.06:
+				chroma_pixels += 1
+			elif color.a > 0.05 and color.s > 0.25 and color.h > 0.28 and color.h < 0.62:
+				cyan_edge_pixels += 1
+	if chroma_pixels > 0:
+		failures.append("shared glow must not retain green RGB in %d transparent pixels" % chroma_pixels)
+	if cyan_edge_pixels > 0:
+		failures.append("shared glow must not retain %d cyan-green edge pixels" % cyan_edge_pixels)
 
 
 func _check_master_ribbon_continuity(style_data: Dictionary) -> void:

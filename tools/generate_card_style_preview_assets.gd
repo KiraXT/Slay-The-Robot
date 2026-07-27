@@ -58,6 +58,6 @@ func _remove_reference_green(image: Image) -> void:
 			var pixel := image.get_pixel(x, y)
 			var non_green: float = max(pixel.r, pixel.b)
 			if pixel.g > 0.42 and pixel.g - non_green > 0.10:
-				pixel.a = 0.0
+				# Keep transparent texels neutral so nine-slice filtering cannot bleed chroma green.
+				pixel = Color(1.0, 1.0, 1.0, 0.0)
 				image.set_pixel(x, y, pixel)
-
