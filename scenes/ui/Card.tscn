@@ -389,9 +389,9 @@ vertical_alignment = 1
 [node name="EnergyCost" type="Label" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 6.0
+offset_left = 5.0
 offset_top = 1.0
-offset_right = 44.0
+offset_right = 43.0
 offset_bottom = 39.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.039216, 0.101961, 0.203922, 0.95)
