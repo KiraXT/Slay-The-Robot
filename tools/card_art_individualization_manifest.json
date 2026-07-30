@@ -1,0 +1,67 @@
+{
+  "design": "docs/superpowers/specs/2026-07-30-card-art-individualization-design.md",
+  "phases": {
+    "pilot": [
+      "card_finisher",
+      "card_backup_drink",
+      "card_metronome",
+      "card_bag_swing",
+      "card_block_initial",
+      "variable_cost_attack_card",
+      "card_attack_block",
+      "card_damage_increase"
+    ],
+    "red": [
+      "attack_lower_cost_on_discard_card",
+      "attack_with_conditional_block_card",
+      "attack_with_conditional_draw_card",
+      "card_banish_attack",
+      "card_discard_block",
+      "card_draft_red_card",
+      "card_duplicate_attacks",
+      "card_law",
+      "card_opening_strike",
+      "card_play_random_from_hand",
+      "card_pursuit",
+      "card_requires_adjacency",
+      "card_right_click_transform_mode_a",
+      "card_right_click_transform_mode_b",
+      "card_vulnerable_enemies",
+      "cards_played_attack_card",
+      "ignore_damage_increase_attack_card",
+      "set_hand_energy_card",
+      "transform_hand_card"
+    ],
+    "colored": [
+      "card_by_accident",
+      "card_hasty_sorting",
+      "card_quick_search",
+      "card_something_fell_out",
+      "card_distorted_note",
+      "card_echo_shield",
+      "card_finale_burst",
+      "card_first_beat",
+      "card_tuning",
+      "card_last_item",
+      "card_old_item_reuse",
+      "card_sports_drink",
+      "card_sprint_start",
+      "card_travel_light",
+      "card_warmup"
+    ],
+    "team": [
+      "add_health_card",
+      "card_shove",
+      "custom_block_card",
+      "end_turn_card",
+      "attack_increase_cost_on_damage_taken_card",
+      "card_energy_on_discard",
+      "improving_retain_block_card",
+      "upgrade_entire_deck_card"
+    ]
+  },
+  "excluded_development_cards": [
+    "card_debug_log",
+    "card_restart_combat"
+  ]
+}
