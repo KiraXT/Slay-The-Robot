@@ -85,8 +85,6 @@ KEY_COLOR_BY_COLOR = {
     "color_purple": "#ff00ff",
 }
 KEY_COLOR_OVERRIDES = {
-    "variable_cost_attack_card": "#ffff00",
-    "custom_block_card": "#ffff00",
     "attack_increase_cost_on_damage_taken_card": "#00ff00",
 }
 
@@ -164,6 +162,16 @@ def validate_card_art(card_id: str, cards: dict[str, dict[str, str]]) -> None:
         alpha_extrema = image.getextrema()[3]
         assert alpha_extrema[0] == 0, f"image is not transparent for {card_id}"
         assert alpha_extrema[1] == 255, f"image has no opaque pixels for {card_id}"
+        visible_bbox = image.getchannel("A").point(
+            lambda alpha: 255 if alpha > 16 else 0
+        ).getbbox()
+        assert visible_bbox is not None, f"image has no visible subject for {card_id}"
+        assert visible_bbox[2] - visible_bbox[0] <= 420, (
+            f"subject exceeds safe width for {card_id}: {visible_bbox}"
+        )
+        assert visible_bbox[3] - visible_bbox[1] <= 420, (
+            f"subject exceeds safe height for {card_id}: {visible_bbox}"
+        )
         for corner in ((0, 0), (511, 0), (0, 511), (511, 511)):
             assert image.getpixel(corner)[3] <= 16, (
                 f"opaque corner {corner} for {card_id}"

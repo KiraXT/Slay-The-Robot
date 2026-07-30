@@ -43,30 +43,34 @@ def main() -> None:
             )
             assert green_fringe == 0
 
-        yellow_raw_path = temporary / "yellow-raw.png"
-        yellow_output_path = temporary / "yellow-output.png"
-        yellow_source = Image.new("RGBA", (64, 64), (255, 255, 0, 255))
-        yellow_draw = ImageDraw.Draw(yellow_source, "RGBA")
+        color_raw_path = temporary / "color-raw.png"
+        color_output_path = temporary / "color-output.png"
+        color_source = Image.new("RGBA", (64, 64), (255, 0, 255, 255))
+        color_draw = ImageDraw.Draw(color_source, "RGBA")
         warm_subject = (244, 190, 160, 255)
-        yellow_draw.rectangle((16, 16, 47, 47), fill=warm_subject)
-        yellow_source.save(yellow_raw_path)
+        color_draw.rectangle((14, 14, 49, 49), fill=(40, 30, 20, 255))
+        color_draw.rectangle((16, 16, 47, 47), fill=warm_subject)
+        yellow_foreground = (255, 235, 47, 255)
+        color_draw.rectangle((24, 24, 39, 39), fill=yellow_foreground)
+        color_source.save(color_raw_path)
 
         process_one(
-            raw_path=yellow_raw_path,
-            output_path=yellow_output_path,
-            key_color="#ffff00",
+            raw_path=color_raw_path,
+            output_path=color_output_path,
+            key_color="#ff00ff",
         )
 
-        with Image.open(yellow_output_path) as image:
+        with Image.open(color_output_path) as image:
             assert image.getpixel((0, 0))[3] == 0
-            assert image.getpixel((256, 256)) == warm_subject
-            yellow_fringe = sum(
+            assert image.getpixel((160, 160)) == warm_subject
+            assert image.getpixel((256, 256)) == yellow_foreground
+            magenta_fringe = sum(
                 1
                 for red, green, blue, alpha in image.getdata()
                 if 0 < alpha < 255
-                and max(abs(red - 255), abs(green - 255), abs(blue)) <= 32
+                and max(abs(red - 255), abs(green), abs(blue - 255)) <= 32
             )
-            assert yellow_fringe == 0
+            assert magenta_fringe == 0
 
         edge_raw_path = temporary / "edge-raw.png"
         edge_output_path = temporary / "edge-output.png"
@@ -87,6 +91,8 @@ def main() -> None:
             ).getbbox()
             assert visible_bbox is not None
             assert visible_bbox[0] >= 32
+            assert visible_bbox[2] - visible_bbox[0] <= 420
+            assert visible_bbox[3] - visible_bbox[1] <= 420
 
     print("CARD_ART_BATCH_PROCESSOR_VALIDATED")
 

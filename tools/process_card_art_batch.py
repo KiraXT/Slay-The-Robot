@@ -7,7 +7,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageFilter
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,37 +27,8 @@ KEY_COLOR_BY_COLOR = {
     "color_purple": "#ff00ff",
 }
 KEY_COLOR_OVERRIDES = {
-    "variable_cost_attack_card": "#ffff00",
-    "custom_block_card": "#ffff00",
     "attack_increase_cost_on_damage_taken_card": "#00ff00",
 }
-
-
-def _smooth_alpha(distance: int) -> int:
-    if distance <= 24:
-        return 0
-    if distance >= 90:
-        return 255
-    ratio = (distance - 24) / (90 - 24)
-    smooth_ratio = ratio * ratio * (3.0 - 2.0 * ratio)
-    return round(255 * smooth_ratio)
-
-
-def _restore_yellow_key_colors(source: Image.Image) -> Image.Image:
-    rgba = source.convert("RGBA")
-    alpha_values = []
-    for red, green, blue, source_alpha in rgba.getdata():
-        distance = max(255 - red, 255 - green, blue)
-        alpha_values.append(
-            round(_smooth_alpha(distance) * (source_alpha / 255.0))
-        )
-
-    alpha = Image.new("L", rgba.size)
-    alpha.putdata(alpha_values)
-    alpha = alpha.filter(ImageFilter.MinFilter(3))
-    alpha = alpha.filter(ImageFilter.GaussianBlur(radius=0.7))
-    rgba.putalpha(alpha)
-    return rgba
 
 
 def _parse_key_color(key_color: str) -> tuple[int, int, int]:
@@ -95,7 +66,7 @@ def _normalize_subject(image: Image.Image) -> Image.Image:
         return image
 
     subject = image.crop(bbox)
-    max_subject_size = 430
+    max_subject_size = 420
     scale = min(
         1.0,
         max_subject_size / subject.width,
@@ -153,10 +124,6 @@ def process_one(raw_path: Path, output_path: Path, key_color: str) -> None:
         )
         with Image.open(keyed_path) as keyed_source:
             keyed = keyed_source.convert("RGBA")
-        if key_color.lower() == "#ffff00":
-            with Image.open(raw_path) as raw_source:
-                keyed = _restore_yellow_key_colors(raw_source)
-
         final = keyed.resize(
             (512, 512),
             Image.Resampling.LANCZOS,
