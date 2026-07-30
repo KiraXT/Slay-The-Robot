@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from openpyxl import load_workbook
+from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,6 +76,20 @@ EXPECTED_PHASES = {
 
 EXCLUDED_DEVELOPMENT_CARDS = {"card_debug_log", "card_restart_combat"}
 
+KEY_COLOR_BY_COLOR = {
+    "color_red": "#00ff00",
+    "color_blue": "#ff00ff",
+    "color_green": "#ff00ff",
+    "color_orange": "#0055ff",
+    "color_white": "#ff00ff",
+    "color_purple": "#ff00ff",
+}
+KEY_COLOR_OVERRIDES = {
+    "variable_cost_attack_card": "#ffff00",
+    "custom_block_card": "#ffff00",
+    "attack_increase_cost_on_damage_taken_card": "#00ff00",
+}
+
 
 def load_manifest() -> dict:
     assert MANIFEST.exists(), "missing card art individualization manifest"
@@ -122,6 +137,57 @@ def validate_card_configs(card_ids: list[str]) -> None:
         assert expected_art_path(card_id, cards).startswith("external/sprites/cards/")
 
 
+def rgb_from_hex(value: str) -> tuple[int, int, int]:
+    stripped = value.removeprefix("#")
+    assert len(stripped) == 6, f"invalid RGB color: {value}"
+    return tuple(int(stripped[index:index + 2], 16) for index in (0, 2, 4))
+
+
+def validate_card_art(card_id: str, cards: dict[str, dict[str, str]]) -> None:
+    expected_path = expected_art_path(card_id, cards)
+    assert cards[card_id]["card_texture_path"] == expected_path, (
+        f"unexpected cards.csv art path for {card_id}: "
+        f"{cards[card_id]['card_texture_path']}"
+    )
+
+    workbook_cards = xlsx_cards()
+    assert (workbook_cards[card_id].get("card_texture_path") or "") == expected_path, (
+        f"unexpected cards.xlsx art path for {card_id}: "
+        f"{workbook_cards[card_id].get('card_texture_path')}"
+    )
+
+    image_path = ROOT / expected_path
+    assert image_path.exists(), f"missing individual card art: {expected_path}"
+    with Image.open(image_path) as image:
+        assert image.size == (512, 512), f"unexpected image size for {card_id}: {image.size}"
+        assert image.mode == "RGBA", f"unexpected image mode for {card_id}: {image.mode}"
+        alpha_extrema = image.getextrema()[3]
+        assert alpha_extrema[0] == 0, f"image is not transparent for {card_id}"
+        assert alpha_extrema[1] == 255, f"image has no opaque pixels for {card_id}"
+        for corner in ((0, 0), (511, 0), (0, 511), (511, 511)):
+            assert image.getpixel(corner)[3] <= 16, (
+                f"opaque corner {corner} for {card_id}"
+            )
+
+        key_hex = KEY_COLOR_OVERRIDES.get(
+            card_id,
+            KEY_COLOR_BY_COLOR[cards[card_id]["card_color_id"]],
+        )
+        key_rgb = rgb_from_hex(key_hex)
+        fringe_pixels = 0
+        for red, green, blue, alpha in image.getdata():
+            if 0 < alpha < 255 and max(
+                abs(red - key_rgb[0]),
+                abs(green - key_rgb[1]),
+                abs(blue - key_rgb[2]),
+            ) <= 32:
+                fringe_pixels += 1
+        assert fringe_pixels < 64, (
+            f"chroma fringe detected for {card_id}: "
+            f"{fringe_pixels} pixels near {key_hex}"
+        )
+
+
 def validate_manifest() -> None:
     assert sum(map(len, EXPECTED_PHASES.values())) == 50
     assert not set.union(*EXPECTED_PHASES.values()) & EXCLUDED_DEVELOPMENT_CARDS
@@ -145,6 +211,9 @@ def validate_phase(phase_name: str) -> None:
     phase_ids = manifest["phases"][phase_name]
     assert set(phase_ids) == EXPECTED_PHASES[phase_name]
     validate_card_configs(phase_ids)
+    cards = csv_cards()
+    for card_id in phase_ids:
+        validate_card_art(card_id, cards)
 
 
 def main() -> None:
