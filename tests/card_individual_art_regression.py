@@ -86,6 +86,7 @@ KEY_COLOR_BY_COLOR = {
 }
 KEY_COLOR_OVERRIDES = {
     "attack_increase_cost_on_damage_taken_card": "#00ff00",
+    "card_banish_attack": "#ff00ff",
 }
 
 

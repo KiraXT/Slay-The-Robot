@@ -11,7 +11,9 @@ sys.path.insert(0, str(ROOT))
 
 
 def main() -> None:
-    from tools.process_card_art_batch import process_one
+    from tools.process_card_art_batch import KEY_COLOR_OVERRIDES, process_one
+
+    assert KEY_COLOR_OVERRIDES["card_banish_attack"] == "#ff00ff"
 
     with tempfile.TemporaryDirectory() as temporary_directory:
         temporary = Path(temporary_directory)
