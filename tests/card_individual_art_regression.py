@@ -210,19 +210,26 @@ def manifest_card_ids(manifest: dict) -> list[str]:
     ]
 
 
-def validate_manifest() -> None:
+def validate_manifest_invariants(manifest: dict) -> list[str]:
     assert sum(map(len, EXPECTED_PHASES.values())) == 50
     assert not set.union(*EXPECTED_PHASES.values()) & EXCLUDED_DEVELOPMENT_CARDS
 
-    manifest = load_manifest()
     assert set(manifest["phases"]) == set(EXPECTED_PHASES)
     assert set(manifest["excluded_development_cards"]) == EXCLUDED_DEVELOPMENT_CARDS
 
     phase_ids = manifest_card_ids(manifest)
     assert len(phase_ids) == 50
     assert len(set(phase_ids)) == 50
+    assert not set(phase_ids) & EXCLUDED_DEVELOPMENT_CARDS, (
+        "manifest phases include excluded development cards"
+    )
     for phase_name, expected_ids in EXPECTED_PHASES.items():
         assert set(manifest["phases"][phase_name]) == expected_ids
+    return phase_ids
+
+
+def validate_manifest() -> None:
+    phase_ids = validate_manifest_invariants(load_manifest())
 
     cards = csv_cards()
     validate_card_configs(phase_ids, cards, xlsx_cards())
@@ -245,10 +252,7 @@ def validate_phase(phase_name: str) -> None:
 
 
 def validate_all() -> None:
-    manifest = load_manifest()
-    phase_ids = manifest_card_ids(manifest)
-    assert len(phase_ids) == 50
-    assert len(set(phase_ids)) == 50
+    phase_ids = validate_manifest_invariants(load_manifest())
     validate_cards(phase_ids)
 
 
