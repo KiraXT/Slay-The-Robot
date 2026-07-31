@@ -19,5 +19,8 @@ external/data/cards/*.json
 __pycache__/
 *.pyc
 
+# Task 7 card-art individualization validation artifacts
+/tmp/card-art-individualization/
+
 # Local isolated worktrees
 .worktrees/

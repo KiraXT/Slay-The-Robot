@@ -124,9 +124,11 @@ def expected_art_path(card_id: str, cards: dict[str, dict[str, str]]) -> str:
     return f"external/sprites/cards/{color_folder}/{card_id}.png"
 
 
-def validate_card_configs(card_ids: list[str]) -> None:
-    cards = csv_cards()
-    workbook_cards = xlsx_cards()
+def validate_card_configs(
+    card_ids: list[str],
+    cards: dict[str, dict[str, str]],
+    workbook_cards: dict[str, dict[str, str]],
+) -> None:
     for card_id in card_ids:
         assert card_id in cards, f"missing card in cards.csv: {card_id}"
         assert card_id in workbook_cards, f"missing card in cards.xlsx: {card_id}"
@@ -142,14 +144,17 @@ def rgb_from_hex(value: str) -> tuple[int, int, int]:
     return tuple(int(stripped[index:index + 2], 16) for index in (0, 2, 4))
 
 
-def validate_card_art(card_id: str, cards: dict[str, dict[str, str]]) -> None:
+def validate_card_art(
+    card_id: str,
+    cards: dict[str, dict[str, str]],
+    workbook_cards: dict[str, dict[str, str]],
+) -> None:
     expected_path = expected_art_path(card_id, cards)
     assert cards[card_id]["card_texture_path"] == expected_path, (
         f"unexpected cards.csv art path for {card_id}: "
         f"{cards[card_id]['card_texture_path']}"
     )
 
-    workbook_cards = xlsx_cards()
     assert (workbook_cards[card_id].get("card_texture_path") or "") == expected_path, (
         f"unexpected cards.xlsx art path for {card_id}: "
         f"{workbook_cards[card_id].get('card_texture_path')}"
@@ -197,6 +202,14 @@ def validate_card_art(card_id: str, cards: dict[str, dict[str, str]]) -> None:
         )
 
 
+def manifest_card_ids(manifest: dict) -> list[str]:
+    return [
+        card_id
+        for phase_ids in manifest["phases"].values()
+        for card_id in phase_ids
+    ]
+
+
 def validate_manifest() -> None:
     assert sum(map(len, EXPECTED_PHASES.values())) == 50
     assert not set.union(*EXPECTED_PHASES.values()) & EXCLUDED_DEVELOPMENT_CARDS
@@ -205,13 +218,22 @@ def validate_manifest() -> None:
     assert set(manifest["phases"]) == set(EXPECTED_PHASES)
     assert set(manifest["excluded_development_cards"]) == EXCLUDED_DEVELOPMENT_CARDS
 
-    phase_ids = [card_id for phase in manifest["phases"].values() for card_id in phase]
+    phase_ids = manifest_card_ids(manifest)
     assert len(phase_ids) == 50
     assert len(set(phase_ids)) == 50
     for phase_name, expected_ids in EXPECTED_PHASES.items():
         assert set(manifest["phases"][phase_name]) == expected_ids
 
-    validate_card_configs(phase_ids)
+    cards = csv_cards()
+    validate_card_configs(phase_ids, cards, xlsx_cards())
+
+
+def validate_cards(card_ids: list[str]) -> None:
+    cards = csv_cards()
+    workbook_cards = xlsx_cards()
+    validate_card_configs(card_ids, cards, workbook_cards)
+    for card_id in card_ids:
+        validate_card_art(card_id, cards, workbook_cards)
 
 
 def validate_phase(phase_name: str) -> None:
@@ -219,19 +241,27 @@ def validate_phase(phase_name: str) -> None:
     manifest = load_manifest()
     phase_ids = manifest["phases"][phase_name]
     assert set(phase_ids) == EXPECTED_PHASES[phase_name]
-    validate_card_configs(phase_ids)
-    cards = csv_cards()
-    for card_id in phase_ids:
-        validate_card_art(card_id, cards)
+    validate_cards(phase_ids)
+
+
+def validate_all() -> None:
+    manifest = load_manifest()
+    phase_ids = manifest_card_ids(manifest)
+    assert len(phase_ids) == 50
+    assert len(set(phase_ids)) == 50
+    validate_cards(phase_ids)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--phase", choices=("manifest", *EXPECTED_PHASES))
+    parser.add_argument("--phase", choices=("manifest", "all", *EXPECTED_PHASES))
     args = parser.parse_args()
     if args.phase == "manifest":
         validate_manifest()
         print("MANIFEST_VALIDATED: 50 cards")
+    elif args.phase == "all":
+        validate_all()
+        print("CARD_ART_VALIDATED: 50 cards")
     elif args.phase:
         validate_phase(args.phase)
         print(f"PHASE_VALIDATED: {args.phase}")
