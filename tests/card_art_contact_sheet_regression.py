@@ -11,7 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from tools.render_card_art_contact_sheet import render_contact_sheet
+from tools.render_card_art_contact_sheet import (
+    _load_cards,
+    _load_manifest,
+    _phase_ids,
+    render_contact_sheet,
+)
 
 
 def _assert_non_background_content(image: Image.Image, columns: int, rows: int) -> None:
@@ -22,7 +27,7 @@ def _assert_non_background_content(image: Image.Image, columns: int, rows: int) 
         for column in range(columns):
             left = column * cell_width
             top = row * cell_height
-            sample = image.crop((left + 24, top + 16, left + 536, top + 528))
+            sample = image.crop((left + 26, top + 18, left + 534, top + 526))
             colors = sample.getcolors(maxcolors=sample.width * sample.height)
             assert colors is not None
             assert any(color != background for _, color in colors), (
@@ -30,7 +35,45 @@ def _assert_non_background_content(image: Image.Image, columns: int, rows: int) 
             )
 
 
+def _assert_card_order(
+    image: Image.Image,
+    card_ids: list[str],
+    cards: dict[str, dict[str, str]],
+) -> None:
+    background = image.getpixel((0, 0))
+    for index, card_id in enumerate(card_ids):
+        column = index % 5
+        row = index // 5
+        with Image.open(ROOT / cards[card_id]["card_texture_path"]) as source:
+            art = source.convert("RGBA")
+        expected = Image.new("RGB", (512, 512), background)
+        expected.paste(art, mask=art.getchannel("A"))
+        actual = image.crop(
+            (
+                column * 560 + 24,
+                row * 620 + 16,
+                column * 560 + 536,
+                row * 620 + 528,
+            )
+        )
+        assert actual.tobytes() == expected.tobytes(), (
+            f"cell {index} does not contain canonical card {card_id}"
+        )
+
+
 def main() -> None:
+    manifest = _load_manifest()
+    cards = _load_cards()
+    expected_all_ids = [
+        card_id
+        for phase_name in ("pilot", "red", "colored", "team")
+        for card_id in manifest["phases"][phase_name]
+    ]
+    all_ids = _phase_ids(manifest, "all")
+    assert all_ids == expected_all_ids
+    assert len(all_ids) == 50
+    assert len(set(all_ids)) == 50
+
     test_temp_root = ROOT / "tmp" / "card-art-contact-sheet-test"
     test_temp_root.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -44,6 +87,15 @@ def main() -> None:
             assert image.height == 2 * 620
             assert image.getpixel((0, 0)) == (38, 42, 48)
             _assert_non_background_content(image, 4, 2)
+
+        output = render_contact_sheet("all", Path(directory) / "all.png")
+        assert output.exists()
+        with Image.open(output) as image:
+            assert image.mode == "RGB"
+            assert image.size == (2800, 6200)
+            assert image.getpixel((0, 0)) == (38, 42, 48)
+            _assert_non_background_content(image, 5, 10)
+            _assert_card_order(image, all_ids, cards)
 
     print("ALL_TESTS_PASSED")
 

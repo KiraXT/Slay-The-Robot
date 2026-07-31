@@ -63,5 +63,71 @@
   "excluded_development_cards": [
     "card_debug_log",
     "card_restart_combat"
-  ]
+  ],
+  "key_colors": {
+    "defaults": {
+      "color_red": "#00ff00",
+      "color_blue": "#ff00ff",
+      "color_green": "#ff00ff",
+      "color_orange": "#0055ff",
+      "color_white": "#ff00ff",
+      "color_purple": "#ff00ff"
+    },
+    "overrides": {
+      "attack_increase_cost_on_damage_taken_card": "#00ff00",
+      "card_banish_attack": "#ff00ff"
+    }
+  },
+  "approved_rgba_sha256": {
+    "card_finisher": "05ab70e497ea80f85020647a2ec60806e559c952605168edb3b7648e50059f3c",
+    "card_backup_drink": "4117d7d7db954a23d77f88a41b13f54b283a82604564804389c7eb6152eaa313",
+    "card_metronome": "088d76f721024b9f5709ce2a364dd7cc0d212d2c5a6c25d34770507bcabad76c",
+    "card_bag_swing": "b6c8852f0faba4bd362b87788905498c707d76e4da52b383a9abb12de4b49649",
+    "card_block_initial": "5fb1c9294d0583862f4aeeb6a14544581cd61b461c710062857217cd721241fc",
+    "variable_cost_attack_card": "7a0c67dc2aff882d94cd6846dcc4e6a549454465c00d62e1ba55788b279a5070",
+    "card_attack_block": "9e0d0da47c1e46fa8d3c5b7f809006f331b64f8ce295aea64a5698111d1ec291",
+    "card_damage_increase": "7b3caf4810ba9799d11fb04a2c5d74f31dd737d96f531d30ae8d148526bebf8e",
+    "attack_lower_cost_on_discard_card": "f116b4fdda4c32c073589903b65f6b2b30a162b688e05308eebed69c4121f5c1",
+    "attack_with_conditional_block_card": "571df50c5fe0514dc54014e72c904e16296cfa822c12a0476abb01cc6e38d9cb",
+    "attack_with_conditional_draw_card": "5168af79a824a3d66c2cb785ee26f4617a0071e277b9dd3e575f24702e9d25e6",
+    "card_banish_attack": "22ca52d8c1ed99084f9c5304863e4cc87b3ca68a1936e0dc5e6e7b9662bee3c8",
+    "card_discard_block": "107b05eab57c7091028a6d411e0612efe86078d15bebda47bb67e77c90e3b6af",
+    "card_draft_red_card": "4cc951fe7cbf2764d6e68c7919ad4044041cd1fce7774919acfdd4078dd4a0be",
+    "card_duplicate_attacks": "4190a37de9aca1e38b2395d35a51fdded153cd2a2f017564cd2434f61a5f44b3",
+    "card_law": "008eefed0d62e91bc92bea7f9814379ab669a20e72d43e2b3228f9b3cffd94ca",
+    "card_opening_strike": "f68e0e356bff90c7aef4f246f3ff473b603a79fb062f531296d8a4694318e42e",
+    "card_play_random_from_hand": "86c3cc6ef2f720dde03320e6237c7ddc5663aff8c7db0def19188e88b480b28b",
+    "card_pursuit": "4922125a3ecfe38fa851caf84bb7b22527a73e3f18293bcb67cc12b28bdd12b8",
+    "card_requires_adjacency": "8097faf81751073779df8579eff7958f16971718dcc43e51fe2ff00f79f4d01c",
+    "card_right_click_transform_mode_a": "05f222cd09f71a45a780896f3acedb6b5b2144e3dd5ca137805099a27a559190",
+    "card_right_click_transform_mode_b": "54b5b9c3308bc2d5eabf7e235a990b4fce8b737a9c6e052662aeadeebe1ea276",
+    "card_vulnerable_enemies": "43e04774118ceb70515d13a54bb1be4df0dc9d26efcace1b64196a1bf29aa4fc",
+    "cards_played_attack_card": "3b86c4dd4bcafbaab2c752a251126c496117bcae95ae698efe43a69a59a5dc12",
+    "ignore_damage_increase_attack_card": "bbd2632ec4f5bcdf48aa7fa85c3b28935b584f716eedc413556540f80a37e9ea",
+    "set_hand_energy_card": "d5c1d161c0298d4ee5fe79afabecd663054c144250b94dfbd0dcf16ede2b2117",
+    "transform_hand_card": "3055f6c4c3805e3f5d8f24328e6ccd41963ef506bd3ad80684545387537dc661",
+    "card_by_accident": "7b2cfc70e42320cac8aff9ca1cca5815cb91e1a63deeb7e514c63a91421e367b",
+    "card_hasty_sorting": "962289dabb6ec7681026e73b5c9535049d930877015b4dfbe5ed720ee485c2e3",
+    "card_quick_search": "bc0398355f4638eadec67da48529b05911f7f8fa2ffe5c76a4ca311c2fe13219",
+    "card_something_fell_out": "dd8ff4a276db1db56c3eccccbce379d02e1328b63e357d17ac16ffe3b6e572ac",
+    "card_distorted_note": "567d32919dfd2c134b1c940bf61fb7c6ddc4cda6ef2bebd40d316454e5151abd",
+    "card_echo_shield": "b8140325b20bbf50b540def217a260ff44a81126f1ea04496d834f651d4c3501",
+    "card_finale_burst": "a5ad089719069d3dc6e96e4c6481454f2acf76b41b1c2eaa25814d87b75912db",
+    "card_first_beat": "fc3764ff577723e62e655e93e65b1a7089940cb57b2b81f76a0ee543693deba6",
+    "card_tuning": "d4ae605bf98d6161596057c80e37b594f3600117881e465fe1026bd74371b065",
+    "card_last_item": "558257e6eb2996535ac0da7920f2eecfa8418820b5a59ab44fdebff497d578ac",
+    "card_old_item_reuse": "0b10b309b052d0db6ac4b239e2f19af1504e4b6db719da43f6d4483c90b5db53",
+    "card_sports_drink": "612ea35acb0c94f8905e7bb2516558ad483886926d9d69d0a7fdad1f0b03cdc9",
+    "card_sprint_start": "06ed5ee82176941610578274295680dd6e395b9a3bb78f3f1f0b9f848f39496a",
+    "card_travel_light": "f1829f363224651c2a1a83a3a6d2382bdc19195f6639097081da3d74b184d381",
+    "card_warmup": "e970648b48a9e7003e0612fd861cd58faa78da95e9a6edef5812e67cf6761b3c",
+    "add_health_card": "db0866d900649c5fff0691742e4ad2da5fa61709dde0876f4e12bc80df01ea06",
+    "card_shove": "f4bb52e4d261f5cf0edad53a4cb3dbfd8d69d3051b44586f2901b648dd91abab",
+    "custom_block_card": "06951b1a1c7c98be3a54f760810dac574475685e5be59d6d9d926f5813ca63db",
+    "end_turn_card": "8cc82a923de9b8c3ecb3b5cf7c609cdb6b14f1f9a1e84eda0d5f9e4dc1e3fd21",
+    "attack_increase_cost_on_damage_taken_card": "14a42483edb9e93b444587ce74444272476d33cef9cabf57a5099bfa825caa74",
+    "card_energy_on_discard": "75461ffc46f7f8a23a2be681c5fd0e5f769a2349892b48cb121051b159bd599e",
+    "improving_retain_block_card": "7f010254700c007baf3ea337b1fad729830efd3d0d502279df38d3f2134be260",
+    "upgrade_entire_deck_card": "12d6ac870434042bbb4891bf618f6d5a7faf3e28947e1a6bb5ecb88eab5d2889"
+  }
 }

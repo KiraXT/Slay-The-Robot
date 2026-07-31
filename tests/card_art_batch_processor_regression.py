@@ -10,13 +10,24 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
-def main() -> None:
-    from tools.process_card_art_batch import KEY_COLOR_OVERRIDES, process_one
+def image_pixels(image: Image.Image):
+    if hasattr(image, "get_flattened_data"):
+        return image.get_flattened_data()
+    return image.getdata()
 
-    assert KEY_COLOR_OVERRIDES["card_banish_attack"] == "#ff00ff"
+
+def main() -> None:
+    repository_chroma_module = ROOT / "tools" / "card_art_chroma.py"
+    assert repository_chroma_module.exists(), (
+        "missing repository-owned chroma-key implementation"
+    )
+
+    from tools import process_card_art_batch as processor
 
     with tempfile.TemporaryDirectory() as temporary_directory:
         temporary = Path(temporary_directory)
+        if hasattr(processor, "CHROMA_TOOL"):
+            processor.CHROMA_TOOL = temporary / "unavailable-external-tool.py"
         raw_path = temporary / "raw.png"
         output_path = temporary / "output.png"
 
@@ -26,7 +37,7 @@ def main() -> None:
         draw.rectangle((16, 16, 47, 47), fill=(255, 0, 0, 255))
         source.save(raw_path)
 
-        process_one(
+        processor.process_one(
             raw_path=raw_path,
             output_path=output_path,
             key_color="#00ff00",
@@ -39,7 +50,7 @@ def main() -> None:
             assert image.getpixel((256, 256))[3] == 255
             green_fringe = sum(
                 1
-                for red, green, blue, alpha in image.getdata()
+                for red, green, blue, alpha in image_pixels(image)
                 if 0 < alpha < 255
                 and max(abs(red), abs(green - 255), abs(blue)) <= 32
             )
@@ -56,7 +67,7 @@ def main() -> None:
         color_draw.rectangle((24, 24, 39, 39), fill=yellow_foreground)
         color_source.save(color_raw_path)
 
-        process_one(
+        processor.process_one(
             raw_path=color_raw_path,
             output_path=color_output_path,
             key_color="#ff00ff",
@@ -68,7 +79,7 @@ def main() -> None:
             assert image.getpixel((256, 256)) == yellow_foreground
             magenta_fringe = sum(
                 1
-                for red, green, blue, alpha in image.getdata()
+                for red, green, blue, alpha in image_pixels(image)
                 if 0 < alpha < 255
                 and max(abs(red - 255), abs(green), abs(blue - 255)) <= 32
             )
@@ -81,7 +92,7 @@ def main() -> None:
         edge_draw.rectangle((0, 16, 47, 47), fill=(255, 0, 0, 255))
         edge_source.save(edge_raw_path)
 
-        process_one(
+        processor.process_one(
             raw_path=edge_raw_path,
             output_path=edge_output_path,
             key_color="#00ff00",

@@ -297,7 +297,7 @@ no UI, no text, no letters, no numbers, no logo, no watermark.
 | `card_metronome` | `character_green.png` | `card_bomb.png` | `#ff00ff` |
 | `card_bag_swing` | `character_orange.png` | `card_attack_big.png` | `#0055ff` |
 | `card_block_initial` | 红、橙角色立绘 | `card_block_basic.png`、`card_block_big.png` | `#ff00ff` |
-| `variable_cost_attack_card` | 红、绿角色立绘 | `card_attack_basic.png`、`card_upgrade_card.png` | `#ffff00` |
+| `variable_cost_attack_card` | 红、绿角色立绘 | `card_attack_basic.png`、`card_upgrade_card.png` | `#ff00ff` |
 | `card_attack_block` | 红、绿、橙角色立绘 | `card_block_basic.png`、`card_echo_shield` 的设计方向 | `#ff00ff` |
 | `card_damage_increase` | 红、绿、橙角色立绘 | `card_combo_starter.png`、`card_upgrade_card.png` | `#ff00ff` |
 
@@ -340,77 +340,39 @@ Expected: FAIL，缺少 `tools.process_card_art_batch`。
 import argparse
 import csv
 import json
-import subprocess
-import sys
-import tempfile
 from pathlib import Path
 
 from PIL import Image
 
+if __package__:
+    from tools.card_art_chroma import remove_chroma_key
+    from tools.card_art_manifest import key_color_for_card
+else:
+    from card_art_chroma import remove_chroma_key
+    from card_art_manifest import key_color_for_card
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tools" / "card_art_individualization_manifest.json"
 CSV_PATH = ROOT / "external" / "config" / "cards.csv"
-CHROMA_TOOL = (
-    Path("/Users/xietong/.codex/skills/.system/imagegen/scripts")
-    / "remove_chroma_key.py"
-)
-
-KEY_COLOR_BY_COLOR = {
-    "color_red": "#00ff00",
-    "color_blue": "#ff00ff",
-    "color_green": "#ff00ff",
-    "color_orange": "#0055ff",
-    "color_white": "#ff00ff",
-    "color_purple": "#ff00ff",
-}
-KEY_COLOR_OVERRIDES = {
-    "variable_cost_attack_card": "#ffff00",
-    "custom_block_card": "#ffff00",
-    "attack_increase_cost_on_damage_taken_card": "#00ff00",
-}
 
 
 def process_one(raw_path: Path, output_path: Path, key_color: str) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        suffix=".png",
-        dir=output_path.parent,
-        delete=False,
-    ) as temporary:
-        keyed_path = Path(temporary.name)
-    try:
-        subprocess.run(
-            [
-                sys.executable,
-                str(CHROMA_TOOL),
-                "--input",
-                str(raw_path),
-                "--out",
-                str(keyed_path),
-                "--key-color",
-                key_color,
-                "--soft-matte",
-                "--transparent-threshold",
-                "24",
-                "--opaque-threshold",
-                "90",
-                "--edge-contract",
-                "1",
-                "--edge-feather",
-                "0.7",
-                "--despill",
-                "--force",
-            ],
-            check=True,
+    with Image.open(raw_path) as source:
+        keyed = remove_chroma_key(
+            source,
+            key_color,
+            transparent_threshold=24,
+            opaque_threshold=90,
+            edge_contract=1,
+            edge_feather=0.7,
+            despill=True,
         )
-        with Image.open(keyed_path) as source:
-            final = source.convert("RGBA").resize(
-                (512, 512),
-                Image.Resampling.LANCZOS,
-            )
-            final.save(output_path, format="PNG", optimize=True)
-    finally:
-        keyed_path.unlink(missing_ok=True)
+    final = keyed.resize((512, 512), Image.Resampling.LANCZOS)
+    final = _remove_key_fringe(final, key_color)
+    final = _normalize_subject(final)
+    final = _remove_key_fringe(final, key_color)
+    final.save(output_path, format="PNG", optimize=True)
 
 
 def process_phase(phase: str) -> list[Path]:
@@ -433,10 +395,7 @@ def process_phase(phase: str) -> list[Path]:
             ROOT / "external" / "sprites" / "cards" / color_folder
             / f"{card_id}.png"
         )
-        key_color = KEY_COLOR_OVERRIDES.get(
-            card_id,
-            KEY_COLOR_BY_COLOR[color_id],
-        )
+        key_color = key_color_for_card(manifest, card_id, color_id)
         process_one(raw_path, output_path, key_color)
         outputs.append(output_path)
     return outputs
@@ -458,38 +417,39 @@ if __name__ == "__main__":
     main()
 ```
 
-`process_one()` 使用指定的本地工具和固定参数：
+`process_one()` 直接调用仓库内 `tools/card_art_chroma.py`，不依赖个人目录或已安装 Codex skill。固定参数为：
 
 ```text
-remove_chroma_key.py
---soft-matte
---transparent-threshold 24
---opaque-threshold 90
---edge-contract 1
---edge-feather 0.7
---despill
---force
+soft matte
+transparent threshold 24
+opaque threshold 90
+edge contract 1
+edge feather 0.7
+despill
 ```
 
 抠像后使用 Pillow 以 `LANCZOS` 缩放为 `512 x 512 RGBA`。
 
-阶段默认底色：
+阶段默认底色和单卡例外只在 `tools/card_art_individualization_manifest.json` 中定义：
 
-```python
-KEY_COLOR_BY_COLOR = {
+```json
+"key_colors": {
+  "defaults": {
     "color_red": "#00ff00",
     "color_blue": "#ff00ff",
     "color_green": "#ff00ff",
     "color_orange": "#0055ff",
     "color_white": "#ff00ff",
-    "color_purple": "#ff00ff",
-}
-KEY_COLOR_OVERRIDES = {
-    "variable_cost_attack_card": "#ffff00",
-    "custom_block_card": "#ffff00",
+    "color_purple": "#ff00ff"
+  },
+  "overrides": {
     "attack_increase_cost_on_damage_taken_card": "#00ff00",
+    "card_banish_attack": "#ff00ff"
+  }
 }
 ```
+
+`variable_cost_attack_card` 与 `custom_block_card` 使用各自颜色的默认洋红底 `#ff00ff`；`card_banish_attack` 保留显式洋红 override，`attack_increase_cost_on_damage_taken_card` 保留绿色 override。
 
 `process_phase()` 从阶段清单和 CSV 读取卡牌颜色，输入和输出路径均由 `card_id` 与 `color_id` 的 f-string 表达式确定。
 

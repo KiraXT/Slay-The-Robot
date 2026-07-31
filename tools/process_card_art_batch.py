@@ -2,34 +2,22 @@
 import argparse
 import csv
 import json
-import subprocess
-import sys
-import tempfile
 from pathlib import Path
 
 from PIL import Image
 
 
+if __package__:
+    from tools.card_art_chroma import remove_chroma_key
+    from tools.card_art_manifest import key_color_for_card
+else:
+    from card_art_chroma import remove_chroma_key
+    from card_art_manifest import key_color_for_card
+
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tools" / "card_art_individualization_manifest.json"
 CSV_PATH = ROOT / "external" / "config" / "cards.csv"
-CHROMA_TOOL = (
-    Path("/Users/xietong/.codex/skills/.system/imagegen/scripts")
-    / "remove_chroma_key.py"
-)
-
-KEY_COLOR_BY_COLOR = {
-    "color_red": "#00ff00",
-    "color_blue": "#ff00ff",
-    "color_green": "#ff00ff",
-    "color_orange": "#0055ff",
-    "color_white": "#ff00ff",
-    "color_purple": "#ff00ff",
-}
-KEY_COLOR_OVERRIDES = {
-    "attack_increase_cost_on_damage_taken_card": "#00ff00",
-    "card_banish_attack": "#ff00ff",
-}
 
 
 def _parse_key_color(key_color: str) -> tuple[int, int, int]:
@@ -91,50 +79,24 @@ def _normalize_subject(image: Image.Image) -> Image.Image:
 
 def process_one(raw_path: Path, output_path: Path, key_color: str) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        suffix=".png",
-        dir=output_path.parent,
-        delete=False,
-    ) as temporary:
-        keyed_path = Path(temporary.name)
-
-    try:
-        subprocess.run(
-            [
-                sys.executable,
-                str(CHROMA_TOOL),
-                "--input",
-                str(raw_path),
-                "--out",
-                str(keyed_path),
-                "--key-color",
-                key_color,
-                "--soft-matte",
-                "--transparent-threshold",
-                "24",
-                "--opaque-threshold",
-                "90",
-                "--edge-contract",
-                "1",
-                "--edge-feather",
-                "0.7",
-                "--despill",
-                "--force",
-            ],
-            check=True,
+    with Image.open(raw_path) as source:
+        keyed = remove_chroma_key(
+            source,
+            key_color,
+            transparent_threshold=24,
+            opaque_threshold=90,
+            edge_contract=1,
+            edge_feather=0.7,
+            despill=True,
         )
-        with Image.open(keyed_path) as keyed_source:
-            keyed = keyed_source.convert("RGBA")
-        final = keyed.resize(
-            (512, 512),
-            Image.Resampling.LANCZOS,
-        )
-        final = _remove_key_fringe(final, key_color)
-        final = _normalize_subject(final)
-        final = _remove_key_fringe(final, key_color)
-        final.save(output_path, format="PNG", optimize=True)
-    finally:
-        keyed_path.unlink(missing_ok=True)
+    final = keyed.resize(
+        (512, 512),
+        Image.Resampling.LANCZOS,
+    )
+    final = _remove_key_fringe(final, key_color)
+    final = _normalize_subject(final)
+    final = _remove_key_fringe(final, key_color)
+    final.save(output_path, format="PNG", optimize=True)
 
 
 def process_phase(phase: str) -> list[Path]:
@@ -165,10 +127,7 @@ def process_phase(phase: str) -> list[Path]:
             / color_folder
             / f"{card_id}.png"
         )
-        key_color = KEY_COLOR_OVERRIDES.get(
-            card_id,
-            KEY_COLOR_BY_COLOR[color_id],
-        )
+        key_color = key_color_for_card(manifest, card_id, color_id)
         process_one(raw_path, output_path, key_color)
         outputs.append(output_path)
     return outputs
