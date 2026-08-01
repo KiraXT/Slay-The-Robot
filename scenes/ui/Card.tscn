@@ -1,10 +1,105 @@
-[gd_scene load_steps=10 format=3 uid="uid://btxmfagad05n5"]
+[gd_scene load_steps=20 format=3 uid="uid://btxmfagad05n5"]
 
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_7f6u3"]
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_n7s1f"]
 [ext_resource type="Script" uid="uid://k4n0whn5t0m" path="res://scripts/ui/Card.gd" id="1_u8ksl"]
 [ext_resource type="PackedScene" uid="uid://daimkj082tvn0" path="res://scenes/ui/general/KeywordContainer.tscn" id="3_6p3td"]
 [ext_resource type="Script" uid="uid://c5i0sjwlko88l" path="res://addons/label_font_auto_sizer/rich_label_auto_sizer.gd" id="3_8gkbw"]
+[ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="4_card_font"]
+
+[sub_resource type="FontVariation" id="FontVariation_card_name"]
+base_font = ExtResource("4_card_font")
+variation_embolden = 0.65
+
+[sub_resource type="FontVariation" id="FontVariation_energy_cost"]
+base_font = ExtResource("4_card_font")
+variation_embolden = 0.8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_glow"]
+bg_color = Color(0.262745, 0.811765, 0.964706, 0.04)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.65098, 0.94902, 1, 0.82)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.117647, 0.709804, 0.901961, 0.34)
+shadow_size = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_outer"]
+bg_color = Color(0.258824, 0.411765, 0.882353, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.879216, 0.931373, 1, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_inner"]
+bg_color = Color(1, 1, 1, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.85)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_art"]
+bg_color = Color(1, 1, 1, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.121569, 0.156863, 0.207843, 0.65)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_bottom"]
+bg_color = Color(1, 1, 1, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.879216, 0.931373, 1, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_ribbon"]
+bg_color = Color(0.258824, 0.411765, 0.882353, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.85)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_energy_badge"]
+bg_color = Color(0.0784314, 0.360784, 0.858824, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.879216, 0.931373, 1, 1)
+corner_radius_top_left = 19
+corner_radius_top_right = 19
+corner_radius_bottom_right = 19
+corner_radius_bottom_left = 19
 
 [sub_resource type="Animation" id="Animation_qe6gy"]
 length = 0.001
@@ -18,7 +113,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(72, 90)]
+"values": [Vector2(72, 101)]
 }
 
 [sub_resource type="Animation" id="Animation_utg8m"]
@@ -34,7 +129,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.2),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(72, 90), Vector2(72, 70)]
+"values": [Vector2(72, 101), Vector2(72, 81)]
 }
 
 [sub_resource type="Animation" id="Animation_obl53"]
@@ -50,7 +145,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.2),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(72, 60), Vector2(72, 98)]
+"values": [Vector2(72, 71), Vector2(72, 109)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_156sy"]
@@ -61,16 +156,16 @@ _data = {
 }
 
 [node name="Card" type="Control" groups=["cards"]]
-custom_minimum_size = Vector2(144, 184)
+custom_minimum_size = Vector2(144, 202)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 144.0
-offset_bottom = 184.0
+offset_bottom = 202.0
 theme = ExtResource("1_n7s1f")
 script = ExtResource("1_u8ksl")
 
 [node name="Pivot" type="Node2D" parent="."]
-position = Vector2(72, 90)
+position = Vector2(72, 101)
 
 [node name="KeywordContainer" parent="Pivot" instance=ExtResource("3_6p3td")]
 offset_left = 80.0
@@ -79,126 +174,263 @@ offset_right = 320.0
 offset_bottom = -53.0
 
 [node name="CardVisual" type="Control" parent="Pivot"]
-custom_minimum_size = Vector2(144, 180)
+custom_minimum_size = Vector2(144, 202)
 layout_mode = 3
 anchors_preset = 0
 offset_left = -72.0
-offset_top = -90.0
+offset_top = -101.0
 offset_right = 72.0
-offset_bottom = 94.0
+offset_bottom = 101.0
 theme = ExtResource("1_n7s1f")
 
-[node name="CardGlow" type="ColorRect" parent="Pivot/CardVisual"]
+[node name="CardGlow" type="Panel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
-offset_left = -8.0
-offset_top = -8.0
-offset_right = 152.0
-offset_bottom = 192.0
-color = Color(0.262745, 0.811765, 0.964706, 0.45)
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 147.0
+offset_bottom = 205.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_glow")
 
-[node name="ColorBackground" type="ColorRect" parent="Pivot/CardVisual"]
+[node name="ColorBackground" type="Panel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 offset_right = 144.0
-offset_bottom = 184.0
+offset_bottom = 202.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_outer")
 
-[node name="Background" type="ColorRect" parent="Pivot/CardVisual"]
+[node name="CardBackground" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 140.0
-offset_bottom = 180.0
-color = Color(1, 1, 1, 0.96)
+offset_bottom = 198.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_inner")
 
-[node name="CardDescription" type="RichTextLabel" parent="Pivot/CardVisual"]
+[node name="FactionBadge" type="ColorRect" parent="Pivot/CardVisual"]
+visible = false
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
+[node name="ArtFrame" type="ColorRect" parent="Pivot/CardVisual"]
+visible = false
+mouse_filter = 2
+
+[node name="DescriptionPanel" type="ColorRect" parent="Pivot/CardVisual"]
+visible = false
+mouse_filter = 2
+
+[node name="CardArtBackground" type="TextureRect" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 8.0
-offset_top = 112.0
-offset_right = 136.0
-offset_bottom = 184.0
-theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
-theme_override_font_sizes/normal_font_size = 12
-bbcode_enabled = true
-text = "100/100
-"
-scroll_active = false
-script = ExtResource("3_8gkbw")
-_max_size = 12
-_current_font_size = 12
-_editor_defaults_set = true
-
-[node name="EnergySprite" type="ColorRect" parent="Pivot/CardVisual"]
-layout_mode = 0
-offset_left = -8.0
-offset_top = -8.0
-offset_right = 16.0
-offset_bottom = 16.0
-color = Color(1, 0.686275, 0.141176, 1)
-metadata/_edit_group_ = true
-
-[node name="EnergyCost" type="Label" parent="Pivot/CardVisual/EnergySprite"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 24.0
-offset_bottom = 24.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_constants/line_spacing = -3
-theme_override_font_sizes/font_size = 12
-text = "3"
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_left = 15.0
+offset_top = 34.0
+offset_right = 131.0
+offset_bottom = 110.0
+expand_mode = 1
+mouse_filter = 2
 
 [node name="CardTexture" type="TextureRect" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 24.0
-offset_top = 12.0
-offset_right = 120.0
-offset_bottom = 108.0
+offset_left = 15.0
+offset_top = 34.0
+offset_right = 131.0
+offset_bottom = 110.0
 texture = ExtResource("1_7f6u3")
 expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
 
-[node name="CardName" type="RichTextLabel" parent="Pivot/CardVisual/CardTexture"]
+[node name="CardHeaderBackground" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 29.0
+offset_top = 4.0
+offset_right = 132.0
+offset_bottom = 27.0
+mouse_filter = 2
+show_behind_parent = true
+
+[node name="CardArtFrame" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 11.0
+offset_top = 30.0
+offset_right = 134.0
+offset_bottom = 116.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_art")
+
+[node name="CardDescriptionBackground" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 8.0
+offset_top = 112.0
+offset_right = 136.0
+offset_bottom = 194.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_bottom")
+
+[node name="CardTypeConnector" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 13.0
+offset_top = 105.0
+offset_right = 131.0
+offset_bottom = 120.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_outer")
+
+[node name="CardTypeBackground" type="TextureRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+z_index = 1
+layout_mode = 0
+offset_left = 49.0
+offset_top = 119.0
+offset_right = 97.0
+offset_bottom = 133.0
+expand_mode = 1
+mouse_filter = 2
+
+[node name="CardType" type="Label" parent="Pivot/CardVisual/CardTypeBackground"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = -16.0
-offset_top = -4.0
-offset_right = 112.0
-offset_bottom = 12.0
-theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
-theme_override_font_sizes/normal_font_size = 11
+offset_right = 48.0
+offset_bottom = 14.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.04, 0.06, 0.9)
+theme_override_constants/line_spacing = -3
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "攻击"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardFactionBadge" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 112.0
+offset_top = 6.0
+offset_right = 132.0
+offset_bottom = 26.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_energy_badge")
+
+[node name="CardFactionStamp" type="Panel" parent="Pivot/CardVisual/CardDescriptionBackground"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 101.0
+offset_top = 57.0
+offset_right = 124.0
+offset_bottom = 80.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_energy_badge")
+
+[node name="EnergySprite" type="Panel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 34.0
+offset_bottom = 34.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_energy_badge")
+metadata/_edit_group_ = true
+
+[node name="CardChrome" type="TextureRect" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 144.0
+offset_bottom = 202.0
+expand_mode = 1
+mouse_filter = 2
+
+[node name="CardName" type="RichTextLabel" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 34.0
+offset_top = 8.0
+offset_right = 124.0
+offset_bottom = 32.0
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.027451, 0.039216, 0.9)
+theme_override_constants/outline_size = 2
+theme_override_fonts/normal_font = SubResource("FontVariation_card_name")
+theme_override_font_sizes/normal_font_size = 12
 bbcode_enabled = true
 text = "Card Name"
 scroll_active = false
+vertical_alignment = 1
 script = ExtResource("3_8gkbw")
 _max_size = 12
-_current_font_size = 11
+_min_size = 8
+_current_font_size = 12
 _editor_defaults_set = true
 
-[node name="CardType" type="Label" parent="Pivot/CardVisual"]
+[node name="CardDescription" type="RichTextLabel" parent="Pivot/CardVisual"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 8.0
-offset_top = 95.0
-offset_right = 136.0
-offset_bottom = 112.0
-theme_override_colors/font_color = Color(0.121569, 0.156863, 0.207843, 1)
+offset_left = 17.0
+offset_top = 139.0
+offset_right = 128.0
+offset_bottom = 177.0
+theme_override_colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
+theme_override_font_sizes/normal_font_size = 9
+bbcode_enabled = true
+text = "100/100"
+scroll_active = false
+script = ExtResource("3_8gkbw")
+_max_size = 9
+_min_size = 7
+_current_font_size = 9
+_editor_defaults_set = true
+
+[node name="CardStars" type="Label" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 17.0
+offset_top = 179.0
+offset_right = 97.0
+offset_bottom = 194.0
+theme_override_colors/font_color = Color(1, 0.835294, 0.184314, 1)
+theme_override_colors/font_outline_color = Color(0.16, 0.12, 0.04, 1)
 theme_override_constants/line_spacing = -3
-theme_override_font_sizes/font_size = 12
-text = "Hit and Run"
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 9
+text = "★★"
+vertical_alignment = 1
+
+[node name="EnergyCost" type="Label" parent="Pivot/CardVisual"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 5.0
+offset_top = 1.0
+offset_right = 43.0
+offset_bottom = 39.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.039216, 0.101961, 0.203922, 0.95)
+theme_override_constants/line_spacing = -3
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = SubResource("FontVariation_energy_cost")
+theme_override_font_sizes/font_size = 19
+text = "3"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="CardButton" type="Button" parent="Pivot"]
 unique_name_in_owner = true
 self_modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(144, 184)
+custom_minimum_size = Vector2(144, 202)
 offset_left = -72.0
-offset_top = -90.0
+offset_top = -101.0
 offset_right = 72.0
-offset_bottom = 94.0
+offset_bottom = 101.0
 button_mask = 1
 metadata/_edit_lock_ = true
 

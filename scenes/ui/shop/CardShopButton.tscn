@@ -4,19 +4,19 @@
 [ext_resource type="PackedScene" uid="uid://btxmfagad05n5" path="res://scenes/ui/Card.tscn" id="2_1jbuy"]
 
 [node name="CardShopButton" type="Control"]
-custom_minimum_size = Vector2(144, 208)
+custom_minimum_size = Vector2(144, 228)
 layout_mode = 3
 anchors_preset = 0
 offset_right = 144.0
-offset_bottom = 208.0
+offset_bottom = 228.0
 script = ExtResource("1_c2gpa")
 
 [node name="Card" parent="." instance=ExtResource("2_1jbuy")]
 
 [node name="PriceLabel" type="Label" parent="."]
 layout_mode = 0
-offset_top = 184.0
+offset_top = 204.0
 offset_right = 144.0
-offset_bottom = 207.0
+offset_bottom = 227.0
 text = "999"
 horizontal_alignment = 1

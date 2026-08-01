@@ -2,8 +2,6 @@
 extends Control
 class_name Card
 
-const ArtUIShellScript := preload("res://scripts/ui/ArtUIShell.gd")
-
 var card_data: CardData = null
 var card_listeners: Array[BaseCardListener] = []
 
@@ -13,20 +11,73 @@ var _card_is_rerendering: bool = false
 const CARD_TEXT_IMAGE_SIZE: int = 16	# images in card descriptions will be set to this size
 const ENERGY_ICON_KEYWORD: String = "[energy_icon]"	# tells description to display an energy icon in place
 
+const CARD_TYPE_LABELS: Dictionary = {
+	CardData.CARD_TYPES.ATTACK: "攻击",
+	CardData.CARD_TYPES.SKILL: "技能",
+	CardData.CARD_TYPES.POWER: "能力",
+	CardData.CARD_TYPES.STATUS: "状态",
+	CardData.CARD_TYPES.CURSE: "诅咒",
+}
+
+const CARD_RARITY_STARS: Dictionary = {
+	CardData.CARD_RARITIES.BASIC: "★",
+	CardData.CARD_RARITIES.COMMON: "★★",
+	CardData.CARD_RARITIES.UNCOMMON: "★★★",
+	CardData.CARD_RARITIES.RARE: "★★★★",
+	CardData.CARD_RARITIES.GENERATED: "",
+}
+
+const CARD_DEFAULT_FRAME_COLOR: Color = Color(0.86, 0.88, 0.92, 1.0)
+const CARD_NEUTRAL_FRAME_COLOR: Color = Color(0.70, 0.73, 0.76, 1.0)
+const CARD_NEUTRAL_FRAME_EDGE_COLOR: Color = Color(0.46, 0.49, 0.52, 1.0)
+const CARD_NEUTRAL_FRAME_BORDER_COLOR: Color = Color(0.62, 0.65, 0.68, 1.0)
+
+const CARD_STYLE_PACK_DIR := "external/data/card_styles/"
+const CARD_STYLE_PACK_FILE := "card_style_preview.json"
+const CARD_TYPE_FALLBACK_TEXTURE_PATH := "external/sprites/ui/card_styles/full_master/ribbons/ribbon_status.png"
+const CARD_ART_FALLBACK_RECT := Rect2(15.0, 34.0, 116.0, 76.0)
+const CARD_ART_MASTER_RECT := Rect2(17.0, 34.0, 114.0, 94.0)
+const CARD_STYLE_SHARED_PANEL_MAP := {
+	"CardGlow": "glow",
+}
+const CARD_STYLE_LEGACY_LAYERS := [
+	"ColorBackground",
+	"CardBackground",
+	"CardHeaderBackground",
+	"CardArtFrame",
+	"CardDescriptionBackground",
+	"CardTypeConnector",
+	"CardFactionBadge",
+	"CardFactionStamp",
+	"EnergySprite",
+]
+
 @onready var card_button: Button = %CardButton
 
 @onready var pivot: Node2D = $Pivot
 
-@onready var card_texture = %CardTexture
+@onready var card_art_background: TextureRect = %CardArtBackground
+@onready var card_texture: TextureRect = %CardTexture
+@onready var card_chrome: TextureRect = %CardChrome
 @onready var card_name: RichLabelAutoSizer = %CardName
 @onready var card_type: Label = %CardType
 @onready var card_description: RichLabelAutoSizer = %CardDescription
 @onready var card_energy_cost: Label = %EnergyCost
-@onready var card_color: ColorRect = %ColorBackground
+@onready var card_color: Panel = %ColorBackground
+@onready var card_background: Panel = %CardBackground
+@onready var card_header_background: Panel = %CardHeaderBackground
+@onready var card_art_frame: Panel = %CardArtFrame
+@onready var card_description_background: Panel = %CardDescriptionBackground
+@onready var card_type_background: TextureRect = %CardTypeBackground
+@onready var card_type_connector: Panel = %CardTypeConnector
+@onready var card_faction_badge: Panel = %CardFactionBadge
+@onready var card_faction_stamp: Panel = %CardFactionStamp
+@onready var card_stars: Label = %CardStars
+@onready var energy_sprite: Panel = %EnergySprite
+var _using_full_card_master := false
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
-@onready var card_glow: ColorRect = %CardGlow
-@onready var card_visual: Control = $Pivot/CardVisual
+@onready var card_glow: Panel = %CardGlow
 
 @onready var keyword_container = $Pivot/KeywordContainer
 @onready var keyword_timer = $KeywordTimer
@@ -42,14 +93,9 @@ signal card_drag_started(Card)
 signal card_drag_ended(Card)
 signal card_drag_cancelled(Card)
 
-func _ready() -> void:
-	_ensure_card_shell()
-
-
 func init(_card_data: CardData, angular_offset: float, connect_combat_signals: bool = false, connect_ui_signals: bool = true):
 	card_data = _card_data
 	pivot.rotation_degrees = angular_offset
-	_ensure_card_shell()
 	
 	# signals used for cards in player's hand
 	if connect_combat_signals:
@@ -90,93 +136,233 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 		_card_is_rerendering = false
 	
 	# update visuals
-	card_texture.texture = FileLoader.load_texture_or_fallback(card_data.card_texture_path, "card")
+	if card_data.card_texture_path != "":
+		card_texture.texture = FileLoader.load_texture(card_data.card_texture_path)
 	
 	# updates the card's display
 	card_name.set_bbcode("[center]" + card_data.get_card_name() + "[/center]")
 	card_description.set_bbcode(get_card_description(selected_enemy))
-	card_type.text = CardData.CARD_RARITIES.keys()[card_data.card_rarity] + " " + CardData.CARD_TYPES.keys()[card_data.card_type]
+	card_type.text = _get_card_type_label(card_data.card_type)
+	card_stars.text = _get_card_star_label(card_data.card_rarity)
 	
 	var color_data: ColorData = Global.get_color_data(card_data.card_color_id)
-	if color_data != null:
-		card_color.color = color_data.color
-		var faction_badge := card_visual.get_node_or_null("FactionBadge") as ColorRect
-		var art_frame := card_visual.get_node_or_null("ArtFrame") as ColorRect
-		var description_panel := card_visual.get_node_or_null("DescriptionPanel") as ColorRect
-		if faction_badge != null and art_frame != null and description_panel != null:
-			ArtUIShellScript.style_card_shell($Pivot/CardVisual/Background, art_frame, description_panel, faction_badge, color_data.color)
+	_apply_card_palette(color_data, card_data.card_color_id)
+	_apply_card_style_pack(card_data.card_color_id, card_data.card_type)
 	
-	$Pivot/CardVisual/EnergySprite.visible = card_data.card_is_playable
+	energy_sprite.visible = card_data.card_is_playable and not _using_full_card_master
+	card_energy_cost.visible = card_data.card_is_playable
 	
+	var energy_cost_text: String
 	if card_data.card_energy_cost_is_variable:
-		card_energy_cost.text = "X"
+		energy_cost_text = "X"
 		if card_data.card_energy_cost_variable_upper_bound >= 1:
-			card_energy_cost.text = "X-" + str(card_data.card_energy_cost_variable_upper_bound)
+			energy_cost_text = "X-" + str(card_data.card_energy_cost_variable_upper_bound)
 	else:
-		card_energy_cost.text = str(card_data.get_card_energy_cost())
+		energy_cost_text = str(card_data.get_card_energy_cost())
+	_update_energy_cost_visual(energy_cost_text)
+
+func _get_card_type_label(card_type_id: int) -> String:
+	if CARD_TYPE_LABELS.has(card_type_id):
+		return CARD_TYPE_LABELS[card_type_id]
+	if card_type_id >= 0 and card_type_id < CardData.CARD_TYPES.keys().size():
+		return CardData.CARD_TYPES.keys()[card_type_id]
+	return ""
 
 
-func _ensure_card_shell() -> void:
-	if not is_inside_tree():
+func _get_card_star_label(card_rarity_id: int) -> String:
+	return CARD_RARITY_STARS.get(card_rarity_id, "")
+
+
+func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
+	_using_full_card_master = false
+	card_chrome.visible = false
+	card_background.visible = true
+	_set_card_art_rect(CARD_ART_FALLBACK_RECT)
+	_set_legacy_card_layers_visible(true)
+	var frame_color := CARD_DEFAULT_FRAME_COLOR
+	if color_data != null:
+		frame_color = color_data.color
+	var compatibility_badge := get_node_or_null("Pivot/CardVisual/FactionBadge") as ColorRect
+	if compatibility_badge != null:
+		compatibility_badge.color = frame_color
+
+	var background_color := Color(1.0, 1.0, 1.0, 0.98)
+	if frame_color.get_luminance() < 0.82:
+		background_color = frame_color.lightened(0.82)
+
+	var frame_edge := frame_color.darkened(0.20)
+	var frame_highlight := frame_color.lightened(0.45)
+	var type_color := frame_color.darkened(0.10)
+	var description_border := frame_color.lightened(0.50)
+	var panel_white := Color(1.0, 1.0, 1.0, 0.96)
+	if card_color_id == "color_white":
+		frame_color = CARD_NEUTRAL_FRAME_COLOR
+		frame_edge = CARD_NEUTRAL_FRAME_EDGE_COLOR
+		frame_highlight = CARD_NEUTRAL_FRAME_BORDER_COLOR
+		type_color = CARD_NEUTRAL_FRAME_BORDER_COLOR
+		description_border = CARD_NEUTRAL_FRAME_BORDER_COLOR.lightened(0.28)
+		background_color = Color(0.96, 0.97, 0.98, 0.98)
+
+	card_art_background.texture = _create_card_art_gradient(frame_color)
+	_set_panel_style(card_color, frame_color, frame_highlight)
+	_set_panel_style(card_background, background_color, panel_white)
+	_set_panel_style(card_art_frame, panel_white, frame_edge)
+	_set_panel_style(card_description_background, panel_white, description_border)
+	card_type_background.texture = _load_style_texture(CARD_TYPE_FALLBACK_TEXTURE_PATH)
+	card_type_background.self_modulate = type_color
+	_set_panel_style(card_type_connector, frame_color, frame_highlight)
+	_set_panel_style(card_faction_badge, frame_color.darkened(0.20), frame_highlight)
+	_set_panel_style(card_faction_stamp, frame_color.darkened(0.20), frame_highlight)
+	_set_panel_style(energy_sprite, Color(0.08, 0.36, 0.86, 1.0), frame_highlight)
+
+func _set_panel_style(panel: Panel, bg_color: Color, border_color: Color) -> void:
+	var style := panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if style == null:
+		style = StyleBoxFlat.new()
+	else:
+		style = style.duplicate()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	panel.add_theme_stylebox_override("panel", style)
+
+
+func _apply_card_style_pack(card_color_id: String, card_type_id: int) -> void:
+	var style_path := CARD_STYLE_PACK_DIR + CARD_STYLE_PACK_FILE
+	if not FileAccess.file_exists(FileLoader._get_modified_filepath(style_path)):
 		return
-	var background := $Pivot/CardVisual/Background as ColorRect
-	var faction_badge := card_visual.get_node_or_null("FactionBadge") as ColorRect
-	if faction_badge == null:
-		faction_badge = ColorRect.new()
-		faction_badge.name = "FactionBadge"
-		card_visual.add_child(faction_badge)
-	faction_badge.position = Vector2(116, 8)
-	faction_badge.size = Vector2(18, 34)
-	faction_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	faction_badge.color = Color(0.13, 0.83, 0.84, 1.0)
-
-	var art_frame := card_visual.get_node_or_null("ArtFrame") as ColorRect
-	if art_frame == null:
-		art_frame = ColorRect.new()
-		art_frame.name = "ArtFrame"
-		card_visual.add_child(art_frame)
-	art_frame.position = Vector2(18, 8)
-	art_frame.size = Vector2(108, 104)
-	art_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	art_frame.color = Color(0.89, 0.98, 1.0, 1.0)
-	_move_after(art_frame, background)
-	_move_before(art_frame, card_texture)
-
-	var description_panel := card_visual.get_node_or_null("DescriptionPanel") as ColorRect
-	if description_panel == null:
-		description_panel = ColorRect.new()
-		description_panel.name = "DescriptionPanel"
-		card_visual.add_child(description_panel)
-	description_panel.position = Vector2(6, 110)
-	description_panel.size = Vector2(132, 70)
-	description_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	description_panel.color = Color(1.0, 1.0, 1.0, 0.92)
-	_move_after(description_panel, background)
-	_move_before(description_panel, card_description)
-	_move_after(faction_badge, background)
-	_move_after(faction_badge, card_texture)
-
-
-func _move_before(node: CanvasItem, reference: CanvasItem) -> void:
-	if node.get_parent() != reference.get_parent():
+	var style_data := FileLoader.load_json(CARD_STYLE_PACK_DIR, CARD_STYLE_PACK_FILE)
+	var master_slots: Dictionary = style_data.get("master_slots", {})
+	var master_path := _get_style_variant_path(master_slots, card_color_id)
+	var type_slots: Dictionary = style_data.get("type_slots", {})
+	var type_path := _get_style_variant_path(type_slots, str(card_type_id))
+	if not _try_apply_full_card_master(master_path, type_path):
 		return
-	if node.get_index() < reference.get_index():
-		return
-	node.get_parent().move_child(node, reference.get_index())
+
+	_using_full_card_master = true
+	card_chrome.visible = true
+	_set_card_art_rect(CARD_ART_MASTER_RECT)
+	_set_legacy_card_layers_visible(false)
+	var shared_slots: Dictionary = style_data.get("shared_slots", {})
+	for panel_name: String in CARD_STYLE_SHARED_PANEL_MAP:
+		var panel := _get_card_style_panel(panel_name)
+		if panel == null:
+			continue
+		var texture_path := str(shared_slots.get(CARD_STYLE_SHARED_PANEL_MAP[panel_name], ""))
+		_apply_texture_stylebox(panel, texture_path)
+
+	card_type_background.visible = true
+	card_name.add_theme_color_override("default_color", Color.WHITE)
+	card_name.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.04, 0.92))
+	card_name.add_theme_constant_override("outline_size", 2)
 
 
-func _move_after(node: CanvasItem, reference: CanvasItem) -> void:
-	if node.get_parent() != reference.get_parent():
+func _get_style_variant_path(slots: Dictionary, key: String) -> String:
+	return str(slots.get(key, slots.get("default", "")))
+
+
+func _set_legacy_card_layers_visible(is_visible: bool) -> void:
+	for node_name: String in CARD_STYLE_LEGACY_LAYERS:
+		var node := get_node_or_null("%" + node_name) as CanvasItem
+		if node != null:
+			node.visible = is_visible
+
+
+func _try_apply_full_card_master(master_path: String, type_path: String) -> bool:
+	var master_texture := _load_style_texture(master_path)
+	var type_texture := _load_style_texture(type_path)
+	if master_texture == null or type_texture == null:
+		return false
+	card_chrome.texture = master_texture
+	card_type_background.texture = type_texture
+	card_type_background.self_modulate = Color.WHITE
+	return true
+
+
+func _load_style_texture(texture_path: String) -> Texture2D:
+	if texture_path.is_empty():
+		return null
+	if not FileAccess.file_exists(FileLoader._get_modified_filepath(texture_path)):
+		return null
+	var texture := FileLoader.load_texture(texture_path)
+	if texture == null or texture.get_size() == Vector2.ZERO:
+		return null
+	return texture
+
+
+func _set_control_rect(control: Control, rect: Rect2) -> void:
+	control.position = rect.position
+	control.size = rect.size
+
+
+func _set_card_art_rect(rect: Rect2) -> void:
+	_set_control_rect(card_art_background, rect)
+	_set_control_rect(card_texture, rect)
+
+
+func _create_card_art_gradient(frame_color: Color) -> GradientTexture2D:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	gradient.colors = PackedColorArray([
+		frame_color.lightened(0.88),
+		frame_color.lightened(0.68),
+		frame_color.lightened(0.38),
+	])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill_from = Vector2(0.08, 0.05)
+	texture.fill_to = Vector2(0.92, 0.95)
+	return texture
+
+
+func _update_energy_cost_visual(cost_text: String) -> void:
+	card_energy_cost.text = cost_text
+	card_energy_cost.add_theme_font_size_override("font_size", 19 if cost_text.length() <= 2 else 14)
+
+
+func _get_card_style_panel(panel_name: String) -> Panel:
+	match panel_name:
+		"CardHeaderBackground":
+			return card_header_background
+		"ColorBackground":
+			return card_color
+		"CardBackground":
+			return card_background
+		"CardArtFrame":
+			return card_art_frame
+		"CardDescriptionBackground":
+			return card_description_background
+		"EnergySprite":
+			return energy_sprite
+		"CardGlow":
+			return card_glow
+		_:
+			return null
+
+
+func _apply_texture_stylebox(panel: Panel, texture_path: String) -> void:
+	var texture := _load_style_texture(texture_path)
+	if texture == null:
 		return
-	if node.get_index() > reference.get_index():
-		return
-	node.get_parent().move_child(node, reference.get_index() + 1)
+	_apply_texture_stylebox_texture(panel, texture)
+
+
+func _apply_texture_stylebox_texture(panel: Panel, texture: Texture2D) -> void:
+	var style := StyleBoxTexture.new()
+	style.texture = texture
+	style.texture_margin_left = 8
+	style.texture_margin_top = 8
+	style.texture_margin_right = 8
+	style.texture_margin_bottom = 8
+	style.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	style.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	panel.add_theme_stylebox_override("panel", style)
+
 
 func set_card_glow(_visible: bool) -> void:
-	card_glow.visible = _visible
+	card_glow.visible = false
 
 func toggle_card_glow() -> void:
-	card_glow.visible = !card_glow.visible
+	card_glow.visible = false
 
 func can_play_card() -> bool:
 	if not card_data.card_is_playable:

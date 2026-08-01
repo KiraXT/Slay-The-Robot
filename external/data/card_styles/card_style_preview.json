@@ -1,0 +1,31 @@
+{
+	"object_id": "card_style_preview",
+	"display_name": "Full Reference Card Master",
+	"source_master": "designer/art_source/card_styles/full_master_v1/card_master_chroma.png",
+	"base_size": [144, 202],
+	"master_slots": {
+		"color_red": "external/sprites/ui/card_styles/full_master/card_master_red.png",
+		"color_blue": "external/sprites/ui/card_styles/full_master/card_master_blue.png",
+		"color_green": "external/sprites/ui/card_styles/full_master/card_master_green.png",
+		"color_orange": "external/sprites/ui/card_styles/full_master/card_master_gold.png",
+		"color_white": "external/sprites/ui/card_styles/full_master/card_master_silver.png",
+		"default": "external/sprites/ui/card_styles/full_master/card_master_silver.png"
+	},
+	"shared_slots": {},
+	"type_slots": {
+		"0": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_attack.png",
+		"1": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_skill.png",
+		"2": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_power.png",
+		"3": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_status.png",
+		"4": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_curse.png",
+		"default": "external/sprites/ui/card_styles/full_master/ribbons/ribbon_status.png"
+	},
+	"layout": {
+		"name_rect": [34, 7, 88, 23],
+		"art_rect": [17, 34, 114, 94],
+		"type_rect": [47, 119, 50, 16],
+		"description_rect": [17, 139, 111, 38],
+		"stars_rect": [17, 179, 80, 15],
+		"energy_rect": [2, 2, 38, 38]
+	}
+}
