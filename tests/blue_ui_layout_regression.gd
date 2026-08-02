@@ -23,12 +23,14 @@ func _run() -> void:
 	if info_panel == null or stage == null or character_buttons == null or run_config == null:
 		failures.append("new run must retain its layout anchors for the title transition")
 	else:
-		if stage.visible:
-			failures.append("new run must hide the title-stage character display")
-		if character_buttons.position != Vector2(56.0, 552.0):
-			failures.append("new run must place character buttons at the legacy blue position")
-		if run_config.position != Vector2.ZERO:
-			failures.append("new run must use the legacy blue run configuration origin")
+		if not stage.visible:
+			failures.append("new run must show the blue title-stage character display")
+		if stage.position != Vector2(370.0, 120.0):
+			failures.append("new run must place the character stage at the blue layout position")
+		if character_buttons.position != Vector2(40.0, 520.0):
+			failures.append("new run must place character buttons at the blue stage layout position")
+		if run_config.position != Vector2(840.0, 120.0):
+			failures.append("new run must place the run configuration at the blue stage layout position")
 		var difficulty_select := run_config.get_node_or_null("DifficultySelect") as Control
 		var modifier_list := run_config.get_node_or_null("CustomRunModifierButtonContainer") as Control
 		var seed_input := run_config.get_node_or_null("SeedInput") as Control
@@ -36,14 +38,14 @@ func _run() -> void:
 		if difficulty_select == null or modifier_list == null or seed_input == null or start_run == null:
 			failures.append("new run must keep the legacy blue configuration controls")
 		else:
-			if difficulty_select.position != Vector2(64.0, 504.0):
-				failures.append("new run must place difficulty controls at the legacy blue position")
-			if modifier_list.position != Vector2(824.0, 168.0):
-				failures.append("new run must place modifiers at the legacy blue position")
-			if seed_input.position != Vector2(472.0, 552.0):
-				failures.append("new run must place the seed input at the legacy blue position")
-			if start_run.position != Vector2(392.0, 600.0):
-				failures.append("new run must place the start control at the legacy blue position")
+			if difficulty_select.position != Vector2.ZERO:
+				failures.append("new run must align difficulty controls to the blue stage configuration panel")
+			if modifier_list.position != Vector2(0.0, 90.0):
+				failures.append("new run must place modifiers below the blue stage configuration header")
+			if seed_input.position != Vector2(0.0, 346.0):
+				failures.append("new run must place the seed input in the blue stage configuration panel")
+			if start_run.position != Vector2(0.0, 410.0):
+				failures.append("new run must place the start control in the blue stage configuration panel")
 	if root_scene.get_node_or_null("TitleScreen/Backdrop") == null:
 		failures.append("the title-screen backdrop must remain available")
 
