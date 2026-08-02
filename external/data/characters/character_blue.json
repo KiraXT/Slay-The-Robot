@@ -1,7 +1,7 @@
 {
     "patch_data": {},
     "properties": {
-        "character_background_texture_path": "",
+        "character_background_texture_path": "external/sprites/characters/character_blue/character_blue_background.png",
         "character_color_id": "color_blue",
         "character_description": "如果他们是绿色的早就死了",
         "character_icon_texture_path": "external/sprites/characters/character_blue/character_blue_icon.png",
