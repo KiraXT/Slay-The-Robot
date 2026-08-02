@@ -1,7 +1,7 @@
 # Settings menu for resolution and other options
 extends Control
 
-@onready var title_screen: Control = $%TitleScreen
+@onready var title_screen: Control = get_parent()
 @onready var resolution_option_button: OptionButton = $ResolutionOptionButton
 @onready var back_button: Button = $BackButton
 

@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://2714jm71pkv4"]
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://2714jm71pkv4"]
 
 [ext_resource type="FontFile" path="res://fonts/ArialUnicode.ttf" id="1_5v7qk"]
 
@@ -21,8 +21,70 @@ content_margin_top = 10.0
 content_margin_right = 12.0
 content_margin_bottom = 10.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 6
+border_color = Color(0.0784314, 0.92549, 0.913725, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.0745098, 0.384314, 0.439216, 0.28)
+shadow_size = 10
+shadow_offset = Vector2(0, 5)
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.894118, 0.980392, 0.980392, 1)
+border_width_left = 3
+border_width_top = 5
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.105882, 0.721569, 0.733333, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.0745098, 0.384314, 0.439216, 0.12)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
+bg_color = Color(0.88, 0.88, 0.88, 0.7)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 5
+border_color = Color(0.55, 0.62, 0.64, 0.7)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.08)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
 [resource]
 default_font = ExtResource("1_5v7qk")
+Button/styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+Button/styles/focus = SubResource("StyleBoxFlat_button_hover")
+Button/styles/hover = SubResource("StyleBoxFlat_button_hover")
+Button/styles/normal = SubResource("StyleBoxFlat_panel")
+Button/styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
 RichTextLabel/colors/default_color = Color(0.121569, 0.156863, 0.207843, 1)
 RichTextLabel/font_sizes/normal_font_size = 12

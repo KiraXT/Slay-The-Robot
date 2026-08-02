@@ -1,22 +1,8 @@
 # maintains combat UI
 extends Control
 
-const ArtUIShellScript := preload("res://scripts/ui/ArtUIShell.gd")
-
-const COMBAT_BACKGROUND_PATH := "external/sprites/ui/flipper/background_soft_cyan.png"
-const ICON_PAUSE_PATH := "external/sprites/ui/flipper/icon_pause.png"
-const ICON_MAP_PATH := "external/sprites/ui/flipper/icon_map.png"
-const ICON_DECK_PATH := "external/sprites/ui/flipper/icon_deck.png"
-const ICON_ENERGY_PATH := "external/sprites/ui/flipper/icon_energy.png"
-const ICON_DRAW_PATH := "external/sprites/ui/flipper/icon_draw.png"
-const ICON_DISCARD_PATH := "external/sprites/ui/flipper/icon_discard.png"
-const ICON_EXHAUST_PATH := "external/sprites/ui/flipper/icon_exhaust.png"
-const ICON_CHEST_PATH := "external/sprites/ui/flipper/icon_chest.png"
-const ICON_SHOP_PATH := "external/sprites/ui/flipper/icon_shop.png"
-
 @onready var money_label: Label = $%MoneyLabel
 @onready var health_label: Label = $%HealthLabel
-@onready var background_art: TextureRect = $BackgroundArt
 
 @onready var energy_count: Label = $Energy/EnergyCount
 @onready var energy: TextureButton = $Energy
@@ -25,8 +11,6 @@ const ICON_SHOP_PATH := "external/sprites/ui/flipper/icon_shop.png"
 @onready var exhaust_count: Label = $ExhaustPile/ExhaustCount
 
 @onready var deck_button: TextureButton = $DeckButton
-@onready var pause_button: TextureButton = $PauseButton
-@onready var map_button: TextureButton = $MapButton
 @onready var draw_pile_button: TextureButton = $DrawPile
 @onready var discard_pile_button: TextureButton = $DiscardPile
 @onready var exhaust_pile_button: TextureButton = $ExhaustPile
@@ -47,8 +31,6 @@ const ICON_SHOP_PATH := "external/sprites/ui/flipper/icon_shop.png"
 var end_turn_object: CombatEndTurn = null
 
 func _ready():
-	_apply_runtime_textures()
-	_apply_combat_shell()
 	Signals.player_money_changed.connect(_on_player_money_changed)
 	Signals.player_health_changed.connect(_on_player_health_changed)
 	
@@ -148,15 +130,6 @@ func set_combat_display_visibility(display_visibility: bool) -> void:
 	discard_pile_button.visible = display_visibility
 	exhaust_pile_button.visible = display_visibility
 	end_turn_button.visible = display_visibility
-	var left_pile_dock := get_node_or_null("LeftPileDock") as CanvasItem
-	if left_pile_dock != null:
-		left_pile_dock.visible = display_visibility
-	var right_pile_dock := get_node_or_null("RightPileDock") as CanvasItem
-	if right_pile_dock != null:
-		right_pile_dock.visible = display_visibility
-	var hand_tray := get_node_or_null("HandTray") as CanvasItem
-	if hand_tray != null:
-		hand_tray.visible = display_visibility
 
 func _on_card_played(_card_play_request: CardPlayRequest):
 	update_combat_display()
@@ -184,26 +157,6 @@ func _on_player_money_changed():
 
 func _on_player_health_changed():
 	health_label.text = "%s / %s" % [Global.player_data.player_health, Global.player_data.player_health_max]
-
-
-func _apply_combat_shell() -> void:
-	ArtUIShellScript.ensure_color_panel(self, "TopResourceBar", Rect2(184, 6, 316, 54), "top_resource_bar", ArtUIShellScript.SURFACE, "BackgroundButton")
-	ArtUIShellScript.ensure_color_panel(self, "LeftPileDock", Rect2(14, 548, 78, 128), "left_pile_dock", ArtUIShellScript.SURFACE, "BackgroundButton")
-	ArtUIShellScript.ensure_color_panel(self, "RightPileDock", Rect2(1064, 548, 130, 128), "right_pile_dock", ArtUIShellScript.SURFACE, "BackgroundButton")
-	ArtUIShellScript.ensure_color_panel(self, "HandTray", Rect2(152, 612, 912, 84), "hand_tray", Color(1.0, 1.0, 1.0, 0.72), "BackgroundButton")
-
-	for label in [money_label, health_label]:
-		ArtUIShellScript.apply_label_capsule(label, "combat_resource")
-	end_turn_button.add_theme_color_override("font_color", Color.WHITE)
-	end_turn_button.add_theme_color_override("font_hover_color", Color.WHITE)
-	end_turn_button.add_theme_color_override("font_pressed_color", Color.WHITE)
-	end_turn_button.add_theme_color_override("font_disabled_color", Color(1.0, 1.0, 1.0, 0.78))
-
-
-func _apply_runtime_textures() -> void:
-	background_art.texture = FileLoader.load_texture_or_fallback(COMBAT_BACKGROUND_PATH, "background")
-	chest.texture_normal = FileLoader.load_texture_or_fallback(ICON_CHEST_PATH, "icon")
-	shop.texture_normal = FileLoader.load_texture_or_fallback(ICON_SHOP_PATH, "icon")
 
 ### Deck Buttons
 
