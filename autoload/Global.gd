@@ -177,6 +177,7 @@ func _ready():
 	#FileLoader._generate_mod_list_data() # generates the mod list used for loading ALL external files
 	#FileLoader._generate_base_mod_data() # generates mod data for base game. uncomment, run once, then comment back after updating SCHEMA
 	FileLoader.load_read_only_data() # loads all mods and base game exteral data
+	_apply_conventional_card_art_paths()
 	
 	### Generated from loaded data
 	# custom signals generated from CustomSignalData
@@ -188,6 +189,14 @@ func _ready():
 	
 	### Exporting Data
 	# FileLoader.export_test_data() # uncomment to output all unexported test data to file
+
+
+func _apply_conventional_card_art_paths() -> void:
+	for card_data: CardData in _id_to_card_data.values():
+		var color_folder := card_data.card_color_id.trim_prefix("color_")
+		var texture_path := "external/sprites/cards/%s/%s.png" % [color_folder, card_data.object_id]
+		if FileAccess.file_exists(FileLoader._get_modified_filepath(texture_path)):
+			card_data.card_texture_path = texture_path
 
 
 #region Run
