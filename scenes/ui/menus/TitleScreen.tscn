@@ -1,0 +1,598 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_theme"]
+[ext_resource type="Script" uid="uid://dw0xyfu580mkb" path="res://scripts/ui/menus/TitleScreen.gd" id="2_title"]
+[ext_resource type="Script" path="res://scripts/ui/menus/MenuBackdrop.gd" id="3_backdrop"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_chest.png" id="4_chest"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_menu.png" id="5_menu"]
+[ext_resource type="Script" uid="uid://cg1kj2nrg24jw" path="res://scripts/ui/menus/MainMenu.gd" id="6_main"]
+[ext_resource type="Script" uid="uid://c4twsg7v4ky8u" path="res://scripts/ui/menus/NewRunMenu.gd" id="7_new_run"]
+[ext_resource type="Script" uid="uid://chcjmcum7dbn7" path="res://scripts/ui/CharacterButtonContainer.gd" id="8_characters"]
+[ext_resource type="Script" uid="uid://djp4k7pq27a7e" path="res://scripts/ui/CustomRunModifierButtonContainer.gd" id="9_modifiers"]
+[ext_resource type="Script" uid="uid://dgls5w4w7ym84" path="res://scripts/ui/menus/CodexMenu.gd" id="10_codex"]
+[ext_resource type="Script" uid="uid://b2t515tpjrija" path="res://addons/smooth_scroll_container/SmoothScrollContainer.gd" id="11_scroll"]
+[ext_resource type="Script" uid="uid://b3nvcsku8u75w" path="res://addons/smooth_scroll_container/scroll_damper/expo_scroll_damper.gd" id="12_damper"]
+[ext_resource type="Script" uid="uid://pfylc0wo8aq2" path="res://scripts/ui/menus/SettingsMenu.gd" id="13_settings"]
+[ext_resource type="Script" path="res://scripts/ui/menus/TitlePerformanceController.gd" id="14_performance"]
+
+[sub_resource type="Resource" id="Resource_i7igs"]
+script = ExtResource("12_damper")
+friction = 10.0
+minimum_velocity = 0.4
+rebound_strength = 7.0
+
+[sub_resource type="Resource" id="Resource_elxq6"]
+script = ExtResource("12_damper")
+friction = 4.0
+minimum_velocity = 0.4
+rebound_strength = 7.0
+
+[sub_resource type="Gradient" id="Gradient_particles"]
+offsets = PackedFloat32Array(0, 0.7, 1)
+colors = PackedColorArray(0.694118, 0.929412, 1, 0.85, 0.545098, 0.803922, 1, 0.45, 0.545098, 0.803922, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_particles"]
+gradient = SubResource("Gradient_particles")
+width = 12
+height = 12
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="TitleScreen" type="Control"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+theme = ExtResource("1_theme")
+script = ExtResource("2_title")
+
+[node name="Backdrop" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+mouse_filter = 2
+script = ExtResource("3_backdrop")
+
+[node name="FallbackSky" type="ColorRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+color = Color(0.780392, 0.964706, 0.984314, 1)
+mouse_filter = 2
+
+[node name="Sky" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="FarIslands" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="MidRuins" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="Platform" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="CharacterBackgroundA" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0)
+
+[node name="CharacterBackgroundB" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0)
+
+[node name="Foreground" type="TextureRect" parent="Backdrop"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="AmbientParticles" type="CPUParticles2D" parent="Backdrop"]
+position = Vector2(600, 480)
+emitting = false
+amount = 24
+lifetime = 8.0
+preprocess = 8.0
+texture = SubResource("GradientTexture2D_particles")
+direction = Vector2(0, -1)
+spread = 28.0
+gravity = Vector2(0, -4)
+initial_velocity_min = 6.0
+initial_velocity_max = 14.0
+scale_amount_min = 0.6
+scale_amount_max = 1.2
+color = Color(0.8, 0.94, 1, 0.7)
+emission_shape = 3
+emission_rect_extents = Vector2(600, 280)
+
+[node name="ConfirmParticles" type="CPUParticles2D" parent="Backdrop"]
+position = Vector2(600, 450)
+emitting = false
+amount = 16
+lifetime = 0.65
+one_shot = true
+explosiveness = 1.0
+texture = SubResource("GradientTexture2D_particles")
+direction = Vector2(0, -1)
+spread = 80.0
+gravity = Vector2(0, 240)
+initial_velocity_min = 220.0
+initial_velocity_max = 340.0
+scale_amount_min = 0.7
+scale_amount_max = 1.4
+color = Color(0.85, 0.97, 1, 0.9)
+emission_shape = 3
+emission_rect_extents = Vector2(180, 80)
+
+[node name="TitleOrnament" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+mouse_filter = 2
+
+[node name="GameTitle" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_top = 27.0
+offset_bottom = 93.0
+grow_horizontal = 2
+text = "Slay the Robot"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="MainMenu" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+script = ExtResource("6_main")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainMenu"]
+layout_mode = 0
+offset_left = 27.0
+offset_top = 392.0
+offset_right = 420.0
+offset_bottom = 660.0
+
+[node name="ContinueButton" type="Button" parent="MainMenu/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Continue"
+
+[node name="ForfeitRunButton" type="Button" parent="MainMenu/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Forfeit Run"
+
+[node name="NewRunButton" type="Button" parent="MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "New Game"
+
+[node name="CodexButton" type="Button" parent="MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Codex"
+
+[node name="SettingsButton" type="Button" parent="MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Settings"
+
+[node name="ExitButton" type="Button" parent="MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Exit"
+
+[node name="NewRunMenu" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+script = ExtResource("7_new_run")
+
+[node name="ScreenTitle" type="Label" parent="NewRunMenu"]
+layout_mode = 0
+offset_top = 26.0
+offset_right = 1200.0
+offset_bottom = 88.0
+text = "New Run"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="InfoPanel" type="Control" parent="NewRunMenu"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 40.0
+offset_top = 120.0
+offset_right = 350.0
+offset_bottom = 500.0
+mouse_filter = 2
+
+[node name="CharacterNameLabel" type="Label" parent="NewRunMenu/InfoPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 294.0
+offset_bottom = 46.0
+theme_override_font_sizes/font_size = 24
+text = "Character Name"
+clip_text = true
+
+[node name="CharacterHealthLabel" type="Label" parent="NewRunMenu/InfoPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 58.0
+offset_right = 145.0
+offset_bottom = 86.0
+theme_override_font_sizes/font_size = 17
+text = "HP:"
+
+[node name="CharacterMoneyLabel" type="Label" parent="NewRunMenu/InfoPanel"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 58.0
+offset_right = 294.0
+offset_bottom = 86.0
+theme_override_font_sizes/font_size = 17
+text = "Money:"
+
+[node name="CharacterDescriptionLabel" type="Label" parent="NewRunMenu/InfoPanel"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 102.0
+offset_right = 294.0
+offset_bottom = 184.0
+theme_override_font_sizes/font_size = 16
+text = "Character Description"
+autowrap_mode = 2
+
+[node name="CharacterArtifactTextureRect" type="TextureRect" parent="NewRunMenu/InfoPanel"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 0
+offset_left = 16.0
+offset_top = 210.0
+offset_right = 80.0
+offset_bottom = 274.0
+texture = ExtResource("4_chest")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CharacterArtifactNameLabel" type="Label" parent="NewRunMenu/InfoPanel"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 208.0
+offset_right = 294.0
+offset_bottom = 236.0
+theme_override_font_sizes/font_size = 16
+text = "Artifact Name"
+clip_text = true
+
+[node name="CharacterArtifactDescriptionLabel" type="Label" parent="NewRunMenu/InfoPanel"]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 240.0
+offset_right = 294.0
+offset_bottom = 352.0
+theme_override_font_sizes/font_size = 16
+text = "Description"
+autowrap_mode = 2
+
+[node name="CharacterStage" type="Control" parent="NewRunMenu"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 370.0
+offset_top = 120.0
+offset_right = 825.0
+offset_bottom = 680.0
+mouse_filter = 2
+
+[node name="StageRing" type="ColorRect" parent="NewRunMenu/CharacterStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 24.0
+offset_top = 36.0
+offset_right = 431.0
+offset_bottom = 540.0
+color = Color(1, 1, 1, 0.1)
+mouse_filter = 2
+
+[node name="CharacterGlow" type="ColorRect" parent="NewRunMenu/CharacterStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 48.0
+offset_top = 58.0
+offset_right = 407.0
+offset_bottom = 514.0
+color = Color(1, 1, 1, 0.12)
+mouse_filter = 2
+
+[node name="CharacterPortrait" type="TextureRect" parent="NewRunMenu/CharacterStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 64.0
+offset_top = 20.0
+offset_right = 391.0
+offset_bottom = 536.0
+texture = ExtResource("5_menu")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="CharacterButtonContainer" type="ScrollContainer" parent="NewRunMenu"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 520.0
+offset_right = 350.0
+offset_bottom = 680.0
+script = ExtResource("8_characters")
+
+[node name="GridContainer" type="GridContainer" parent="NewRunMenu/CharacterButtonContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 4
+
+[node name="RunConfigPanel" type="Control" parent="NewRunMenu"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 840.0
+offset_top = 120.0
+offset_right = 1170.0
+offset_bottom = 680.0
+mouse_filter = 2
+
+[node name="DifficultySelect" type="Control" parent="NewRunMenu/RunConfigPanel"]
+layout_mode = 0
+offset_right = 330.0
+offset_bottom = 44.0
+
+[node name="DecreaseDifficultyButton" type="Button" parent="NewRunMenu/RunConfigPanel/DifficultySelect"]
+layout_mode = 0
+offset_right = 56.0
+offset_bottom = 40.0
+text = "<--"
+
+[node name="DifficultyLabel" type="Label" parent="NewRunMenu/RunConfigPanel/DifficultySelect"]
+layout_mode = 0
+offset_left = 64.0
+offset_right = 266.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 16
+text = "Difficulty 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="IncreaseDifficultyButton" type="Button" parent="NewRunMenu/RunConfigPanel/DifficultySelect"]
+layout_mode = 0
+offset_left = 274.0
+offset_right = 330.0
+offset_bottom = 40.0
+text = "-->"
+
+[node name="ModifierLabel" type="Label" parent="NewRunMenu/RunConfigPanel"]
+layout_mode = 0
+offset_top = 52.0
+offset_right = 330.0
+offset_bottom = 82.0
+theme_override_font_sizes/font_size = 20
+text = "Custom Modifiers"
+horizontal_alignment = 1
+
+[node name="CustomRunModifierButtonContainer" type="ScrollContainer" parent="NewRunMenu/RunConfigPanel"]
+layout_mode = 0
+offset_top = 90.0
+offset_right = 330.0
+offset_bottom = 296.0
+script = ExtResource("9_modifiers")
+
+[node name="MarginContainer" type="MarginContainer" parent="NewRunMenu/RunConfigPanel/CustomRunModifierButtonContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="NewRunMenu/RunConfigPanel/CustomRunModifierButtonContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="SeedLabel" type="Label" parent="NewRunMenu/RunConfigPanel"]
+layout_mode = 0
+offset_top = 312.0
+offset_right = 330.0
+offset_bottom = 340.0
+theme_override_font_sizes/font_size = 20
+text = "Seed"
+
+[node name="SeedInput" type="LineEdit" parent="NewRunMenu/RunConfigPanel"]
+layout_mode = 0
+offset_top = 346.0
+offset_right = 330.0
+offset_bottom = 382.0
+text = "1234567890123456"
+alignment = 1
+max_length = 16
+
+[node name="StartRunButton" type="Button" parent="NewRunMenu/RunConfigPanel"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 0
+offset_top = 410.0
+offset_right = 330.0
+offset_bottom = 450.0
+text = "Start Run"
+
+[node name="BackButton" type="Button" parent="NewRunMenu/RunConfigPanel"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 0
+offset_top = 468.0
+offset_right = 330.0
+offset_bottom = 508.0
+text = "Back"
+
+[node name="EmptyStateLabel" type="Label" parent="NewRunMenu"]
+visible = false
+layout_mode = 0
+offset_left = 48.0
+offset_top = 474.0
+offset_right = 342.0
+offset_bottom = 506.0
+text = "No playable characters available"
+horizontal_alignment = 1
+
+[node name="CodexMenu" type="Control" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+script = ExtResource("10_codex")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CodexMenu"]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 24.0
+offset_right = 1176.0
+offset_bottom = 632.0
+follow_focus = true
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
+script = ExtResource("11_scroll")
+wheel_scroll_damper = SubResource("Resource_i7igs")
+dragging_scroll_damper = SubResource("Resource_elxq6")
+follow_focus_margin = 200
+allow_horizontal_scroll = false
+
+[node name="MarginContainer" type="MarginContainer" parent="CodexMenu/ScrollContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CodexCardContainer" type="GridContainer" parent="CodexMenu/ScrollContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 6
+
+[node name="BackButton" type="Button" parent="CodexMenu"]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 648.0
+offset_right = 785.0
+offset_bottom = 682.0
+text = "Back"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CodexMenu"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 88.0
+offset_right = 136.0
+offset_bottom = 584.0
+
+[node name="Button" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+text = "Cards"
+
+[node name="Button2" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+text = "Enemies"
+
+[node name="Button3" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+text = "Artifacts"
+
+[node name="Button4" type="Button" parent="CodexMenu/VBoxContainer"]
+layout_mode = 2
+disabled = true
+text = "Consumables"
+
+[node name="SettingsMenu" type="Control" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+script = ExtResource("13_settings")
+
+[node name="Label" type="Label" parent="SettingsMenu"]
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 78.0
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="ResolutionLabel" type="Label" parent="SettingsMenu"]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 200.0
+offset_right = 520.0
+offset_bottom = 233.0
+text = "Resolution"
+
+[node name="ResolutionOptionButton" type="OptionButton" parent="SettingsMenu"]
+layout_mode = 0
+offset_left = 540.0
+offset_top = 195.0
+offset_right = 840.0
+offset_bottom = 235.0
+
+[node name="BackButton" type="Button" parent="SettingsMenu"]
+layout_mode = 0
+offset_left = 403.5
+offset_top = 648.0
+offset_right = 796.5
+offset_bottom = 682.0
+text = "Back"
+
+[node name="TransitionOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 1200.0
+offset_bottom = 700.0
+mouse_filter = 2
+color = Color(0.04, 0.06, 0.08, 1)
+modulate = Color(1, 1, 1, 0)
+
+[node name="TitlePerformanceController" type="Node" parent="."]
+script = ExtResource("14_performance")
