@@ -192,22 +192,16 @@ func _apply_combat_shell() -> void:
 	ArtUIShellScript.ensure_color_panel(self, "RightPileDock", Rect2(1064, 548, 130, 128), "right_pile_dock", ArtUIShellScript.SURFACE, "BackgroundButton")
 	ArtUIShellScript.ensure_color_panel(self, "HandTray", Rect2(152, 612, 912, 84), "hand_tray", Color(1.0, 1.0, 1.0, 0.72), "BackgroundButton")
 
-	for label in [money_label, health_label, energy_count, draw_count, discard_count, exhaust_count]:
+	for label in [money_label, health_label]:
 		ArtUIShellScript.apply_label_capsule(label, "combat_resource")
-	for texture_button in [energy, draw_pile_button, discard_pile_button, exhaust_pile_button, deck_button]:
-		ArtUIShellScript.apply_texture_button_shell(texture_button, "combat_icon")
-	ArtUIShellScript.apply_button(end_turn_button, "primary")
+	end_turn_button.add_theme_color_override("font_color", Color.WHITE)
+	end_turn_button.add_theme_color_override("font_hover_color", Color.WHITE)
+	end_turn_button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	end_turn_button.add_theme_color_override("font_disabled_color", Color(1.0, 1.0, 1.0, 0.78))
 
 
 func _apply_runtime_textures() -> void:
 	background_art.texture = FileLoader.load_texture_or_fallback(COMBAT_BACKGROUND_PATH, "background")
-	pause_button.texture_normal = FileLoader.load_texture_or_fallback(ICON_PAUSE_PATH, "icon")
-	map_button.texture_normal = FileLoader.load_texture_or_fallback(ICON_MAP_PATH, "icon")
-	deck_button.texture_normal = FileLoader.load_texture_or_fallback(ICON_DECK_PATH, "icon")
-	energy.texture_normal = FileLoader.load_texture_or_fallback(ICON_ENERGY_PATH, "icon")
-	draw_pile_button.texture_normal = FileLoader.load_texture_or_fallback(ICON_DRAW_PATH, "icon")
-	discard_pile_button.texture_normal = FileLoader.load_texture_or_fallback(ICON_DISCARD_PATH, "icon")
-	exhaust_pile_button.texture_normal = FileLoader.load_texture_or_fallback(ICON_EXHAUST_PATH, "icon")
 	chest.texture_normal = FileLoader.load_texture_or_fallback(ICON_CHEST_PATH, "icon")
 	shop.texture_normal = FileLoader.load_texture_or_fallback(ICON_SHOP_PATH, "icon")
 

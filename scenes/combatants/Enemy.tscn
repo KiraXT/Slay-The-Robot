@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://528isoebkdpv"]
+[gd_scene load_steps=9 format=3 uid="uid://528isoebkdpv"]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://d4l5y1jvle1mq" path="res://scripts/combatants/Enemy.gd" id="1_10iyf"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_x4bdi"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_nimvv"]
+[ext_resource type="Script" path="res://scripts/ui/IntentAttackIcon.gd" id="4_2wghv"]
 
 [sub_resource type="Animation" id="Animation_3iu6k"]
 resource_name = "attack"
@@ -141,29 +142,43 @@ offset_bottom = 64.0
 [node name="Intent" type="Control" parent="Visible"]
 visible = false
 anchors_preset = 0
-offset_top = 24.0
-offset_right = 200.0
-offset_bottom = 48.0
+offset_left = 57.0
+offset_top = -78.0
+offset_right = 143.0
+offset_bottom = -38.0
 mouse_filter = 2
 
-[node name="IntentTexture" type="TextureRect" parent="Visible/Intent"]
+[node name="BadgePanel" type="Panel" parent="Visible/Intent"]
+visible = false
 layout_mode = 0
-offset_left = 80.0
-offset_top = -16.0
-offset_right = 120.0
-offset_bottom = 24.0
+offset_top = 3.0
+offset_right = 94.0
+offset_bottom = 66.0
 mouse_filter = 2
-texture = ExtResource("2_x4bdi")
-expand_mode = 1
+
+[node name="IntentTexture" type="Control" parent="Visible/Intent"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = 3.0
+offset_right = 34.0
+offset_bottom = 39.0
+mouse_filter = 2
+script = ExtResource("4_2wghv")
 
 [node name="IntentAmount" type="Label" parent="Visible/Intent"]
 layout_mode = 0
-offset_left = 104.0
-offset_top = 8.0
-offset_right = 144.0
-offset_bottom = 31.0
+offset_left = 34.0
+offset_top = -1.0
+offset_right = 86.0
+offset_bottom = 39.0
 theme = ExtResource("1_1k9pz")
+theme_override_colors/font_color = Color(0.117647, 0.12549, 0.145098, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.95)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 28
 text = "15"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="FadeContainer" type="Node2D" parent="Visible"]
 position = Vector2(100, -8)
