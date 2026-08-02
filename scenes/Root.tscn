@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=3 uid="uid://bg7gmq537qyn5"]
+[gd_scene load_steps=59 format=3 uid="uid://bg7gmq537qyn5"]
 
 [ext_resource type="Script" uid="uid://ckfi22o2jit0b" path="res://scripts/Root.gd" id="1_ak6de"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menus/TitleScreen.tscn" id="43_title_screen"]
@@ -19,6 +19,7 @@
 [ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_swords.png" id="41_swords"]
 [ext_resource type="Texture2D" path="res://sprites/ui/flipper/background_soft_cyan.png" id="42_bg"]
 [ext_resource type="Script" uid="uid://dao05mln2rw4g" path="res://scripts/ui/Combat.gd" id="3_h4evn"]
+[ext_resource type="Script" path="res://scripts/ui/CombatHudBadge.gd" id="44_hudbadge"]
 [ext_resource type="Script" uid="uid://dlwowe1wugkh4" path="res://scripts/ui/Hand.gd" id="4_i2yfj"]
 [ext_resource type="Script" uid="uid://p4ouiuival0e" path="res://scripts/ui/EnemyContainer.gd" id="4_kvn7e"]
 [ext_resource type="PackedScene" uid="uid://c0sxkaemtqb5x" path="res://scenes/combatants/Player.tscn" id="5_7crh0"]
@@ -49,6 +50,63 @@ keycode = 4194305
 
 [sub_resource type="Shortcut" id="Shortcut_i7igs"]
 events = [SubResource("InputEventKey_p8axl")]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_end_turn_normal"]
+bg_color = Color(1, 0.611765, 0.0941176, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color(1, 0.760784, 0.239216, 1)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+shadow_color = Color(0, 0, 0, 0.22)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_end_turn_hover"]
+bg_color = Color(1, 0.690196, 0.160784, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color(1, 0.85098, 0.34902, 1)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_end_turn_pressed"]
+bg_color = Color(0.941176, 0.505882, 0.0588235, 1)
+border_width_left = 2
+border_width_top = 4
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.905882, 0.388235, 0.0392157, 1)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
+shadow_color = Color(0, 0, 0, 0.16)
+shadow_size = 4
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_end_turn_disabled"]
+bg_color = Color(0.82, 0.82, 0.82, 0.72)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.70, 0.70, 0.70, 0.9)
+corner_radius_top_left = 11
+corner_radius_top_right = 11
+corner_radius_bottom_right = 11
+corner_radius_bottom_left = 11
 
 [sub_resource type="Animation" id="Animation_m5prp"]
 resource_name = "end_turn"
@@ -258,36 +316,69 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_left = 16.0
 offset_top = 8.0
-offset_right = 66.0
-offset_bottom = 58.0
+offset_right = 60.0
+offset_bottom = 52.0
 shortcut = SubResource("Shortcut_i7igs")
 shortcut_feedback = false
 shortcut_in_tooltip = false
-texture_normal = ExtResource("31_pause")
 ignore_texture_size = true
 stretch_mode = 0
 script = ExtResource("13_i7igs")
 
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/PauseButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "pause"
+accent_color = Color(0.92549, 0.215686, 0.305882, 1)
+
 [node name="MapButton" type="TextureButton" parent="RunScreen/Combat"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 72.0
+offset_left = 66.0
 offset_top = 8.0
-offset_right = 122.0
-offset_bottom = 58.0
-texture_normal = ExtResource("32_map")
+offset_right = 110.0
+offset_bottom = 52.0
 ignore_texture_size = true
 stretch_mode = 0
 
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/MapButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "map"
+accent_color = Color(0.117647, 0.752941, 0.709804, 1)
+
 [node name="DeckButton" type="TextureButton" parent="RunScreen/Combat"]
 layout_mode = 0
-offset_left = 128.0
+offset_left = 116.0
 offset_top = 8.0
-offset_right = 178.0
-offset_bottom = 58.0
-texture_normal = ExtResource("33_deck")
+offset_right = 160.0
+offset_bottom = 52.0
 ignore_texture_size = true
 stretch_mode = 0
+
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/DeckButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "deck"
+accent_color = Color(0.309804, 0.560784, 0.92549, 1)
 
 [node name="MoneyLabel" type="Label" parent="RunScreen/Combat"]
 unique_name_in_owner = true
@@ -299,6 +390,9 @@ offset_top = 8.0
 offset_right = -887.0
 offset_bottom = 56.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.145098, 0.156863, 0.176471, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.92)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 34
 text = "$10000"
 horizontal_alignment = 2
@@ -313,6 +407,9 @@ offset_top = 8.0
 offset_right = -712.0
 offset_bottom = 56.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.145098, 0.156863, 0.176471, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.92)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 34
 text = "99/99"
 horizontal_alignment = 2
@@ -448,21 +545,35 @@ horizontal_alignment = 1
 visible = false
 layout_mode = 0
 offset_left = 24.0
-offset_top = 560.0
-offset_right = 74.0
-offset_bottom = 610.0
+offset_top = 564.0
+offset_right = 68.0
+offset_bottom = 608.0
 tooltip_text = "Energy"
-texture_normal = ExtResource("34_energy")
 ignore_texture_size = true
 stretch_mode = 0
 
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/Energy"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "energy"
+accent_color = Color(0.956863, 0.662745, 0.105882, 1)
+
 [node name="EnergyCount" type="Label" parent="RunScreen/Combat/Energy"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 32.0
-offset_right = 66.0
-offset_bottom = 58.0
-theme_override_font_sizes/font_size = 18
+offset_left = 3.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(0.145098, 0.156863, 0.176471, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.85)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 15
 text = "30"
 horizontal_alignment = 1
 
@@ -470,65 +581,107 @@ horizontal_alignment = 1
 visible = false
 layout_mode = 0
 offset_left = 24.0
-offset_top = 616.0
-offset_right = 74.0
-offset_bottom = 666.0
+offset_top = 612.0
+offset_right = 68.0
+offset_bottom = 656.0
 tooltip_text = "Draw Pile"
-texture_normal = ExtResource("35_draw")
 ignore_texture_size = true
 stretch_mode = 0
 
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/DrawPile"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "draw"
+accent_color = Color(0.309804, 0.560784, 0.92549, 1)
+
 [node name="DrawCount" type="Label" parent="RunScreen/Combat/DrawPile"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 32.0
-offset_right = 66.0
-offset_bottom = 58.0
-theme_override_font_sizes/font_size = 18
+offset_left = 4.0
+offset_top = 25.0
+offset_right = 42.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(0.145098, 0.156863, 0.176471, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.85)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 15
 text = "30"
 horizontal_alignment = 1
 
 [node name="DiscardPile" type="TextureButton" parent="RunScreen/Combat"]
 visible = false
 layout_mode = 0
-offset_left = 1136.0
-offset_top = 560.0
-offset_right = 1186.0
-offset_bottom = 610.0
+offset_left = 1144.0
+offset_top = 564.0
+offset_right = 1188.0
+offset_bottom = 608.0
 tooltip_text = "Discard Pile"
-texture_normal = ExtResource("36_discard")
 ignore_texture_size = true
 stretch_mode = 0
 
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/DiscardPile"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "discard"
+accent_color = Color(0.92549, 0.215686, 0.305882, 1)
+
 [node name="DiscardCount" type="Label" parent="RunScreen/Combat/DiscardPile"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 32.0
-offset_right = 66.0
-offset_bottom = 58.0
-theme_override_font_sizes/font_size = 18
+offset_left = 4.0
+offset_top = 25.0
+offset_right = 42.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(0.145098, 0.156863, 0.176471, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.85)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 15
 text = "30"
 horizontal_alignment = 1
 
 [node name="ExhaustPile" type="TextureButton" parent="RunScreen/Combat"]
 visible = false
 layout_mode = 0
-offset_left = 1080.0
-offset_top = 560.0
-offset_right = 1130.0
-offset_bottom = 610.0
+offset_left = 1096.0
+offset_top = 564.0
+offset_right = 1140.0
+offset_bottom = 608.0
 tooltip_text = "Exhaust Pile"
-texture_normal = ExtResource("37_exhaust")
 ignore_texture_size = true
 stretch_mode = 0
 
+[node name="BadgeVisual" type="Control" parent="RunScreen/Combat/ExhaustPile"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("44_hudbadge")
+icon_id = "exhaust"
+accent_color = Color(0.501961, 0.364706, 0.807843, 1)
+
 [node name="ExhaustCount" type="Label" parent="RunScreen/Combat/ExhaustPile"]
 layout_mode = 0
-offset_left = 24.0
-offset_top = 32.0
-offset_right = 66.0
-offset_bottom = 58.0
-theme_override_font_sizes/font_size = 18
+offset_left = 4.0
+offset_top = 25.0
+offset_right = 42.0
+offset_bottom = 47.0
+theme_override_colors/font_color = Color(0.145098, 0.156863, 0.176471, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.85)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 15
 text = "30"
 horizontal_alignment = 1
 
@@ -587,11 +740,20 @@ mouse_filter = 2
 [node name="EndTurnButton" type="Button" parent="RunScreen/Combat"]
 visible = false
 layout_mode = 0
-offset_left = 1080.0
-offset_top = 624.0
+offset_left = 1084.0
+offset_top = 626.0
 offset_right = 1192.0
 offset_bottom = 664.0
 disabled = true
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 0.78)
+theme_override_colors/font_outline_color = Color(0.58, 0.28, 0.04, 0.72)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_end_turn_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_end_turn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_end_turn_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_end_turn_disabled")
 text = "End Turn"
 
 [node name="SelectTargetLabel" type="Label" parent="RunScreen/Combat"]

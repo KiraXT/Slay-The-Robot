@@ -151,9 +151,12 @@ func update_enemy_intent():
 	enemy_intent.visible = false
 	if enemy_intent_attack_damage * enemy_intent_number_of_attacks > 0:
 		enemy_intent.visible = true
-		enemy_intent_amount_text.text = str(enemy_intent_attack_damage)
-		if enemy_intent_number_of_attacks > 1:
-			enemy_intent_amount_text.text += " x " + str(enemy_intent_number_of_attacks)
+		enemy_intent_amount_text.text = _format_attack_intent_text(enemy_intent_attack_damage, enemy_intent_number_of_attacks)
+
+func _format_attack_intent_text(damage: int, number_of_attacks: int) -> String:
+	if number_of_attacks > 1:
+		return "%sx%s" % [damage, number_of_attacks]
+	return str(damage)
 
 func is_alive() -> bool:
 	return enemy_data.enemy_health > 0

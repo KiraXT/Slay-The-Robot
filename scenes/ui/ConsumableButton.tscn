@@ -1,13 +1,39 @@
 [gd_scene load_steps=3 format=3 uid="uid://c7qo6l6ra5jhr"]
 
-[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_energy.png" id="1_1j522"]
+[ext_resource type="Script" path="res://scripts/ui/CombatHudBadge.gd" id="1_f762g"]
 [ext_resource type="Script" uid="uid://lclxd5k1by2h" path="res://scripts/ui/ConsumableButton.gd" id="2_8oul1"]
 
 [node name="ConsumableButton" type="TextureButton"]
 custom_minimum_size = Vector2(32, 32)
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture_normal = ExtResource("1_1j522")
 ignore_texture_size = true
 stretch_mode = 0
 script = ExtResource("2_8oul1")
+
+[node name="BadgeVisual" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_f762g")
+icon_id = "consumable"
+accent_color = Color(0.956863, 0.560784, 0.101961, 1)
+
+[node name="IconTexture" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 7.0
+offset_top = 7.0
+offset_right = -7.0
+offset_bottom = -7.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5

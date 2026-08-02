@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://528isoebkdpv"]
+[gd_scene load_steps=10 format=3 uid="uid://528isoebkdpv"]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://d4l5y1jvle1mq" path="res://scripts/combatants/Enemy.gd" id="1_10iyf"]
 [ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_swords.png" id="2_x4bdi"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_nimvv"]
+[ext_resource type="Script" path="res://scripts/ui/IntentAttackIcon.gd" id="4_2wghv"]
 
 [sub_resource type="Animation" id="Animation_3iu6k"]
 resource_name = "attack"
@@ -93,16 +94,19 @@ _data = {
 }
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_intent_badge"]
-bg_color = Color(1, 1, 1, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 4
-border_color = Color(0.188235, 0.784314, 0.792157, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+bg_color = Color(0.105882, 0.0588235, 0.054902, 0.93)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 7
+border_color = Color(0.890196, 0.196078, 0.101961, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.46)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
 
 [node name="Enemy" type="Control" groups=["enemies", "enemies_alive_or_dead"]]
 custom_minimum_size = Vector2(200, 144)
@@ -153,37 +157,41 @@ offset_bottom = 64.0
 [node name="Intent" type="Control" parent="Visible"]
 visible = false
 anchors_preset = 0
-offset_left = 53.0
-offset_top = -76.0
-offset_right = 169.0
-offset_bottom = -28.0
+offset_left = 57.0
+offset_top = -78.0
+offset_right = 143.0
+offset_bottom = -38.0
 mouse_filter = 2
 
 [node name="BadgePanel" type="Panel" parent="Visible/Intent"]
+visible = false
 layout_mode = 0
-offset_right = 116.0
-offset_bottom = 48.0
+offset_top = 3.0
+offset_right = 94.0
+offset_bottom = 66.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_intent_badge")
 
-[node name="IntentTexture" type="TextureRect" parent="Visible/Intent"]
+[node name="IntentTexture" type="Control" parent="Visible/Intent"]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -2.0
+offset_top = 3.0
+offset_right = 34.0
+offset_bottom = 39.0
 mouse_filter = 2
-texture = ExtResource("2_x4bdi")
-expand_mode = 1
+script = ExtResource("4_2wghv")
 
 [node name="IntentAmount" type="Label" parent="Visible/Intent"]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 4.0
-offset_right = 110.0
-offset_bottom = 42.0
+offset_left = 34.0
+offset_top = -1.0
+offset_right = 86.0
+offset_bottom = 39.0
 theme = ExtResource("1_1k9pz")
-theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.117647, 0.12549, 0.145098, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 0.95)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 28
 text = "15"
 horizontal_alignment = 1
 vertical_alignment = 1
