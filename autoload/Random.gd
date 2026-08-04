@@ -23,7 +23,7 @@ func shuffle_slice_array(rng: RandomNumberGenerator, array: Array, index: int = 
 		# negative slices will simply include entire array
 		var slice_width: int = clamp(index, 0, len(new_array))
 		new_array = new_array.slice(0, slice_width)
-	
+
 	return new_array
 
 ## General random method. Randomly selects a variant object from a list of objects given a mapping of the objects to their
@@ -39,7 +39,7 @@ func get_weighted_selection(rng: RandomNumberGenerator, weights: Dictionary[Vari
 			var weight: int = weights[weighted_object]
 			weight_total += weight
 			weight_buckets[weighted_object] = weight_total
-		
+
 		# randomly select a bucket
 		var random_weight: int = rng.randi() % max(weight_total, 1)
 		var bottom_weight: int = 0
@@ -50,22 +50,22 @@ func get_weighted_selection(rng: RandomNumberGenerator, weights: Dictionary[Vari
 				return weighted_object
 			else:
 				bottom_weight = weight_bucket
-		
+
 		return first_object
-	
+
 	return null
-	
+
 func test_weighted_selection(weights: Dictionary[Variant, int]) -> void:
 	var rng_enemy_spawning: RandomNumberGenerator = RandomNumberGenerator.new()
-	
+
 	var weight_results: Dictionary[Variant, int] = {}
-	
+
 	for i in 1000:
 		var selected_object: Variant = Random.get_weighted_selection(rng_enemy_spawning, weights)
 		var weight: int = weight_results.get(selected_object, 0)
 		weight += 1
 		weight_results[selected_object] = weight
-	
+
 	print(weight_results)
 
 ### Drafting Cards
@@ -74,7 +74,7 @@ func test_weighted_selection(weights: Dictionary[Variant, int]) -> void:
 ## This ignores weighting.
 func generate_unweighted_card_draft(rng: RandomNumberGenerator, number_of_cards: int) -> Array[CardData]:
 	var returned_cards: Array[CardData] = []
-	
+
 	# randomize ordered list of all player card pool
 	var card_pool_ids: Array = Global.player_data.player_reward_card_filter_cache.convert_to_unique_card_object_ids()
 	card_pool_ids = shuffle_slice_array(rng, card_pool_ids, number_of_cards)
@@ -87,54 +87,143 @@ func generate_unweighted_card_draft_from_card_pack_id(rng: RandomNumberGenerator
 	var returned_cards: Array[CardData] = []
 	var cached_card_filter: CardFilter = Global.get_cached_card_filter(card_pack_id)
 	var card_ids: Array[String] = cached_card_filter.convert_to_unique_card_object_ids()
-	
+
 	card_ids = shuffle_slice_array(rng, card_ids, number_of_cards)
-	
+
 	returned_cards = Global.get_card_data_from_prototypes(card_ids)
 	return returned_cards
+
+const CARD_RARITY_KEY_TO_ID: Dictionary = {
+	"basic": CardData.CARD_RARITIES.BASIC,
+	"common": CardData.CARD_RARITIES.COMMON,
+	"uncommon": CardData.CARD_RARITIES.UNCOMMON,
+	"rare": CardData.CARD_RARITIES.RARE,
+	"generated": CardData.CARD_RARITIES.GENERATED,
+}
+
+func generate_rarity_weighted_card_draft_from_card_pack_id(rng: RandomNumberGenerator, card_pack_id: String, number_of_cards: int) -> Array[CardData]:
+	var cached_card_filter: CardFilter = Global.get_cached_card_filter(card_pack_id)
+	var card_pack_data: CardPackData = Global.get_card_pack_data(card_pack_id)
+	var loot_table: Dictionary[Variant, int] = _get_card_pack_rarity_weights(card_pack_data)
+	var rarity_to_card_ids: Dictionary = {}
+	var max_card_amount: int = number_of_cards
+
+	if number_of_cards < 0:
+		max_card_amount = cached_card_filter.convert_to_unique_card_object_ids().size()
+	elif number_of_cards == 0:
+		return []
+
+	for card_data: CardData in cached_card_filter.filtered_cards:
+		var card_id_bucket: Array = rarity_to_card_ids.get(card_data.card_rarity, [])
+		if not card_id_bucket.has(card_data.object_id):
+			card_id_bucket.append(card_data.object_id)
+		rarity_to_card_ids[card_data.card_rarity] = card_id_bucket
+
+	var card_ids_in_draft: Array[String] = []
+	while card_ids_in_draft.size() < max_card_amount:
+		var available_loot_table: Dictionary[Variant, int] = {}
+		for rarity_key: Variant in loot_table.keys():
+			var card_rarity: int = int(rarity_key)
+			var card_id_bucket: Array = rarity_to_card_ids.get(card_rarity, [])
+			var rarity_weight: int = int(loot_table[rarity_key])
+			if rarity_weight > 0 and len(card_id_bucket) > 0:
+				var card_rarity_variant: Variant = card_rarity
+				available_loot_table[card_rarity_variant] = rarity_weight
+
+		if available_loot_table.is_empty():
+			break
+
+		var selected_card_rarity: int = int(get_weighted_selection(rng, available_loot_table))
+		var selected_card_bucket: Array = rarity_to_card_ids[selected_card_rarity]
+		shuffle_array(rng, selected_card_bucket)
+
+		var selected_card_id: String = ""
+		while selected_card_id == "" and len(selected_card_bucket) > 0:
+			selected_card_id = selected_card_bucket.pop_back()
+			if card_ids_in_draft.has(selected_card_id):
+				selected_card_id = ""
+
+		rarity_to_card_ids[selected_card_rarity] = selected_card_bucket
+		if selected_card_id != "":
+			card_ids_in_draft.append(selected_card_id)
+
+	return Global.get_card_data_from_prototypes(card_ids_in_draft)
+
+func _get_card_pack_rarity_weights(card_pack_data: CardPackData) -> Dictionary[Variant, int]:
+	var normalized_weights: Dictionary[Variant, int] = {}
+	var source_weights: Dictionary = {}
+	if card_pack_data != null:
+		source_weights.assign(card_pack_data.card_pack_rarity_weights)
+	if source_weights.is_empty():
+		source_weights.assign(CARD_DRAFT_RARITY_WEIGHTS[CARD_DRAFT_TABLE_TYPES.STANDARD].duplicate(true))
+
+	for rarity_key: Variant in source_weights.keys():
+		var card_rarity: int = _normalize_card_rarity_key(rarity_key)
+		var rarity_weight: int = max(0, int(source_weights[rarity_key]))
+		if rarity_weight > 0:
+			var card_rarity_variant: Variant = card_rarity
+			normalized_weights[card_rarity_variant] = rarity_weight
+
+	if normalized_weights.is_empty():
+		var common_rarity: Variant = CardData.CARD_RARITIES.COMMON
+		normalized_weights[common_rarity] = 1
+
+	return normalized_weights
+
+func _normalize_card_rarity_key(rarity_key: Variant) -> int:
+	if rarity_key is int:
+		return rarity_key
+
+	var rarity_label: String = str(rarity_key).strip_edges().to_lower()
+	if CARD_RARITY_KEY_TO_ID.has(rarity_label):
+		return CARD_RARITY_KEY_TO_ID[rarity_label]
+	if rarity_label.is_valid_int():
+		return int(rarity_label)
+
+	return CardData.CARD_RARITIES.COMMON
 
 enum CARD_DRAFT_TABLE_TYPES {STANDARD, MINIBOSS, BOSS, SHOP}
 
 const CARD_DRAFT_RARITY_WEIGHTS: Dictionary = {
-	CARD_DRAFT_TABLE_TYPES.STANDARD: 
+	CARD_DRAFT_TABLE_TYPES.STANDARD:
 		{
 		CardData.CARD_RARITIES.COMMON: 55,
 		CardData.CARD_RARITIES.UNCOMMON: 43,
 		CardData.CARD_RARITIES.RARE: 2,
 		},
-	CARD_DRAFT_TABLE_TYPES.MINIBOSS: 
+	CARD_DRAFT_TABLE_TYPES.MINIBOSS:
 		{
 		CardData.CARD_RARITIES.COMMON: 50,
 		CardData.CARD_RARITIES.UNCOMMON: 40,
 		CardData.CARD_RARITIES.RARE: 10,
 		},
-	CARD_DRAFT_TABLE_TYPES.BOSS: 
+	CARD_DRAFT_TABLE_TYPES.BOSS:
 		{
 		CardData.CARD_RARITIES.COMMON: 0,
 		CardData.CARD_RARITIES.UNCOMMON: 0,
 		CardData.CARD_RARITIES.RARE: 100,
 		},
-	CARD_DRAFT_TABLE_TYPES.SHOP: 
+	CARD_DRAFT_TABLE_TYPES.SHOP:
 		{
 		CardData.CARD_RARITIES.COMMON: 55,
 		CardData.CARD_RARITIES.UNCOMMON: 40,
 		CardData.CARD_RARITIES.RARE: 5,
 		},
-	
+
 }	# affects the chances of a card being seen during a rarity weighted draft
 
 func generate_rarity_weighted_card_draft(rng: RandomNumberGenerator, number_of_cards, card_draft_table_type: int = CARD_DRAFT_TABLE_TYPES.STANDARD, use_pity_system: bool = true) -> Array[CardData]:
 	# randomly gets a number of cards from the card pool and returns a list of them
 	# factors in card rarity and a pity system
 	var returned_cards: Array[CardData] = []
-	
+
 	# get the desired loot table weights
 	var loot_table: Dictionary[Variant, int] = {}
 	loot_table.assign(CARD_DRAFT_RARITY_WEIGHTS[card_draft_table_type].duplicate(true))
 	# get cards available to player sorted by rarity, duplicated to allow mutation
 	var player_reward_card_rarity_cache: Dictionary[int, Array] = Global.player_data.player_reward_card_rarity_cache.duplicate(true)
 	var card_ids_in_draft: Array[String] = []
-	
+
 	if use_pity_system:
 		# rare cards show up and commons show up less
 		var player_rare_card_modifier_current: int = int(floor(Global.player_data.player_rare_card_modifier_current))
@@ -142,35 +231,35 @@ func generate_rarity_weighted_card_draft(rng: RandomNumberGenerator, number_of_c
 		var common: Variant = CardData.CARD_RARITIES.COMMON # typecasting into Variant to get around Dict[Variant,] bug
 		loot_table[rare] = loot_table[rare] + player_rare_card_modifier_current
 		loot_table[common] = loot_table[common] - player_rare_card_modifier_current
-	
-	
+
+
 	var rarity_to_card_pool: Dictionary = {} # cached card pools per rarity ensures no duplicates
 	var rare_card_found: bool = false
-	
+
 	# get all the card ids for this draft, using randomly weighted selection of rarity buckets
 	for i in number_of_cards:
 		# determine what bucket of rarity the roll falls in
 		var selected_card_rarity: int = CardData.CARD_RARITIES.COMMON
 		selected_card_rarity = get_weighted_selection(rng, loot_table)
-		
-		
+
+
 		if player_reward_card_rarity_cache.has(selected_card_rarity):
 			# get the cards in the selected rarity bucket
 			var card_id_bucket: Array = player_reward_card_rarity_cache[selected_card_rarity]
 			shuffle_array(rng, card_id_bucket)
 			var selected_card_id: String = ""
-			
+
 			# go through the bucket until emptied or a non duplicate card is found
 			while selected_card_id == "" and len(card_id_bucket) > 0:
 				selected_card_id = card_id_bucket.pop_back()
 				if card_ids_in_draft.has(selected_card_id):
 					selected_card_id = ""
-			
+
 			if selected_card_id == "":
 				DebugLogger.log_warning("Random.generate_rarity_weighted_card_draft(): Insufficient cards IDs in rarity bucket {0} for drafting".format([selected_card_rarity]))
 			else:
 				card_ids_in_draft.append(selected_card_id)
-			
+
 				# pity system
 				if use_pity_system:
 					if selected_card_rarity == CardData.CARD_RARITIES.RARE:
@@ -178,10 +267,10 @@ func generate_rarity_weighted_card_draft(rng: RandomNumberGenerator, number_of_c
 					if selected_card_rarity == CardData.CARD_RARITIES.COMMON:
 						# finding a common card increases the pity weighting
 						Global.player_data.player_rare_card_modifier_current += Global.player_data.player_rare_card_increment_rate
-	
+
 	# convert card ids into card prototypes
 	returned_cards = Global.get_card_data_from_prototypes(card_ids_in_draft)
-	
+
 	return returned_cards
 
 
@@ -215,39 +304,79 @@ func get_random_consumable_object_id(rng: RandomNumberGenerator, whitelisted_con
 	var potential_consumable_object_ids = whitelisted_consumable_object_ids
 	if len(potential_consumable_object_ids) == 0:
 		potential_consumable_object_ids = Global._id_to_consumable_data.keys().duplicate()
-	
+
 	shuffle_array(rng, potential_consumable_object_ids)
-	
+
 	for consumable_object_id in potential_consumable_object_ids:
 		if not blacklisted_consumable_object_ids.has(consumable_object_id):
 			return consumable_object_id
 	return ""
-	
+
+const CONSUMABLE_CHEST_RARITY_WEIGHTS: Dictionary[Variant, int] = {
+	ConsumableData.CONSUMABLE_RARITIES.COMMON: 70,
+	ConsumableData.CONSUMABLE_RARITIES.UNCOMMON: 25,
+	ConsumableData.CONSUMABLE_RARITIES.RARE: 5,
+}
+
+func get_location_consumable_rewards(_location_data: LocationData = Global.get_player_location_data(), consumable_count: int = 1) -> Array[String]:
+	var returned_consumable_ids: Array[String] = []
+	var rng_consumable_rewards: RandomNumberGenerator = Global.player_data.get_player_rng("rng_consumable_rewards")
+	var rarity_to_consumable_ids: Dictionary = {}
+
+	for consumable_object_id: String in Global._id_to_consumable_data.keys():
+		var consumable_data: ConsumableData = Global.get_consumable_data(consumable_object_id)
+		if consumable_data == null:
+			continue
+		var consumable_id_bucket: Array = rarity_to_consumable_ids.get(consumable_data.consumable_rarity, [])
+		consumable_id_bucket.append(consumable_object_id)
+		rarity_to_consumable_ids[consumable_data.consumable_rarity] = consumable_id_bucket
+
+	for _i: int in consumable_count:
+		var available_weights: Dictionary[Variant, int] = {}
+		for rarity_key: Variant in CONSUMABLE_CHEST_RARITY_WEIGHTS.keys():
+			var rarity: int = int(rarity_key)
+			var consumable_id_bucket: Array = rarity_to_consumable_ids.get(rarity, [])
+			if len(consumable_id_bucket) > 0:
+				var rarity_variant: Variant = rarity
+				available_weights[rarity_variant] = CONSUMABLE_CHEST_RARITY_WEIGHTS[rarity_key]
+
+		if available_weights.is_empty():
+			break
+
+		var selected_consumable_rarity: int = int(get_weighted_selection(rng_consumable_rewards, available_weights))
+		var selected_consumable_bucket: Array = rarity_to_consumable_ids[selected_consumable_rarity]
+		shuffle_array(rng_consumable_rewards, selected_consumable_bucket)
+		var selected_consumable_id: String = selected_consumable_bucket.pop_back()
+		rarity_to_consumable_ids[selected_consumable_rarity] = selected_consumable_bucket
+		returned_consumable_ids.append(selected_consumable_id)
+
+	return returned_consumable_ids
+
 ### Locations
 
 
 ## Gets the card rewards for the player at the player's current location.
 ## NOTE: If this is empty either the player's card packs are empty, the card draft cache is not
-## (re)generated, or there's not enough cards to draft 
+## (re)generated, or there's not enough cards to draft
 func get_location_card_rewards(location_data: LocationData = Global.get_player_location_data()) -> Array:
 	# returns array of array of cards representing multiple drafts
 	var card_draft_rewards: Array[Array] = []
 	# get the number of drafts and cards per draft from run data
 	var number_of_drafts: int = Global.player_data.reward_drafts
 	var cards_per_draft: int = Global.player_data.reward_cards_per_draft
-	
+
 	# determine the loot table to use for the reward
 	var card_draft_table_type: int = CARD_DRAFT_TABLE_TYPES.STANDARD
 	if location_data.location_type == LocationData.LOCATION_TYPES.MINIBOSS:
 		card_draft_table_type = CARD_DRAFT_TABLE_TYPES.MINIBOSS
 	if location_data.location_type == LocationData.LOCATION_TYPES.BOSS:
 		card_draft_table_type = CARD_DRAFT_TABLE_TYPES.BOSS
-	
+
 	var rng_reward_card_drafts: RandomNumberGenerator = Global.player_data.get_player_rng("rng_reward_card_drafts")
 	for i in number_of_drafts:
 		var card_draft: Array[CardData] = generate_rarity_weighted_card_draft(rng_reward_card_drafts, cards_per_draft, card_draft_table_type, true)
 		card_draft_rewards.append(card_draft)
-		
+
 	return card_draft_rewards
 
 func get_location_money_reward(location_data: LocationData = Global.get_player_location_data()) -> int:
@@ -286,7 +415,7 @@ func get_location_artifact_rewards(location_data: LocationData = Global.get_play
 				returned_artifact_ids.append_array(artifact_ids)
 		LocationData.LOCATION_TYPES.BOSS:
 			return Global.player_data.get_next_boss_artifacts_from_pool(artifact_count, true)
-	
+
 	return returned_artifact_ids
 
 ### Shops

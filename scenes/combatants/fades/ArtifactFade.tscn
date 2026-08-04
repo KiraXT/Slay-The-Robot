@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bcb365dtd8vsy"]
 
 [ext_resource type="Script" uid="uid://dr6qc5pdjo7yy" path="res://scripts/combatants/fades/ArtifactFade.gd" id="1_nm21a"]
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_rfplr"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_chest.png" id="2_rfplr"]
 
 [sub_resource type="Animation" id="Animation_ceare"]
 resource_name = "fade"

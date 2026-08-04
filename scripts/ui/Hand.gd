@@ -36,6 +36,7 @@ var performing_card_right_click: bool = false	# flag used to lock card plays whi
 
 ### Drag-to-Play
 var drag_line: Line2D
+var drag_arrow_head: Polygon2D
 var is_dragging: bool = false
 var dragged_card: Card = null
 var drag_original_scale: Vector2 = Vector2.ONE
@@ -43,6 +44,11 @@ var drag_original_scale: Vector2 = Vector2.ONE
 var _target_borders: Dictionary = {}   # BaseCombatant -> Panel
 var _last_drag_hover_target: BaseCombatant = null
 var _cards_in_play_animation: Array[Card] = []   # cards currently in play-release animation
+var _card_hover_tweens: Dictionary = {}
+var _highlighted_drag_target: BaseCombatant = null
+var _target_feedback_tweens: Dictionary = {}
+var _target_original_scales: Dictionary = {}
+var _target_original_modulates: Dictionary = {}
 
 ### Retain
 var cards_retained_this_turn: Array[CardData] = []
@@ -70,7 +76,30 @@ var middle: float = (size[0] / 2) - MIDDLE_OFFSET # calculate middle X position 
 
 # y offsets for when the player hovers over a card
 const CARD_UNHOVERED_HEIGHT = 0.0
-const CARD_HOVERED_HEIGHT = -30
+const CARD_HOVERED_HEIGHT = -45.0
+const CARD_UNHOVERED_SCALE: float = 1.0
+const CARD_HOVERED_SCALE: float = 1.22
+const CARD_HOVER_OVERSHOOT_MULTIPLIER: float = 1.06
+const CARD_HOVER_SCALE_IN_TIME: float = 0.09
+const CARD_HOVER_SCALE_SETTLE_TIME: float = 0.13
+const CARD_HOVERED_Z_INDEX: int = 50
+const DRAG_LINE_WIDTH: float = 7.0
+const DRAG_LINE_COLOR: Color = Color(0.19, 0.88, 0.94, 0.92)
+const DRAG_LINE_INVALID_COLOR: Color = Color(1.0, 0.25, 0.20, 0.90)
+const DRAG_TARGET_ENEMY_COLOR: Color = Color(1.0, 0.88, 0.24, 0.95)
+const DRAG_TARGET_PLAYER_COLOR: Color = Color(0.22, 0.80, 1.0, 0.95)
+const DRAG_ARROW_LENGTH: float = 34.0
+const DRAG_ARROW_WIDTH: float = 30.0
+const DRAG_TARGET_SCALE: float = 1.035
+const DRAG_TARGET_FEEDBACK_TIME: float = 0.08
+const CARD_PLAY_RELEASE_WINDUP_TIME: float = 0.06
+const CARD_PLAY_RELEASE_TRAVEL_TIME: float = 0.16
+const CARD_PLAY_RELEASE_WINDUP_SCALE: float = 1.34
+const CARD_PLAY_RELEASE_END_SCALE: float = 0.12
+const CARD_INVALID_ENERGY_COLOR: Color = Color(1.0, 0.22, 0.18, 1.0)
+const CARD_INVALID_TARGET_COLOR: Color = Color(1.0, 0.48, 0.18, 1.0)
+const CARD_INVALID_CONDITION_COLOR: Color = Color(0.85, 0.85, 0.85, 1.0)
+const CARD_INVALID_SHAKE_OFFSET: float = 9.0
 
 const CARD_PICK_POSITIONS: Array = [
 	[0.0],
@@ -122,11 +151,22 @@ func _ready():
 	drag_line = Line2D.new()
 	drag_line.name = "DragLine"
 	drag_line.visible = false
-	drag_line.width = 3.0
-	drag_line.default_color = Color(0.5, 0.5, 0.5, 0.7)
+	drag_line.width = DRAG_LINE_WIDTH
+	drag_line.default_color = DRAG_LINE_COLOR
+	drag_line.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	drag_line.end_cap_mode = Line2D.LINE_CAP_ROUND
+	drag_line.joint_mode = Line2D.LINE_JOINT_ROUND
 	drag_line.z_index = 100
 	drag_line.top_level = true
 	add_child(drag_line)
+
+	drag_arrow_head = Polygon2D.new()
+	drag_arrow_head.name = "DragArrowHead"
+	drag_arrow_head.visible = false
+	drag_arrow_head.color = DRAG_LINE_COLOR
+	drag_arrow_head.z_index = 101
+	drag_arrow_head.top_level = true
+	add_child(drag_arrow_head)
 
 ## Recalculates the transforms of Card objects in hand and tweens them to their new positions.
 func tween_hand():
@@ -205,21 +245,57 @@ func tween_hand():
 
 func _on_card_hovered(card: Card):
 	for child in get_children():
+		var child_card: Card = child as Card
+		if child_card == null:
+			continue
 		if child == dragged_card:
 			continue
 		if card == child:
-			child.position.y = CARD_HOVERED_HEIGHT
-			child.z_index = 1
+			_tween_card_hover_visual(child_card, CARD_HOVERED_HEIGHT, CARD_HOVERED_SCALE, CARD_HOVERED_Z_INDEX)
 		else:
-			child.position.y = CARD_UNHOVERED_HEIGHT
-			child.z_index = 0
+			_tween_card_hover_visual(child_card, CARD_UNHOVERED_HEIGHT, CARD_UNHOVERED_SCALE, 0)
 
 func _on_card_unhovered(_card: Card):
 	for child in get_children():
+		var child_card: Card = child as Card
+		if child_card == null:
+			continue
 		if child == dragged_card:
 			continue
-		child.position.y = CARD_UNHOVERED_HEIGHT
-		child.z_index = 0
+		_tween_card_hover_visual(child_card, CARD_UNHOVERED_HEIGHT, CARD_UNHOVERED_SCALE, 0)
+
+func _tween_card_hover_visual(card: Card, target_y: float, target_scale: float, target_z_index: int) -> void:
+	_kill_card_hover_tween(card)
+	card.z_index = target_z_index
+	var position_tween := create_tween()
+	position_tween.tween_property(card, "position:y", target_y, CARD_TWEEN_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+	var scale_tween := create_tween()
+	if target_scale > CARD_UNHOVERED_SCALE:
+		var overshoot_scale := target_scale * CARD_HOVER_OVERSHOOT_MULTIPLIER
+		scale_tween.tween_property(card.pivot, "scale", Vector2.ONE * overshoot_scale, CARD_HOVER_SCALE_IN_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		scale_tween.tween_property(card.pivot, "scale", Vector2.ONE * target_scale, CARD_HOVER_SCALE_SETTLE_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	else:
+		scale_tween.tween_property(card.pivot, "scale", Vector2.ONE * target_scale, CARD_TWEEN_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+	var active_tweens: Array[Tween] = [position_tween, scale_tween]
+	_card_hover_tweens[card] = active_tweens
+	scale_tween.finished.connect(func():
+		if _card_hover_tweens.get(card) == active_tweens:
+			_card_hover_tweens.erase(card)
+	)
+
+func _kill_card_hover_tween(card: Card) -> void:
+	var tween_entry = _card_hover_tweens.get(card)
+	var tweens: Array = []
+	if tween_entry is Array:
+		tweens = tween_entry
+	elif tween_entry is Tween:
+		tweens = [tween_entry]
+	for tween in tweens:
+		if tween != null and tween.is_valid():
+			tween.kill()
+	_card_hover_tweens.erase(card)
 
 func _on_card_drag_started(card: Card):
 	if is_dragging:
@@ -231,6 +307,7 @@ func _on_card_drag_started(card: Card):
 	if performing_card_right_click:
 		return
 	if not card.can_play_card():
+		_show_invalid_card_feedback(card, _get_unplayable_card_feedback_color(card))
 		return
 	# cannot drag cards already queued
 	for card_play_request in card_play_queue:
@@ -239,42 +316,43 @@ func _on_card_drag_started(card: Card):
 
 	is_dragging = true
 	dragged_card = card
-	drag_original_scale = card.pivot.scale
+	drag_original_scale = Vector2.ONE * CARD_UNHOVERED_SCALE
 
-	# reset hover offset so the card doesn't float above the mouse
-	card.position = Vector2.ZERO
+	_kill_card_hover_tween(card)
+	card.position.y = CARD_HOVERED_HEIGHT
 
 	# bring to front
 	card.z_index = 100
 
-	# scale up card slightly during drag
-	card.pivot.scale = Vector2.ONE * 1.15
+	# hold the card at the same visual emphasis as hover while the targeting arrow is active
+	card.pivot.scale = Vector2.ONE * CARD_HOVERED_SCALE
 
 	# show trail line only for target-requiring cards
 	if card.card_data.card_requires_target:
+		_update_drag_line_color(false)
 		drag_line.visible = true
 		drag_line.clear_points()
 		drag_line.add_point(card.pivot.global_position)
 		drag_line.add_point(card.pivot.global_position)
+		drag_arrow_head.visible = true
+		_update_drag_arrow_head(card.pivot.global_position)
 
 func _on_card_drag_ended(card: Card):
 	if not is_dragging or dragged_card != card:
 		return
 
 	var mouse_pos = get_global_mouse_position()
-	var target = _get_drag_hover_target(mouse_pos)
+	var target = _get_drag_hover_target(mouse_pos, card)
 
 	# A: hover enemy + requires target -> attack
-	if target is Enemy and card.card_data.card_requires_target:
-		_execute_card_play(card, target)
-	# B: hover player + requires target -> self-cast
-	elif target == player and card.card_data.card_requires_target:
+	if card.card_data.card_requires_target and _is_valid_card_play_target(card, target):
 		_execute_card_play(card, target)
 	# D: no target required -> play anywhere
 	elif not card.card_data.card_requires_target:
 		_execute_card_play(card, null)
 	# C: invalid target -> cancel
 	else:
+		_show_invalid_card_feedback(card, CARD_INVALID_TARGET_COLOR)
 		_cancel_drag()
 
 func _execute_card_play(card: Card, target: BaseCombatant):
@@ -284,17 +362,11 @@ func _execute_card_play(card: Card, target: BaseCombatant):
 	card.card_button.disabled = true
 
 	var tween = create_tween()
-	tween.set_parallel(true)
-
-	if target != null:
-		var target_rect = target.selection_button.get_global_rect()
-		var target_center = target_rect.position + target_rect.size * 0.5
-		tween.tween_property(card.pivot, "global_position", target_center, 0.15)
-	else:
-		tween.tween_property(card.pivot, "global_position", card.pivot.global_position + Vector2(0, -50), 0.15)
-
-	tween.tween_property(card.pivot, "scale", Vector2.ZERO, 0.15)
-	tween.tween_property(card, "modulate", Color.TRANSPARENT, 0.15)
+	var release_target := _get_card_release_target(card, target)
+	tween.tween_property(card.pivot, "scale", Vector2.ONE * CARD_PLAY_RELEASE_WINDUP_SCALE, CARD_PLAY_RELEASE_WINDUP_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(card.pivot, "global_position", release_target, CARD_PLAY_RELEASE_TRAVEL_TIME).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(card.pivot, "scale", Vector2.ONE * CARD_PLAY_RELEASE_END_SCALE, CARD_PLAY_RELEASE_TRAVEL_TIME).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.parallel().tween_property(card, "modulate", Color.TRANSPARENT, CARD_PLAY_RELEASE_TRAVEL_TIME)
 
 	_cleanup_drag_state(false)
 	tween_hand()
@@ -308,6 +380,45 @@ func _execute_card_play(card: Card, target: BaseCombatant):
 		add_card_to_play_queue(card_play_request, true, false)
 	)
 
+func _get_card_release_target(card: Card, target: BaseCombatant) -> Vector2:
+	if target != null and is_instance_valid(target):
+		var target_rect = target.selection_button.get_global_rect()
+		return target_rect.position + target_rect.size * 0.5
+
+	var player_rect = player.selection_button.get_global_rect()
+	var player_center = player_rect.position + player_rect.size * 0.5
+	match card.card_data.card_type:
+		CardData.CARD_TYPES.ATTACK:
+			if combat != null:
+				var combat_rect = combat.get_global_rect()
+				return combat_rect.position + Vector2(combat_rect.size.x * 0.5, combat_rect.size.y * 0.42)
+			return player_center + Vector2(0.0, -160.0)
+		CardData.CARD_TYPES.POWER:
+			return player_center + Vector2(0.0, -135.0)
+		_:
+			return player_center + Vector2(0.0, -90.0)
+
+func _get_unplayable_card_feedback_color(card: Card) -> Color:
+	if card.card_data.card_is_playable and Global.player_data.player_energy < card.card_data.get_card_energy_cost():
+		return CARD_INVALID_ENERGY_COLOR
+	return CARD_INVALID_CONDITION_COLOR
+
+func _show_invalid_card_feedback(card: Card, feedback_color: Color) -> void:
+	if card == null or not is_instance_valid(card):
+		return
+	_kill_card_hover_tween(card)
+	var start_x := card.position.x
+	var tween := create_tween()
+	tween.tween_property(card, "modulate", feedback_color, 0.04)
+	tween.tween_property(card, "position:x", start_x - CARD_INVALID_SHAKE_OFFSET, 0.035)
+	tween.tween_property(card, "position:x", start_x + CARD_INVALID_SHAKE_OFFSET, 0.045)
+	tween.tween_property(card, "position:x", start_x, 0.045)
+	tween.parallel().tween_property(card, "modulate", Color.WHITE, 0.12)
+	if is_instance_valid(card.card_energy_cost) and feedback_color == CARD_INVALID_ENERGY_COLOR:
+		var label_tween := create_tween()
+		label_tween.tween_property(card.card_energy_cost, "modulate", CARD_INVALID_ENERGY_COLOR, 0.04)
+		label_tween.tween_property(card.card_energy_cost, "modulate", Color.WHITE, 0.16)
+
 func _cancel_drag():
 	if dragged_card == null:
 		return
@@ -320,6 +431,7 @@ func _on_card_drag_cancelled(card: Card):
 
 func _cleanup_drag_state(reset_card_visuals: bool = true):
 	if dragged_card != null and is_instance_valid(dragged_card):
+		_kill_card_hover_tween(dragged_card)
 		if reset_card_visuals:
 			dragged_card.z_index = 0
 			dragged_card.pivot.scale = drag_original_scale
@@ -328,17 +440,19 @@ func _cleanup_drag_state(reset_card_visuals: bool = true):
 	dragged_card = null
 	drag_line.visible = false
 	drag_line.clear_points()
+	drag_arrow_head.visible = false
+	drag_arrow_head.polygon = PackedVector2Array()
 	_unprompt_target()
-	_update_drag_target_highlight(null)
+	_clear_drag_target_feedback()
 	_last_drag_hover_target = null
 
 func _update_drag_line(p0: Vector2, p2: Vector2) -> void:
 	var mid = (p0 + p2) * 0.5
 	var dist = p0.distance_to(p2)
-	var p1 = mid + Vector2(0, -dist * 0.3)
+	var p1 = mid + Vector2(0, -clamp(dist * 0.34, 60.0, 180.0))
 
 	var points: PackedVector2Array = PackedVector2Array()
-	const SEGMENTS: int = 20
+	const SEGMENTS: int = 28
 	for i in range(SEGMENTS + 1):
 		var t = float(i) / SEGMENTS
 		var q0 = p0.lerp(p1, t)
@@ -346,6 +460,29 @@ func _update_drag_line(p0: Vector2, p2: Vector2) -> void:
 		points.append(q0.lerp(q1, t))
 
 	drag_line.points = points
+
+func _update_drag_arrow_head(mouse_pos: Vector2) -> void:
+	if drag_line.points.size() < 2:
+		return
+	var previous_point := drag_line.points[drag_line.points.size() - 2]
+	var direction := (mouse_pos - previous_point).normalized()
+	if direction == Vector2.ZERO:
+		direction = Vector2.UP
+	var normal := Vector2(-direction.y, direction.x)
+	var base_center := mouse_pos - direction * DRAG_ARROW_LENGTH
+	drag_arrow_head.polygon = PackedVector2Array([
+		mouse_pos,
+		base_center + normal * (DRAG_ARROW_WIDTH * 0.5),
+		base_center - normal * (DRAG_ARROW_WIDTH * 0.5),
+	])
+
+func _update_drag_line_color(has_valid_target: bool) -> void:
+	var color := DRAG_LINE_COLOR if has_valid_target else DRAG_LINE_INVALID_COLOR
+	drag_line.default_color = color
+	drag_arrow_head.color = color
+
+func _is_drag_visual_node(child: Node) -> bool:
+	return child == drag_line or child == drag_arrow_head
 
 func _process(_delta: float):
 	if not is_dragging or dragged_card == null or not is_instance_valid(dragged_card):
@@ -361,10 +498,12 @@ func _process(_delta: float):
 	# update trail line: curved from card position to mouse
 	if dragged_card.card_data.card_requires_target:
 		_update_drag_line(dragged_card.pivot.global_position, mouse_pos)
+		_update_drag_arrow_head(mouse_pos)
 
 	# target detection
-	var hover_target = _get_drag_hover_target(mouse_pos)
+	var hover_target = _get_drag_hover_target(mouse_pos, dragged_card)
 	_update_drag_target_highlight(hover_target)
+	_update_drag_line_color(hover_target != null)
 
 	# update description preview only when hover target changes
 	if hover_target != _last_drag_hover_target:
@@ -374,39 +513,81 @@ func _process(_delta: float):
 		else:
 			dragged_card.update_card_display()
 
-func _get_drag_hover_target(mouse_pos: Vector2) -> BaseCombatant:
+func _get_drag_hover_target(mouse_pos: Vector2, card: Card = null) -> BaseCombatant:
 	# check enemies
 	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy.is_alive() and enemy.selection_button.get_global_rect().has_point(mouse_pos):
+		if enemy.is_alive() and enemy.selection_button.get_global_rect().has_point(mouse_pos) and _is_valid_card_play_target(card, enemy):
 			return enemy
 	# check player
-	if player.selection_button.get_global_rect().has_point(mouse_pos):
+	if player.selection_button.get_global_rect().has_point(mouse_pos) and _is_valid_card_play_target(card, player):
 		return player
 	return null
 
+func _is_valid_card_play_target(card: Card, target: BaseCombatant) -> bool:
+	if card == null or target == null or not is_instance_valid(target):
+		return false
+	if not card.card_data.card_requires_target:
+		return false
+	# Current card data has no self-target flag. Treat target-required cards as enemy-targeted by default.
+	return target is Enemy and target.is_alive()
+
 func _update_drag_target_highlight(target: BaseCombatant):
-	# clear old borders
-	for combatant in _target_borders.keys():
-		var panel = _target_borders[combatant]
-		if is_instance_valid(panel):
-			panel.queue_free()
-	_target_borders.clear()
+	if target == _highlighted_drag_target and (target == null or _target_borders.has(target)):
+		return
+	_clear_drag_target_feedback()
+	_highlighted_drag_target = target
 
 	if target != null:
 		var border = Panel.new()
 		border.name = "TargetBorder"
 		border.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var style = StyleBoxFlat.new()
-		style.border_color = Color.YELLOW
-		style.border_width_left = 3
-		style.border_width_top = 3
-		style.border_width_right = 3
-		style.border_width_bottom = 3
-		style.bg_color = Color.TRANSPARENT
+		var highlight_color := DRAG_TARGET_PLAYER_COLOR if target == player else DRAG_TARGET_ENEMY_COLOR
+		style.border_color = highlight_color
+		style.border_width_left = 4
+		style.border_width_top = 4
+		style.border_width_right = 4
+		style.border_width_bottom = 4
+		style.bg_color = Color(highlight_color.r, highlight_color.g, highlight_color.b, 0.08)
 		border.add_theme_stylebox_override("panel", style)
 		border.set_anchors_preset(Control.PRESET_FULL_RECT)
 		target.add_child(border)
 		_target_borders[target] = border
+		_apply_drag_target_feedback(target)
+
+func _clear_drag_target_feedback() -> void:
+	for combatant in _target_borders.keys():
+		var panel = _target_borders[combatant]
+		if is_instance_valid(panel):
+			panel.queue_free()
+	_target_borders.clear()
+	for combatant in _target_original_scales.keys():
+		if is_instance_valid(combatant):
+			_kill_drag_target_tween(combatant)
+			combatant.scale = _target_original_scales[combatant]
+			combatant.modulate = _target_original_modulates.get(combatant, Color.WHITE)
+	_target_original_scales.clear()
+	_target_original_modulates.clear()
+	_highlighted_drag_target = null
+
+func _apply_drag_target_feedback(target: BaseCombatant) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	_target_original_scales[target] = target.scale
+	_target_original_modulates[target] = target.modulate
+	_kill_drag_target_tween(target)
+	var highlight_color := DRAG_TARGET_PLAYER_COLOR if target == player else DRAG_TARGET_ENEMY_COLOR
+	var tween := create_tween()
+	_target_feedback_tweens[target] = tween
+	tween.set_parallel(true)
+	tween.tween_property(target, "scale", target.scale * DRAG_TARGET_SCALE, DRAG_TARGET_FEEDBACK_TIME).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(target, "modulate", Color(highlight_color.r, highlight_color.g, highlight_color.b, 1.0), DRAG_TARGET_FEEDBACK_TIME)
+
+func _kill_drag_target_tween(target: BaseCombatant) -> void:
+	var tween: Tween = _target_feedback_tweens.get(target, null)
+	if tween != null and tween.is_valid():
+		tween.kill()
+	_target_feedback_tweens.erase(target)
 
 func _on_card_selected(card: Card):
 	# Drag system handles normal card plays; this path is only for card picking UI
@@ -500,7 +681,7 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 	# generate a special action which signifies the end of the card play, to be done after all the other card actions
 	var card_played_finished_action: Array[BaseAction] = [ActionGenerator.generate_card_play_finished(card_play_request)]
 	
-	ActionHandler.add_actions(card_played_finished_action + card_play_actions)
+	ActionHandler.add_actions(card_play_actions + card_played_finished_action)
 	
 	# update the hand while the actions are processing
 	tween_hand()
@@ -518,6 +699,7 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 		if card_play_request.card_data.card_exhausts:
 			# exhaust pile
 			Global.player_data.player_exhaust.append(card_play_request.card_data)
+			Signals.card_moved_to_pile.emit(card_play_request.card_data, "exhaust")
 			# card cannot be considered exhausted twice in a duplicate play
 			if not card_play_request.is_duplicate_play:
 				# cannot exhaust a card already from exhaust pile
@@ -526,6 +708,7 @@ func _play_card(card_play_request: CardPlayRequest) -> void:
 		else:
 			# discard pile
 			Global.player_data.player_discard.append(card_play_request.card_data)
+			Signals.card_moved_to_pile.emit(card_play_request.card_data, "discard")
 	
 	combat.update_combat_display()
 
@@ -562,6 +745,8 @@ func add_card_to_play_queue(card_play_request: CardPlayRequest, require_energy: 
 		
 		# energy cost
 		Global.player_data.player_energy -= energy_cost
+		if energy_cost > 0:
+			Signals.card_energy_spent.emit(card_play_request, energy_cost)
 		combat.update_combat_display()
 	else:
 		# card doesn't require energy, reserve -1 energy in energy queue
@@ -887,6 +1072,7 @@ func discard_cards(cards: Array[CardData], is_manual_discard: bool = false) -> v
 		# transfer card
 		move_card_to_limbo(card_data)
 		Global.player_data.player_discard.append(card_data)
+		Signals.card_moved_to_pile.emit(card_data, "discard")
 		
 		# perform discard actions
 		if is_manual_discard:
@@ -907,6 +1093,7 @@ func exhaust_cards(cards: Array[CardData]) -> void:
 	for card_data in cards.duplicate():
 		move_card_to_limbo(card_data)
 		Global.player_data.player_exhaust.append(card_data)
+		Signals.card_moved_to_pile.emit(card_data, "exhaust")
 		
 		# generate fake card play request
 		var card_play_request: CardPlayRequest = CardPlayRequest.new()
@@ -977,7 +1164,7 @@ func reset_deck() -> void:
 	_cards_in_play_animation.clear()
 
 	for child in get_children():
-		if child == drag_line:
+		if _is_drag_visual_node(child):
 			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
@@ -1096,7 +1283,7 @@ func _on_combat_ended():
 
 	# remove cards in hand
 	for child in get_children():
-		if child == drag_line:
+		if _is_drag_visual_node(child):
 			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()
@@ -1118,7 +1305,7 @@ func _on_run_ended():
 
 	# remove cards in hand
 	for child in get_children():
-		if child == drag_line:
+		if _is_drag_visual_node(child):
 			continue
 		child.queue_free()
 	card_data_to_hand_card.clear()

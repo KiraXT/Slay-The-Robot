@@ -4,9 +4,9 @@
         "object_id": "card_bookmark_clip",
         "object_uid": "",
         "card_name": "夹好书签",
-        "card_description": "选择1张手牌保留。下个玩家回合中，那张牌费用变为0。",
+        "card_description": "选择 1 张手牌保留。那张牌下回合费用变为 0。",
         "card_type": 1,
-        "card_rarity": 2,
+        "card_rarity": 1,
         "card_color_id": "color_orange",
         "card_energy_cost": 1,
         "card_energy_cost_is_variable": false,
@@ -16,51 +16,66 @@
         "card_is_ethereal": false,
         "card_is_retained": false,
         "card_appears_in_card_packs": true,
-        "card_texture_path": "external/sprites/cards/orange/card_orange.png",
+        "card_texture_path": "external/sprites/cards/orange/card_bookmark_clip.png",
+        "card_visual_profile": "skill",
+        "card_play_sfx": "card_status",
+        "card_impact_vfx": "status_burst",
+        "card_screen_shake": "small",
+        "card_hit_pause": 0.025,
         "card_keyword_object_ids": [
             "keyword_retain"
         ],
-        "card_values": {},
+        "card_values": {
+            "status_charge_amount": 1
+        },
         "card_play_actions": [
             {
                 "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
                     "card_pick_type": 0,
                     "min_card_amount": 1,
                     "max_card_amount": 1,
-                    "card_pick_text": "选择1张牌夹好书签。{1}/{0}",
+                    "min_cards_are_required_for_action": false,
+                    "quick_pick": true,
+                    "card_pick_text": "选择 1 张牌保留。那张牌下回合费用变为 0。",
                     "action_data": [
                         {
-                            "res://scripts/actions/cardset_actions/ActionRetainCards.gd": {}
-                        },
-                        {
-                            "res://scripts/actions/cardset_actions/ActionModifyCardTags.gd": {
-                                "add_tags": [
-                                    "temporary_bookmark_clip_discount"
+                            "res://scripts/actions/cardset_actions/ActionTagCards.gd": {
+                                "card_tags_to_add": [
+                                    "tag_bookmark_clip"
                                 ]
                             }
                         },
                         {
-                            "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
-                                "target_override": 2,
-                                "status_effect_object_id": "status_effect_bookmark_clip",
-                                "status_charge_amount": 1,
-                                "status_custom_values": {
-                                    "trigger_signal": "player_turn_started",
-                                    "activate_on_next_player_turn": true,
-                                    "card_tag_filter": "temporary_bookmark_clip_discount",
-                                    "remove_tag_on_trigger": false,
-                                    "expire_on_player_turn_end": true,
-                                    "action_data": [
-                                        {
-                                            "res://scripts/actions/cardset_actions/ActionChangeCardEnergies.gd": {
-                                                "card_energy_cost_until_turn": 0
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
+                            "res://scripts/actions/cardset_actions/ActionRetainCards.gd": {}
                         }
                     ]
+                }
+            },
+            {
+                "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                    "target_override": 2,
+                    "status_effect_object_id": "status_effect_bookmark_clip",
+                    "status_charge_amount": 1,
+                    "status_custom_values": {
+                        "trigger_signal": "player_turn_started",
+                        "card_tags": [
+                            "tag_bookmark_clip"
+                        ],
+                        "search_card_piles": [
+                            "hand"
+                        ],
+                        "arm_on_next_player_turn": true,
+                        "consume_charge_on_trigger": true,
+                        "remove_card_tags_on_trigger": true,
+                        "action_data": [
+                            {
+                                "res://scripts/actions/cardset_actions/ActionChangeCardEnergies.gd": {
+                                    "pick_played_card": true,
+                                    "card_energy_cost_until_turn": 0
+                                }
+                            }
+                        ]
+                    }
                 }
             }
         ],

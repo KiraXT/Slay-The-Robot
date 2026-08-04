@@ -69,9 +69,9 @@
         "enemy_health_max": 40,
         "enemy_initial_status_effects": {},
         "enemy_is_minion": false,
-        "enemy_name": "强攻敌人",
+        "enemy_name": "强袭破阵机",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_purple_medium.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_4.png",
         "enemy_type": 0,
         "object_id": "enemy_4",
         "object_uid": ""

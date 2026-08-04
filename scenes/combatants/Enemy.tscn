@@ -1,8 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://528isoebkdpv"]
+[gd_scene load_steps=10 format=3 uid="uid://528isoebkdpv"]
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://d4l5y1jvle1mq" path="res://scripts/combatants/Enemy.gd" id="1_10iyf"]
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_x4bdi"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_swords.png" id="2_x4bdi"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_nimvv"]
 [ext_resource type="Script" path="res://scripts/ui/IntentAttackIcon.gd" id="4_2wghv"]
 
@@ -93,6 +93,21 @@ _data = {
 &"death": SubResource("Animation_8wuxe")
 }
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_intent_badge"]
+bg_color = Color(0.105882, 0.0588235, 0.054902, 0.93)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 7
+border_color = Color(0.890196, 0.196078, 0.101961, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.46)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
 [node name="Enemy" type="Control" groups=["enemies", "enemies_alive_or_dead"]]
 custom_minimum_size = Vector2(200, 144)
 layout_mode = 3
@@ -155,6 +170,7 @@ offset_top = 3.0
 offset_right = 94.0
 offset_bottom = 66.0
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_intent_badge")
 
 [node name="IntentTexture" type="Control" parent="Visible/Intent"]
 layout_mode = 0

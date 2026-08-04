@@ -16,7 +16,12 @@
         "card_is_ethereal": false,
         "card_is_retained": false,
         "card_appears_in_card_packs": true,
-        "card_texture_path": "external/sprites/cards/orange/card_bag_swing.png",
+        "card_texture_path": "external/sprites/cards/orange/card_orange.png",
+        "card_visual_profile": "attack",
+        "card_play_sfx": "card_attack",
+        "card_impact_vfx": "impact_slash",
+        "card_screen_shake": "small",
+        "card_hit_pause": 0.035,
         "card_keyword_object_ids": [],
         "card_values": {
             "damage": 7,
@@ -26,7 +31,7 @@
         "card_play_actions": [
             {
                 "res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {
-                    "time_delay": 0.0,
+                    "time_delay": 0,
                     "actions_on_lethal": []
                 }
             },
@@ -49,7 +54,7 @@
                                     "damage": "bonus_damage"
                                 },
                                 "number_of_attacks": 1,
-                                "time_delay": 0.0,
+                                "time_delay": 0,
                                 "actions_on_lethal": []
                             }
                         }

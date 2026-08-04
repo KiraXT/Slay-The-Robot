@@ -51,7 +51,8 @@ func populate_dialogue_options() -> void:
 	dialogue_prompt_label.parse_bbcode(current_dialogue_state.dialogue_state_prompt_bbcode)
 	
 	# set prompt image
-	dialogue_texture_rect.texture = FileLoader.load_texture_or_fallback(current_dialogue_state.dialogue_state_dialogue_texture_path, "background")
+	if current_dialogue_state.dialogue_state_dialogue_texture_path != "":
+		dialogue_texture_rect.texture = FileLoader.load_texture(current_dialogue_state.dialogue_state_dialogue_texture_path)
 	
 	# create and validate dialogue option buttons
 	# keep track of how many are actually clickable
@@ -141,7 +142,7 @@ func reset_dialogue() -> void:
 	clear_dialogue_options()
 	visible = false
 	dialogue_prompt_label.parse_bbcode("")
-	dialogue_texture_rect.texture = load("res://icon.svg")
+	dialogue_texture_rect.texture = load("res://sprites/ui/flipper/icon_menu.png")
 	
 	current_dialogue_data = null
 	current_dialogue_state = null

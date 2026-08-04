@@ -45,9 +45,9 @@
         "enemy_health_max": 3,
         "enemy_initial_status_effects": {},
         "enemy_is_minion": true,
-        "enemy_name": "喽啰2",
+        "enemy_name": "绿壳子机",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_green_small.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_minion_2.png",
         "enemy_type": 0,
         "object_id": "enemy_minion_2",
         "object_uid": ""

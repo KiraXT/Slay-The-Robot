@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://c2ftr3dvpi75p" path="res://scripts/combatants/BaseCombatant.gd" id="1_fjkbl"]
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_nc4eu"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_swords.png" id="2_nc4eu"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_bf3nk"]
 
 [sub_resource type="Animation" id="Animation_0d3kb"]

@@ -20,7 +20,7 @@ func init(_consumable_slot_index: int):
 	
 	var consumable_data: ConsumableData = Global.get_player_consumable_in_slot_index(consumable_slot_index)
 	if consumable_data != null:
-		icon_texture.texture = FileLoader.load_texture_or_fallback(consumable_data.consumable_texture_path, "icon")
+		icon_texture.texture = FileLoader.load_texture(consumable_data.consumable_texture_path)
 		badge_visual.set("draw_icon", false)
 		self_modulate.a = 1.0
 		# set tooltip

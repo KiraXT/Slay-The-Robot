@@ -36,18 +36,23 @@ func _get_picked_cards() -> Array[CardData]:
 	if parent_action != null:
 		if parent_action is ActionBasePickCards:
 			return parent_action.picked_cards
-	else:
-		# fall back to picked_cards value
-		var picked_cards: Array = get_action_value("picked_cards", [])
-		# convert typed array
-		var returned_cards: Array[CardData] = []
-		for card_data in picked_cards:
-			returned_cards.append(card_data)
-		
-		return returned_cards
-		
+
+	var card_pick_type: int = get_action_value("card_pick_type", -1)
+	if card_pick_type >= 0:
+		var input_cardset: Array[CardData] = []
+		input_cardset.assign(Global.player_data.get_pile(card_pick_type))
+		var validator_data: Array = []
+		validator_data.assign(get_action_value("validator_data", []))
+		return CardFilter.new(input_cardset).filter_card_validators(validator_data).filtered_cards
+
+	# fall back to picked_cards value
+	var picked_cards: Array = get_action_value("picked_cards", [])
+	# convert typed array
+	var returned_cards: Array[CardData] = []
+	for card_data in picked_cards:
+		returned_cards.append(card_data)
 	
-	return []
+	return returned_cards
 
 func _to_string():
 	return "BaseCardset Action"

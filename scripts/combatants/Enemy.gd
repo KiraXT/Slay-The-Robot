@@ -20,7 +20,7 @@ func init(_enemy_data: EnemyData):
 	selection_button.mouse_entered.connect(_on_mouse_entered)
 	selection_button.mouse_exited.connect(_on_mouse_exited)
 	
-	set_combat_sprite_texture(enemy_data.enemy_texture_path, ENEMY_COMBAT_SPRITE_HEIGHT, "enemy")
+	set_combat_sprite_texture(enemy_data.enemy_texture_path, ENEMY_COMBAT_SPRITE_HEIGHT)
 	
 	# apply initial effects
 	for status_effect_object_id in enemy_data.enemy_initial_status_effects.keys():

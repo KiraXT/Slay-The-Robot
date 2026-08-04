@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://dkooa02iutqlt"]
+[gd_scene load_steps=7 format=3 uid="uid://dkooa02iutqlt"]
 
 [ext_resource type="Script" uid="uid://b30k46q1v2d56" path="res://scripts/ui/CharacterSelectionButton.gd" id="1_script"]
 
@@ -28,6 +28,12 @@ corner_radius_top_right = 36
 corner_radius_bottom_right = 36
 corner_radius_bottom_left = 36
 
+[sub_resource type="Shader" id="Shader_avatar_mask"]
+code = "shader_type canvas_item;\n\nvoid fragment() {\n\tif (distance(UV, vec2(0.5)) > 0.5) {\n\t\tdiscard;\n\t}\n}\n"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_avatar_mask"]
+shader = SubResource("Shader_avatar_mask")
+
 [node name="CharacterSelectionButton" type="TextureButton"]
 custom_minimum_size = Vector2(72, 72)
 layout_mode = 0
@@ -55,6 +61,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+material = SubResource("ShaderMaterial_avatar_mask")
 expand_mode = 1
 stretch_mode = 5
 mouse_filter = 2

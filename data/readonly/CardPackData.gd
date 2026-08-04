@@ -11,6 +11,14 @@ class_name CardPackData
 ## Provides a shorthand for filtering cards by color
 @export var card_pack_color_id: String = ""
 
+## Rarity weights used when card pack drafts request weighted generation.
+## Keys can be rarity names such as "common", "uncommon", "rare" or the numeric CardData rarity id.
+@export var card_pack_rarity_weights: Dictionary = {
+	"common": 55,
+	"uncommon": 43,
+	"rare": 2,
+}
+
 ## Prevents rarities other than ones defined by CardData.STANDARD_CARD_RARITIES. Usually turned off
 ## for packs that use generated cards or statuses.
 @export var exclude_non_standard_rarities = true

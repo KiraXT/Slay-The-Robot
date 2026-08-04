@@ -16,7 +16,7 @@ func init(_artifact_data: ArtifactData):
 	artifact_data = _artifact_data
 	var artifact_script_asset: Resource = load(artifact_data.artifact_script_path)
 	artifact_script = artifact_script_asset.new(artifact_data)
-	texture_normal = FileLoader.load_texture_or_fallback(artifact_data.artifact_texture_path, "icon")
+	texture_normal = FileLoader.load_texture(artifact_data.artifact_texture_path)
 	update_artifact_counter()
 	
 	tooltip_text = artifact_data.artifact_name

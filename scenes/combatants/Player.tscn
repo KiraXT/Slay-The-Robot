@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_1k9pz"]
 [ext_resource type="Script" uid="uid://bu5jx208ipx8i" path="res://scripts/combatants/Player.gd" id="1_hkgmy"]
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_snepv"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_swords.png" id="2_snepv"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://scenes/combatants/LayeredHealthBar.tscn" id="3_ef7si"]
 
 [sub_resource type="Animation" id="Animation_0d3kb"]
@@ -120,28 +120,31 @@ offset_bottom = 64.0
 visible = false
 layout_mode = 3
 anchors_preset = 0
-offset_left = -40.0
-offset_top = -64.0
-offset_right = 168.0
-offset_bottom = -40.0
+offset_left = 34.0
+offset_top = -132.0
+offset_right = 150.0
+offset_bottom = -84.0
 
 [node name="TextureRect" type="TextureRect" parent="Visible/IncomingDamage"]
 layout_mode = 0
-offset_left = 80.0
-offset_top = -16.0
-offset_right = 128.0
-offset_bottom = 32.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 40.0
+offset_bottom = 40.0
 texture = ExtResource("2_snepv")
 expand_mode = 1
 
 [node name="IncomingDamageAmount" type="Label" parent="Visible/IncomingDamage"]
 layout_mode = 0
-offset_left = 104.0
-offset_top = 16.0
-offset_right = 144.0
-offset_bottom = 39.0
+offset_left = 40.0
+offset_top = 4.0
+offset_right = 110.0
+offset_bottom = 42.0
 theme = ExtResource("1_1k9pz")
+theme_override_font_sizes/font_size = 26
 text = "15"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="FadeContainer" type="Node2D" parent="Visible"]
 position = Vector2(64, -96)

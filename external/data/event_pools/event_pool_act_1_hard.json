@@ -7,7 +7,9 @@
 			"event_act_1_easy_combat_1",
 			"event_act_1_easy_combat_2",
 			"event_act_1_easy_combat_3",
-			"event_act_1_easy_combat_4"
+			"event_act_1_easy_combat_4",
+			"event_act_1_hard_combat_scrap_wall",
+			"event_act_1_hard_combat_disruptor_support"
 		],
 		"event_pool_fallback_event_object_id": "",
 		"object_id": "event_pool_act_1_hard"

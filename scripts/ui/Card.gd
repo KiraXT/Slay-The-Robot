@@ -182,9 +182,6 @@ func _apply_card_palette(color_data: ColorData, card_color_id: String) -> void:
 	var frame_color := CARD_DEFAULT_FRAME_COLOR
 	if color_data != null:
 		frame_color = color_data.color
-	var compatibility_badge := get_node_or_null("Pivot/CardVisual/FactionBadge") as ColorRect
-	if compatibility_badge != null:
-		compatibility_badge.color = frame_color
 
 	var background_color := Color(1.0, 1.0, 1.0, 0.98)
 	if frame_color.get_luminance() < 0.82:
