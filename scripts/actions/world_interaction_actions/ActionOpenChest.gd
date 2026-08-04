@@ -63,20 +63,17 @@ func perform_action() -> void:
 				artifact_ids = chest_artifact_ids
 		
 		# consumables
-		#TODO Support consumables in rewards
-		#if not chest_has_consumables:
-			#consumable_ids = []
-		#else:
-			## either generate cards, or use specified cards
-			#var chest_generates_consumables: bool = action_interceptor_processor.get_shadowed_action_values("chest_generates_consumables", true)
-			#if chest_generates_consumables:
-				##TODO Generate consumables
-				#pass
-				## var chest_consumable_count: int = action_interceptor_processor.get_shadowed_action_values("chest_consumable_count", 1)
-				## consumable_ids = Random.get_location_consumable_rewards(location_data, chest_consumable_count)
-			#else:
-				#var chest_consumable_ids: Array[String] = action_interceptor_processor.get_shadowed_action_values("consumable_ids", [])
-				#consumable_ids = chest_consumable_ids
+		if not chest_has_consumables:
+			consumable_ids = []
+		else:
+			var chest_generates_consumables: bool = action_interceptor_processor.get_shadowed_action_values("chest_generates_consumables", true)
+			if chest_generates_consumables:
+				var chest_consumable_count: int = action_interceptor_processor.get_shadowed_action_values("chest_consumable_count", 1)
+				consumable_ids = Random.get_location_consumable_rewards(location_data, chest_consumable_count)
+			else:
+				var chest_consumable_ids: Array[String] = []
+				chest_consumable_ids.assign(action_interceptor_processor.get_shadowed_action_values("consumable_ids", []))
+				consumable_ids = chest_consumable_ids
 		
 		var chest_contents: Dictionary[String, Variant] = {
 			"reward_group": reward_group,

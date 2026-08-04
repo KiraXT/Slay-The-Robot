@@ -5,7 +5,9 @@
 	"properties": {
 		"event_pool_event_object_ids": [
 			"event_act_1_miniboss_1",
-			"event_act_1_miniboss_2"
+			"event_act_1_miniboss_2",
+			"event_act_1_miniboss_bastion_guard",
+			"event_act_1_miniboss_command_core"
 		],
 		"event_pool_fallback_event_object_id": "",
 		"object_id": "event_pool_act_1_miniboss"

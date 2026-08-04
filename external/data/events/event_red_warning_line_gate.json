@@ -1,0 +1,160 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "event_red_warning_line_gate",
+        "event_background_texture_path": "",
+        "event_dialogue_object_id": "",
+        "event_dialogue_data": {
+            "object_id": "dialogue_red_warning_line_gate",
+            "dialogue_initial_dialogue_state_object_id": "dialogue_state_red_warning_line_gate_initial",
+            "dialogue_option_id_to_dialogue_options": {
+                "dialogue_option_red_warning_line_gate_1": {
+                    "object_id": "dialogue_option_red_warning_line_gate_1",
+                    "dialogue_option_bbcode": "正面突破: [color=red]失去10点生命[/color]，获得1张红色稀有牌",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/ActionAddHealth.gd": {
+                                "health_amount": -10
+                            }
+                        },
+                        {
+                            "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                                "action_data": [
+                                    {
+                                        "res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {}
+                                    }
+                                ],
+                                "card_pick_text": "选择 1 张牌加入牌组",
+                                "card_pick_type": 8,
+                                "draft_from_card_pool": true,
+                                "draft_is_weighted": false,
+                                "draft_max_card_amount": 3,
+                                "draft_use_pity_system": false,
+                                "draft_use_player_draft": false,
+                                "force_manual_selection": true,
+                                "max_card_amount": 1,
+                                "min_card_amount": 1,
+                                "min_cards_are_required_for_action": true,
+                                "pick_draft_cards": false,
+                                "random_selection": false,
+                                "rng_name": "rng_events",
+                                "validator_data": [
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardColor.gd": {
+                                            "card_color_ids": ["color_red"]
+                                        }
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardDraftable.gd": {}
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardRarity.gd": {
+                                            "card_rarities": [3]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [
+                        {
+                            "res://scripts/validators/ValidatorPlayerHealth.gd": {
+                                "health_amount": 11
+                            }
+                        }
+                    ],
+                    "dialogue_option_visible_on_failed_validation": true
+                },
+                "dialogue_option_red_warning_line_gate_2": {
+                    "object_id": "dialogue_option_red_warning_line_gate_2",
+                    "dialogue_option_bbcode": "找准破绽: 从3张红色牌中选择1张加入牌组",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                                "action_data": [
+                                    {
+                                        "res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {}
+                                    }
+                                ],
+                                "card_pick_text": "选择 1 张牌加入牌组",
+                                "card_pick_type": 8,
+                                "draft_from_card_pool": true,
+                                "draft_is_weighted": false,
+                                "draft_max_card_amount": 3,
+                                "draft_use_pity_system": false,
+                                "draft_use_player_draft": false,
+                                "force_manual_selection": true,
+                                "max_card_amount": 1,
+                                "min_card_amount": 1,
+                                "min_cards_are_required_for_action": true,
+                                "pick_draft_cards": false,
+                                "random_selection": false,
+                                "rng_name": "rng_events",
+                                "validator_data": [
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardColor.gd": {
+                                            "card_color_ids": ["color_red"]
+                                        }
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardDraftable.gd": {}
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardRarity.gd": {
+                                            "card_rarities_exclude": [4]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [],
+                    "dialogue_option_visible_on_failed_validation": true
+                },
+                "dialogue_option_red_warning_line_gate_3": {
+                    "object_id": "dialogue_option_red_warning_line_gate_3",
+                    "dialogue_option_bbcode": "暂时撤退: [color=green]获得1个格挡药剂[/color]",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+                                "consumable_object_id": "consumable_block"
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [],
+                    "dialogue_option_visible_on_failed_validation": true
+                }
+            },
+            "dialogue_state_id_to_dialogue_states": {
+                "dialogue_state_red_warning_line_gate_initial": {
+                    "object_id": "dialogue_state_red_warning_line_gate_initial",
+                    "dialogue_state_dialogue_texture_path": "external/sprites/events/event_red_warning_line_gate.png",
+                    "dialogue_state_dialogue_option_object_ids": [
+                        "dialogue_option_red_warning_line_gate_1",
+                        "dialogue_option_red_warning_line_gate_2",
+                        "dialogue_option_red_warning_line_gate_3"
+                    ],
+                    "dialogue_state_prompt_bbcode": "一扇门前投射着红色警戒线。系统不断播报“只允许攻击姿态通过”，门后的奖励箱已经半开。"
+                }
+            }
+        },
+        "event_enemy_placement_is_automatic": true,
+        "event_enemy_placement_positions": [],
+        "event_initial_combat_actions": [],
+        "event_pool_validator_data": [
+            {
+                "res://scripts/validators/ValidatorCharacter.gd": {
+                    "character_object_ids": ["character_red"]
+                }
+            }
+        ],
+        "event_weighted_enemy_object_ids": [],
+        "location_event_pool_validator_failed_strategy": 1
+    }
+}

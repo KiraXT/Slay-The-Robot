@@ -1,6 +1,6 @@
 [gd_scene load_steps=20 format=3 uid="uid://btxmfagad05n5"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_7f6u3"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_deck.png" id="1_7f6u3"]
 [ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="1_n7s1f"]
 [ext_resource type="Script" uid="uid://k4n0whn5t0m" path="res://scripts/ui/Card.gd" id="1_u8ksl"]
 [ext_resource type="PackedScene" uid="uid://daimkj082tvn0" path="res://scenes/ui/general/KeywordContainer.tscn" id="3_6p3td"]
@@ -210,19 +210,6 @@ offset_top = 4.0
 offset_right = 140.0
 offset_bottom = 198.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_inner")
-
-[node name="FactionBadge" type="ColorRect" parent="Pivot/CardVisual"]
-visible = false
-mouse_filter = 2
-color = Color(1, 1, 1, 1)
-
-[node name="ArtFrame" type="ColorRect" parent="Pivot/CardVisual"]
-visible = false
-mouse_filter = 2
-
-[node name="DescriptionPanel" type="ColorRect" parent="Pivot/CardVisual"]
-visible = false
-mouse_filter = 2
 
 [node name="CardArtBackground" type="TextureRect" parent="Pivot/CardVisual"]
 unique_name_in_owner = true

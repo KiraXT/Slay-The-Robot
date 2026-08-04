@@ -177,16 +177,18 @@ func get_drafted_cards() -> Array[CardData]:
 	var rng_name: String = get_action_value("rng_name", "rng_non_reward_card_drafting")
 	var rng_non_reward_card_drafting: RandomNumberGenerator = Global.player_data.get_player_rng(rng_name)
 	var draft_max_card_amount: int = get_action_value("draft_max_card_amount", 3) # 0 or negative for all cards. Use DECK card pick type for larger ui selections
+	var draft_probability_is_weighted: bool = get_action_value("draft_is_weighted", false)
 	
 	if draft_card_pack_id != "":
-		#TODO support weighting for card pack based drafting
-		filtered_card_draft = Random.generate_unweighted_card_draft_from_card_pack_id(rng_non_reward_card_drafting, draft_card_pack_id, draft_max_card_amount)
+		if draft_probability_is_weighted:
+			filtered_card_draft = Random.generate_rarity_weighted_card_draft_from_card_pack_id(rng_non_reward_card_drafting, draft_card_pack_id, draft_max_card_amount)
+		else:
+			filtered_card_draft = Random.generate_unweighted_card_draft_from_card_pack_id(rng_non_reward_card_drafting, draft_card_pack_id, draft_max_card_amount)
 	elif draft_use_player_draft:
 		# generate a draft from player available cards
 		# can be weighted or unweighted
 		# NOTE: validator_data should be empty for this kind of draft or it may break the
 		# draft once it hits get_pickable_cards() and runs the validator over them
-		var draft_probability_is_weighted: bool = get_action_value("draft_is_weighted", false)
 		var draft_use_pity_system: bool = get_action_value("draft_use_pity_system", false)
 		if draft_probability_is_weighted:
 			filtered_card_draft = Random.generate_rarity_weighted_card_draft(rng_non_reward_card_drafting, draft_max_card_amount, Random.CARD_DRAFT_TABLE_TYPES.STANDARD, draft_use_pity_system)

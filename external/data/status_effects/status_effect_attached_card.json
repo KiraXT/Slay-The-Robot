@@ -21,7 +21,7 @@
         "status_effect_priority": 0,
         "status_effect_script_path": "res://scripts/status_effects/StatusEffectAttachedCard.gd",
         "status_effect_stacks": false,
-        "status_effect_texture_path": "",
+		"status_effect_texture_path": "external/sprites/status_effects/status_effect_attached_card.png",
         "status_effect_type": 2
     }
 }

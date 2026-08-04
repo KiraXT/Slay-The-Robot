@@ -1,0 +1,52 @@
+{
+    "patch_data": {},
+    "properties": {
+        "enemy_actions_on_death": [],
+        "enemy_attack_states": {
+            "1": {
+                "attack_damage": 0,
+                "block": 6,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "2": 1.0
+                },
+                "number_of_attacks": 0
+            },
+            "2": {
+                "attack_damage": 18,
+                "block": 0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0
+                },
+                "number_of_attacks": 1
+            },
+            "initial": {
+                "attack_damage": 0,
+                "block": 0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1.0
+                },
+                "number_of_attacks": 0
+            }
+        },
+        "enemy_block": 0,
+        "enemy_difficulty_to_enemy_modfiers": {
+            "1": {
+                "enemy_health": 34,
+                "enemy_health_max": 34
+            }
+        },
+        "enemy_health": 28,
+        "enemy_health_max": 28,
+        "enemy_initial_status_effects": {},
+        "enemy_is_minion": false,
+        "enemy_name": "侦测打手",
+        "enemy_object_id": "",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_1_scout_striker.png",
+        "enemy_type": 0,
+        "object_id": "enemy_act_1_scout_striker",
+        "object_uid": ""
+    }
+}

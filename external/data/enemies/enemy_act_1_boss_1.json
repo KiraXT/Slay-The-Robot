@@ -58,7 +58,7 @@
         "enemy_health_max": 200,
         "enemy_initial_status_effects": {},
         "enemy_is_minion": false,
-        "enemy_name": "第一幕Boss",
+        "enemy_name": "蜂巢主机",
         "enemy_object_id": "",
         "enemy_texture_path": "external/sprites/enemies/enemy_act_1_boss_1.png",
         "enemy_type": 2,

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://5nql2bvlw7u3"]
 
-[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="1_ifaph"]
+[ext_resource type="Texture2D" path="res://sprites/ui/flipper/icon_energy.png" id="1_ifaph"]
 [ext_resource type="Script" uid="uid://c3fsbs4llckwx" path="res://scripts/ui/shop/ConsumableShopButton.gd" id="2_ldcee"]
 
 [node name="ConsumableShopButton" type="Control"]

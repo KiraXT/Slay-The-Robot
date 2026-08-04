@@ -1,0 +1,168 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "event_orange_prep_supply_stop",
+        "event_background_texture_path": "",
+        "event_dialogue_object_id": "",
+        "event_dialogue_data": {
+            "object_id": "dialogue_orange_prep_supply_stop",
+            "dialogue_initial_dialogue_state_object_id": "dialogue_state_orange_prep_supply_stop_initial",
+            "dialogue_option_id_to_dialogue_options": {
+                "dialogue_option_orange_prep_supply_stop_1": {
+                    "object_id": "dialogue_option_orange_prep_supply_stop_1",
+                    "dialogue_option_bbcode": "打包饮料: [color=green]获得1个治疗药剂[/color]，并获得1张橙色普通牌",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+                                "consumable_object_id": "consumable_heal"
+                            }
+                        },
+                        {
+                            "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                                "action_data": [
+                                    {
+                                        "res://scripts/actions/cardset_actions/ActionAddCardsToDeck.gd": {}
+                                    }
+                                ],
+                                "card_pick_text": "选择 1 张牌加入牌组",
+                                "card_pick_type": 8,
+                                "draft_from_card_pool": true,
+                                "draft_is_weighted": false,
+                                "draft_max_card_amount": 3,
+                                "draft_use_pity_system": false,
+                                "draft_use_player_draft": false,
+                                "force_manual_selection": true,
+                                "max_card_amount": 1,
+                                "min_card_amount": 1,
+                                "min_cards_are_required_for_action": true,
+                                "pick_draft_cards": false,
+                                "random_selection": false,
+                                "rng_name": "rng_events",
+                                "validator_data": [
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardColor.gd": {
+                                            "card_color_ids": ["color_orange"]
+                                        }
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardDraftable.gd": {}
+                                    },
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardRarity.gd": {
+                                            "card_rarities": [1]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [],
+                    "dialogue_option_visible_on_failed_validation": true
+                },
+                "dialogue_option_orange_prep_supply_stop_2": {
+                    "object_id": "dialogue_option_orange_prep_supply_stop_2",
+                    "dialogue_option_bbcode": "轻装上阵: [color=red]失去50金币[/color]，移除1张牌",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/player_actions/ActionAddMoney.gd": {
+                                "money_amount": -50
+                            }
+                        },
+                        {
+                            "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                                "action_data": [
+                                    {
+                                        "res://scripts/actions/cardset_actions/ActionRemoveCardsFromDeck.gd": {}
+                                    }
+                                ],
+                                "card_pick_text": "选择 1 张牌移除",
+                                "card_pick_type": 1,
+                                "force_manual_selection": true,
+                                "max_card_amount": 1,
+                                "min_card_amount": 1,
+                                "min_cards_are_required_for_action": false,
+                                "validator_data": [
+                                    {
+                                        "res://scripts/validators/card/ValidatorCardRemovableFromDeck.gd": {}
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [
+                        {
+                            "res://scripts/validators/ValidatorMoney.gd": {
+                                "money_amount": 50
+                            }
+                        },
+                        {
+                            "res://scripts/validators/deck/ValidatorDeckHasRemovableCard.gd": {}
+                        }
+                    ],
+                    "dialogue_option_visible_on_failed_validation": true
+                },
+                "dialogue_option_orange_prep_supply_stop_3": {
+                    "object_id": "dialogue_option_orange_prep_supply_stop_3",
+                    "dialogue_option_bbcode": "多拿一点: [color=red]失去6点生命[/color]，获得2个随机消耗品",
+                    "dialogue_option_failed_validator_bbcode": "[color=grey][锁定]：条件不足[/color]",
+                    "dialogue_option_next_dialogue_state_id": "",
+                    "dialogue_option_actions": [
+                        {
+                            "res://scripts/actions/ActionAddHealth.gd": {
+                                "health_amount": -6
+                            }
+                        },
+                        {
+                            "res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+                                "random_consumable": true,
+                                "rng_name": "rng_events"
+                            }
+                        },
+                        {
+                            "res://scripts/actions/player_actions/ActionAddConsumable.gd": {
+                                "random_consumable": true,
+                                "rng_name": "rng_events"
+                            }
+                        }
+                    ],
+                    "dialogue_option_validators": [
+                        {
+                            "res://scripts/validators/ValidatorPlayerHealth.gd": {
+                                "health_amount": 7
+                            }
+                        }
+                    ],
+                    "dialogue_option_visible_on_failed_validation": true
+                }
+            },
+            "dialogue_state_id_to_dialogue_states": {
+                "dialogue_state_orange_prep_supply_stop_initial": {
+                    "object_id": "dialogue_state_orange_prep_supply_stop_initial",
+                    "dialogue_state_dialogue_texture_path": "external/sprites/events/event_orange_prep_supply_stop.png",
+                    "dialogue_state_dialogue_option_object_ids": [
+                        "dialogue_option_orange_prep_supply_stop_1",
+                        "dialogue_option_orange_prep_supply_stop_2",
+                        "dialogue_option_orange_prep_supply_stop_3"
+                    ],
+                    "dialogue_state_prompt_bbcode": "一处自动补给站还亮着灯。货架上有饮料、旧护具和临时路线图，但每个格子都快卡住了。"
+                }
+            }
+        },
+        "event_enemy_placement_is_automatic": true,
+        "event_enemy_placement_positions": [],
+        "event_initial_combat_actions": [],
+        "event_pool_validator_data": [
+            {
+                "res://scripts/validators/ValidatorCharacter.gd": {
+                    "character_object_ids": ["character_orange"]
+                }
+            }
+        ],
+        "event_weighted_enemy_object_ids": [],
+        "location_event_pool_validator_failed_strategy": 1
+    }
+}

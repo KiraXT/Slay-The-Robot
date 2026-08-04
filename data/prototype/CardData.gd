@@ -46,6 +46,12 @@ const STANDARD_CARD_RARITIES: Array[int] = [CARD_RARITIES.COMMON, CARD_RARITIES.
 
 @export var card_requires_target: bool = true	# card requires user to select a target to play it
 
+### Presentation
+@export var card_visual_profile: String = ""	# optional presentation override, default derived from card_type
+@export var card_play_sfx: String = ""	# optional sound id for card release
+@export var card_impact_vfx: String = ""	# optional visual effect id for impact
+@export var card_screen_shake: String = ""	# optional shake preset id for impact
+@export var card_hit_pause: float = 0.0	# optional hit-stop duration for impact feedback
 
 ### Card Values
 @export var card_values: Dictionary = {}	# values on the card like attack/block amount. These are fallback values used by the card's actions and can be modified

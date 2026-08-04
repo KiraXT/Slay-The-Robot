@@ -16,7 +16,12 @@
         "card_is_ethereal": false,
         "card_is_retained": true,
         "card_appears_in_card_packs": true,
-        "card_texture_path": "external/sprites/cards/orange/card_warmup.png",
+        "card_texture_path": "external/sprites/cards/orange/card_orange.png",
+        "card_visual_profile": "skill",
+        "card_play_sfx": "card_skill_guard",
+        "card_impact_vfx": "guard_burst",
+        "card_screen_shake": "",
+        "card_hit_pause": 0,
         "card_keyword_object_ids": [
             "keyword_block",
             "keyword_retain"

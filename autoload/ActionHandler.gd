@@ -57,9 +57,10 @@ func add_actions(actions: Array[BaseAction], enqueue: bool = false, front_of_que
 				current_action_queue += actions
 	else:
 		# adding to stack
-		# adds each action to top of stack as their own queue
-		for action in actions:
-			action_stack += [[action]]
+		# add each action as its own queue. _perform_actions() pops from the back,
+		# so push in reverse to preserve the caller's declared action order.
+		for action_index in range(len(actions) - 1, -1, -1):
+			action_stack.append([actions[action_index]])
 	
 	if len(actions) > 0:	# automatically perform the actions when they're added
 		if not actions_being_performed:	# check to prevent multiple automatic calls of this method

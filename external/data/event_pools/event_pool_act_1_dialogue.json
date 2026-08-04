@@ -1,12 +1,18 @@
 {
-	"patch_data": {
-
-	},
+	"patch_data": {},
 	"properties": {
 		"event_pool_event_object_ids": [
-			"event_pick_something"
+			"event_pick_something",
+			"event_red_broken_boxing_ring",
+			"event_red_warning_line_gate",
+			"event_blue_scattered_toolbox",
+			"event_blue_runaway_shuffler",
+			"event_green_echo_tuning_room",
+			"event_green_corrosion_tank",
+			"event_orange_prep_supply_stop",
+			"event_orange_hidden_backpack_pocket"
 		],
-		"event_pool_fallback_event_object_id": "",
+		"event_pool_fallback_event_object_id": "event_pick_something",
 		"object_id": "event_pool_act_1_dialogue"
 	}
 }

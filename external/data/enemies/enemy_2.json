@@ -45,9 +45,9 @@
         "enemy_health_max": 5,
         "enemy_initial_status_effects": {},
         "enemy_is_minion": false,
-        "enemy_name": "蓝色敌人",
+        "enemy_name": "蓝壳斥候",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_2.png",
         "enemy_type": 0,
         "object_id": "enemy_2",
         "object_uid": ""

@@ -245,6 +245,8 @@ func get_next_event_object_id_from_pool(event_pool_object_id: String) -> String:
 		DebugLogger.log_line(message, Color.YELLOW)
 		# copy event ids from corresponding event pool
 		for event_object_id: String in event_pool_data.event_pool_event_object_ids:
+			if player_event_blacklisted_ids.has(event_object_id):
+				continue
 			if not event_pool_event_object_ids.has(event_object_id):
 				event_pool_event_object_ids.append(event_object_id)
 			
@@ -259,18 +261,30 @@ func get_next_event_object_id_from_pool(event_pool_object_id: String) -> String:
 	# find the first event that passes validators and store events that don't pass
 	var failed_event_object_ids: Array[String] = [] # events that fail their validators and must be handled
 	for event_object_id: String in event_pool_event_object_ids:
+		if player_event_blacklisted_ids.has(event_object_id):
+			failed_event_object_ids.append(event_object_id)
+			continue
+
 		var event_data: EventData = Global.get_event_data(event_object_id)
-		
+		if event_data == null:
+			failed_event_object_ids.append(event_object_id)
+			continue
+
 		var validators_passed: bool = event_data.validate_event()
 		if validators_passed:
 			next_event_object_id = event_data.object_id
 			break # valid event found, no need to keep looking
+
+		failed_event_object_ids.append(event_object_id)
 		
 	# handle each failed event according to its strategy for how it should be put back into the
 	# event pool.
 	for failed_event_object_id: String in failed_event_object_ids:
 		var event_data: EventData = Global.get_event_data(failed_event_object_id)
-		#TODO
+		if event_data == null or player_event_blacklisted_ids.has(failed_event_object_id):
+			event_pool_event_object_ids.erase(failed_event_object_id)
+			continue
+
 		var validator_failed_strategy = event_data.location_event_pool_validator_failed_strategy
 		# if not keeping, remove it
 		if not validator_failed_strategy == EventData.FailedEventPoolStrategies.KEEP:

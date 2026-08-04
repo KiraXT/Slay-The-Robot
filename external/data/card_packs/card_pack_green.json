@@ -5,6 +5,11 @@
 	"properties": {
 		"card_pack_card_ids": [],
 		"card_pack_color_id": "color_green",
+		"card_pack_rarity_weights": {
+			"common": 55,
+			"rare": 2,
+			"uncommon": 43
+		},
 		"card_pack_validators": [],
 		"exclude_non_standard_rarities": true,
 		"exclude_non_standard_types": true,
