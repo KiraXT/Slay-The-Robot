@@ -4,6 +4,7 @@ class_name MapLocation
 const FALLBACK_TEXTURE_PATH := "external/sprites/ui/map_locations/map_location_event.png"
 const HIDDEN_LOCATION_TEXTURE_PATH := "external/sprites/ui/map_locations/map_location_event.png"
 const LOCATION_TYPE_TO_TEXTURE_PATH := {
+	LocationData.LOCATION_TYPES.STARTING: "external/sprites/ui/map_locations/map_location_combat.png",
 	LocationData.LOCATION_TYPES.COMBAT: "external/sprites/ui/map_locations/map_location_combat.png",
 	LocationData.LOCATION_TYPES.EVENT: "external/sprites/ui/map_locations/map_location_event.png",
 	LocationData.LOCATION_TYPES.SHOP: "external/sprites/ui/map_locations/map_location_shop.png",
