@@ -10,6 +10,12 @@ extends Control
 
 const CODEX_ENTRY_SIZE: Vector2 = Vector2(150, 220)
 const CODEX_IMAGE_SIZE: Vector2 = Vector2(112, 88)
+const CODEX_ACCENT_CYAN := Color(0.133333, 0.831373, 0.839216, 1.0)
+const CODEX_ACCENT_GOLD := Color(0.968627, 0.760784, 0.360784, 1.0)
+const CODEX_PANEL_BG := Color(1.0, 1.0, 1.0, 0.94)
+const CODEX_IMAGE_BG := Color(0.894118, 0.980392, 0.980392, 0.76)
+const CODEX_TEXT_MUTED := Color(0.258824, 0.337255, 0.384314, 1.0)
+const STYLED_TOOLTIP_PANEL_SCRIPT := preload("res://scripts/ui/general/StyledTooltipPanel.gd")
 
 func _ready():
 	back_button.button_up.connect(_on_back_button_up)
@@ -60,11 +66,11 @@ func clear_codex_card_container() -> void:
 		child.queue_free()
 
 func _create_enemy_codex_entry(enemy_data: EnemyData) -> Control:
-	var entry := _create_base_codex_entry()
+	var entry := _create_base_codex_entry(CODEX_ACCENT_CYAN)
 	var content: VBoxContainer = entry.get_node("MarginContainer/VBoxContainer")
 
-	var texture_rect := _create_codex_texture(enemy_data.enemy_texture_path)
-	content.add_child(texture_rect)
+	var texture_panel := _create_codex_image_panel(enemy_data.enemy_texture_path)
+	content.add_child(texture_panel)
 	content.add_child(_create_codex_label(enemy_data.enemy_name, 16))
 	content.add_child(_create_codex_label("HP %s/%s" % [enemy_data.enemy_health, enemy_data.enemy_health_max], 13))
 
@@ -85,11 +91,11 @@ func _create_enemy_codex_entry(enemy_data: EnemyData) -> Control:
 	return entry
 
 func _create_artifact_codex_entry(artifact_data: ArtifactData) -> Control:
-	var entry := _create_base_codex_entry()
+	var entry := _create_base_codex_entry(CODEX_ACCENT_GOLD)
 	var content: VBoxContainer = entry.get_node("MarginContainer/VBoxContainer")
 
-	var texture_rect := _create_codex_texture(artifact_data.artifact_texture_path)
-	content.add_child(texture_rect)
+	var texture_panel := _create_codex_image_panel(artifact_data.artifact_texture_path)
+	content.add_child(texture_panel)
 	content.add_child(_create_codex_label(artifact_data.artifact_name, 16))
 
 	var rarity_label := _get_enum_label(ArtifactData.ARTIFACT_RARITIES.keys(), artifact_data.artifact_rarity)
@@ -101,18 +107,20 @@ func _create_artifact_codex_entry(artifact_data: ArtifactData) -> Control:
 		entry.tooltip_text += "\n%s\n%s" % [rarity_label, artifact_data.artifact_description]
 	return entry
 
-func _create_base_codex_entry() -> PanelContainer:
-	var panel := PanelContainer.new()
+func _create_base_codex_entry(accent_color: Color = CODEX_ACCENT_CYAN) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.set_script(STYLED_TOOLTIP_PANEL_SCRIPT)
 	panel.custom_minimum_size = CODEX_ENTRY_SIZE
 	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	panel.add_theme_stylebox_override("panel", _create_codex_entry_style(accent_color))
 
 	var margin := MarginContainer.new()
 	margin.name = "MarginContainer"
-	margin.add_theme_constant_override("margin_left", 8)
-	margin.add_theme_constant_override("margin_top", 8)
-	margin.add_theme_constant_override("margin_right", 8)
-	margin.add_theme_constant_override("margin_bottom", 8)
+	margin.add_theme_constant_override("margin_left", 9)
+	margin.add_theme_constant_override("margin_top", 9)
+	margin.add_theme_constant_override("margin_right", 9)
+	margin.add_theme_constant_override("margin_bottom", 9)
 	panel.add_child(margin)
 
 	var content := VBoxContainer.new()
@@ -123,13 +131,51 @@ func _create_base_codex_entry() -> PanelContainer:
 
 	return panel
 
-func _create_codex_texture(texture_path: String) -> TextureRect:
+func _create_codex_entry_style(accent_color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = CODEX_PANEL_BG
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 4
+	style.border_color = accent_color
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
+	style.shadow_color = Color(0.0745098, 0.384314, 0.439216, 0.18)
+	style.shadow_size = 6
+	style.shadow_offset = Vector2(0, 3)
+	return style
+
+func _create_codex_image_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = CODEX_IMAGE_BG
+	style.border_width_left = 1
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.border_color = Color(1, 1, 1, 0.82)
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_right = 6
+	style.corner_radius_bottom_left = 6
+	return style
+
+func _create_codex_image_panel(texture_path: String) -> PanelContainer:
+	var image_panel := PanelContainer.new()
+	image_panel.name = "ImagePanel"
+	image_panel.custom_minimum_size = CODEX_IMAGE_SIZE
+	image_panel.add_theme_stylebox_override("panel", _create_codex_image_style())
+
 	var texture_rect := TextureRect.new()
+	texture_rect.name = "TextureRect"
 	texture_rect.custom_minimum_size = CODEX_IMAGE_SIZE
 	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	texture_rect.texture = FileLoader.load_texture(texture_path)
-	return texture_rect
+	image_panel.add_child(texture_rect)
+	return image_panel
 
 func _create_codex_label(text: String, font_size: int, alignment: HorizontalAlignment = HORIZONTAL_ALIGNMENT_CENTER) -> Label:
 	var label := Label.new()
@@ -137,6 +183,8 @@ func _create_codex_label(text: String, font_size: int, alignment: HorizontalAlig
 	label.horizontal_alignment = alignment
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", font_size)
+	if font_size <= 13:
+		label.add_theme_color_override("font_color", CODEX_TEXT_MUTED)
 	return label
 
 func _get_enum_label(enum_keys: Array, enum_value: int) -> String:

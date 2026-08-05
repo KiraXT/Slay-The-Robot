@@ -23,6 +23,7 @@ func _run() -> void:
 	_assert_tooltip_theme(load(TITLE_THEME_PATH), "title screen theme", false)
 	_assert_tooltip_theme(load(RUN_THEME_PATH), "run screen theme", false)
 	_assert_tooltip_factory()
+	await _assert_codex_entry_shells()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -87,3 +88,57 @@ func _assert_tooltip_factory() -> void:
 		if not rich_text_label.get_parsed_text().contains("每进行3次攻击获得5点格挡"):
 			failures.append("factory tooltip must preserve the body text")
 	tooltip.queue_free()
+
+
+func _assert_codex_entry_shells() -> void:
+	var packed: PackedScene = load("res://scenes/ui/menus/TitleScreen.tscn")
+	var title_screen: Control = packed.instantiate()
+	root.add_child(title_screen)
+	await process_frame
+	var codex_menu: Control = title_screen.get_node("CodexMenu")
+	if not codex_menu.has_method("populate_codex_enemy_container") or not codex_menu.has_method("populate_codex_artifact_container"):
+		failures.append("CodexMenu script must load with populate methods")
+		title_screen.queue_free()
+		return
+
+	codex_menu.populate_codex_enemy_container()
+	await process_frame
+	_assert_first_codex_entry(codex_menu, "enemy codex entry")
+
+	codex_menu.populate_codex_artifact_container()
+	await process_frame
+	_assert_first_codex_entry(codex_menu, "artifact codex entry")
+
+	title_screen.queue_free()
+
+
+func _assert_first_codex_entry(codex_menu: Control, label: String) -> void:
+	var grid: GridContainer = codex_menu.get_node("ScrollContainer/MarginContainer/CodexCardContainer")
+	if grid.get_child_count() == 0:
+		failures.append("%s must create at least one entry" % label)
+		return
+	var child := grid.get_child(0)
+	if child is not PanelContainer:
+		failures.append("%s must use PanelContainer, got %s" % [label, child.get_class()])
+		return
+	var entry := child as PanelContainer
+	var script := entry.get_script() as Script
+	var has_styled_tooltip := script != null and script.resource_path.ends_with("StyledTooltipPanel.gd")
+	if not has_styled_tooltip:
+		failures.append("%s must use StyledTooltipPanel.gd" % label)
+	if not entry.has_theme_stylebox_override("panel"):
+		failures.append("%s must override its panel style" % label)
+	else:
+		var style := entry.get_theme_stylebox("panel") as StyleBoxFlat
+		if style == null:
+			failures.append("%s panel style must be StyleBoxFlat" % label)
+		elif style.bg_color.a < 0.90 or style.bg_color.r < 0.85:
+			failures.append("%s panel must use a light card shell, got %s" % [label, style.bg_color])
+	if not entry.has_node("MarginContainer/VBoxContainer/ImagePanel"):
+		failures.append("%s must provide ImagePanel for icon staging" % label)
+	if has_styled_tooltip:
+		var tooltip: Control = entry.call("_make_custom_tooltip", entry.tooltip_text)
+		if tooltip == null:
+			failures.append("%s custom tooltip must return a Control" % label)
+		else:
+			tooltip.queue_free()
