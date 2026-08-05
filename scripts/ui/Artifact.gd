@@ -2,6 +2,8 @@
 ## Supports being right clicked to activate effects
 extends TextureButton
 
+const TOOLTIP_FACTORY_SCRIPT := preload("res://scripts/ui/general/TooltipFactory.gd")
+
 var artifact_data: ArtifactData
 var artifact_script: BaseArtifact
 
@@ -45,3 +47,7 @@ func update_artifact_counter() -> void:
 
 func _on_right_button_up() -> void:
 	artifact_script.right_click_artifact()
+
+
+func _make_custom_tooltip(for_text: String) -> Object:
+	return TOOLTIP_FACTORY_SCRIPT.create_text_tooltip(for_text)

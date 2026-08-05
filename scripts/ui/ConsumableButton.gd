@@ -3,6 +3,8 @@
 extends TextureButton
 class_name ConsumableButton
 
+const TOOLTIP_FACTORY_SCRIPT := preload("res://scripts/ui/general/TooltipFactory.gd")
+
 @onready var icon_texture: TextureRect = $IconTexture
 @onready var badge_visual: Control = $BadgeVisual
 
@@ -38,3 +40,7 @@ func init(_consumable_slot_index: int):
 
 func _on_button_up():
 	consumable_slot_button_up.emit(consumable_slot_index)
+
+
+func _make_custom_tooltip(for_text: String) -> Object:
+	return TOOLTIP_FACTORY_SCRIPT.create_text_tooltip(for_text)

@@ -2,6 +2,8 @@
 extends TextureRect
 class_name StatusEffect
 
+const TOOLTIP_FACTORY_SCRIPT := preload("res://scripts/ui/general/TooltipFactory.gd")
+
 var status_effect_script: BaseStatusEffect
 
 @onready var status_charge_label: Label = $StatusChargeLabel
@@ -22,3 +24,7 @@ func update_status_charge_display() -> void:
 	
 	
 	tooltip_text = status_effect_script.status_effect_data.status_effect_name
+
+
+func _make_custom_tooltip(for_text: String) -> Object:
+	return TOOLTIP_FACTORY_SCRIPT.create_text_tooltip(for_text)

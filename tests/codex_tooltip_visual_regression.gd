@@ -23,6 +23,7 @@ func _run() -> void:
 	_assert_tooltip_theme(load(TITLE_THEME_PATH), "title screen theme", false)
 	_assert_tooltip_theme(load(RUN_THEME_PATH), "run screen theme", false)
 	_assert_tooltip_factory()
+	_assert_scripted_tooltip_providers()
 	await _assert_codex_entry_shells()
 
 	if failures.is_empty():
@@ -47,7 +48,7 @@ func _assert_tooltip_scene(tooltip: Control, label: String) -> void:
 			failures.append("%s RichTextLabel must autowrap" % label)
 		if rich_text_label.scroll_active:
 			failures.append("%s RichTextLabel scrolling must stay disabled" % label)
-	tooltip.queue_free()
+	tooltip.free()
 
 
 func _assert_tooltip_theme(theme: Theme, label: String, panel_container: bool) -> void:
@@ -87,7 +88,35 @@ func _assert_tooltip_factory() -> void:
 			failures.append("factory tooltip must preserve the title text")
 		if not rich_text_label.get_parsed_text().contains("每进行3次攻击获得5点格挡"):
 			failures.append("factory tooltip must preserve the body text")
-	tooltip.queue_free()
+	tooltip.free()
+
+
+func _assert_scripted_tooltip_providers() -> void:
+	var script_paths := [
+		"res://scripts/ui/Artifact.gd",
+		"res://scripts/ui/ConsumableButton.gd",
+		"res://scripts/combatants/StatusEffect.gd",
+		"res://scripts/ui/CustomRunModifierCheckbox.gd",
+	]
+	for path: String in script_paths:
+		var script: Script = load(path)
+		if script == null:
+			failures.append("%s must load" % path)
+			continue
+		if not script.source_code.contains("func _make_custom_tooltip"):
+			failures.append("%s must explicitly implement _make_custom_tooltip" % path)
+			continue
+		var instance: Object = script.new()
+		if not instance.has_method("_make_custom_tooltip"):
+			failures.append("%s must implement _make_custom_tooltip" % path)
+		else:
+			var tooltip: Control = instance.call("_make_custom_tooltip", "标题\n说明")
+			if tooltip == null:
+				failures.append("%s _make_custom_tooltip must return a Control" % path)
+			else:
+				tooltip.free()
+		if instance is Node:
+			(instance as Node).free()
 
 
 func _assert_codex_entry_shells() -> void:
@@ -99,6 +128,7 @@ func _assert_codex_entry_shells() -> void:
 	if not codex_menu.has_method("populate_codex_enemy_container") or not codex_menu.has_method("populate_codex_artifact_container"):
 		failures.append("CodexMenu script must load with populate methods")
 		title_screen.queue_free()
+		await process_frame
 		return
 
 	codex_menu.populate_codex_enemy_container()
@@ -110,6 +140,7 @@ func _assert_codex_entry_shells() -> void:
 	_assert_first_codex_entry(codex_menu, "artifact codex entry")
 
 	title_screen.queue_free()
+	await process_frame
 
 
 func _assert_first_codex_entry(codex_menu: Control, label: String) -> void:
@@ -141,4 +172,4 @@ func _assert_first_codex_entry(codex_menu: Control, label: String) -> void:
 		if tooltip == null:
 			failures.append("%s custom tooltip must return a Control" % label)
 		else:
-			tooltip.queue_free()
+			tooltip.free()
