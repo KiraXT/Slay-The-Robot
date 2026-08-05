@@ -6,8 +6,11 @@ const KEYWORD_THEME_PATH := "res://themes/keyword_tooltip_theme.tres"
 const TITLE_THEME_PATH := "res://themes/title_screen_theme.tres"
 const RUN_THEME_PATH := "res://themes/run_screen_theme.tres"
 const TOOLTIP_FACTORY_PATH := "res://scripts/ui/general/TooltipFactory.gd"
-const EXPECTED_TOOLTIP_WIDTH_MIN := 248.0
-const EXPECTED_TOOLTIP_WIDTH_MAX := 272.0
+const EXPECTED_TOOLTIP_BASE_WIDTH_MAX := 8.0
+const EXPECTED_TOOLTIP_SHORT_WIDTH_MAX := 224.0
+const EXPECTED_TOOLTIP_SHORT_HEIGHT_MAX := 120.0
+const EXPECTED_TOOLTIP_LONG_WIDTH_MIN := 236.0
+const EXPECTED_TOOLTIP_LONG_WIDTH_MAX := 272.0
 
 var failures: Array[String] = []
 
@@ -22,7 +25,7 @@ func _run() -> void:
 	_assert_tooltip_theme(load(KEYWORD_THEME_PATH), "keyword tooltip theme", true)
 	_assert_tooltip_theme(load(TITLE_THEME_PATH), "title screen theme", false)
 	_assert_tooltip_theme(load(RUN_THEME_PATH), "run screen theme", false)
-	_assert_tooltip_factory()
+	await _assert_tooltip_factory()
 	_assert_scripted_tooltip_providers()
 	await _assert_codex_entry_shells()
 
@@ -38,8 +41,8 @@ func _run() -> void:
 
 
 func _assert_tooltip_scene(tooltip: Control, label: String) -> void:
-	if tooltip.custom_minimum_size.x < EXPECTED_TOOLTIP_WIDTH_MIN or tooltip.custom_minimum_size.x > EXPECTED_TOOLTIP_WIDTH_MAX:
-		failures.append("%s width must stay near 260px, got %.1f" % [label, tooltip.custom_minimum_size.x])
+	if tooltip.custom_minimum_size.x > EXPECTED_TOOLTIP_BASE_WIDTH_MAX:
+		failures.append("%s base width must not force a large fixed tooltip, got %.1f" % [label, tooltip.custom_minimum_size.x])
 	var rich_text_label: RichTextLabel = tooltip.get_node_or_null("RichTextLabel")
 	if rich_text_label == null:
 		failures.append("%s must contain RichTextLabel" % label)
@@ -76,7 +79,7 @@ func _assert_tooltip_factory() -> void:
 	if factory == null:
 		failures.append("TooltipFactory.gd must load")
 		return
-	var tooltip: Control = factory.create_text_tooltip("攻击格挡\n每进行3次攻击获得5点格挡")
+	var tooltip: Control = factory.create_text_tooltip("手牌保留\nBoss\n回合结束时手牌保留")
 	if tooltip == null:
 		failures.append("TooltipFactory.create_text_tooltip must return a Control")
 		return
@@ -84,11 +87,32 @@ func _assert_tooltip_factory() -> void:
 	if rich_text_label == null:
 		failures.append("factory tooltip must contain RichTextLabel")
 	else:
-		if not rich_text_label.get_parsed_text().contains("攻击格挡"):
+		if not rich_text_label.get_parsed_text().contains("手牌保留"):
 			failures.append("factory tooltip must preserve the title text")
-		if not rich_text_label.get_parsed_text().contains("每进行3次攻击获得5点格挡"):
+		if not rich_text_label.get_parsed_text().contains("回合结束时手牌保留"):
 			failures.append("factory tooltip must preserve the body text")
-	tooltip.free()
+	root.add_child(tooltip)
+	await process_frame
+	_assert_tooltip_size(tooltip, "short factory tooltip", EXPECTED_TOOLTIP_SHORT_WIDTH_MAX, EXPECTED_TOOLTIP_SHORT_HEIGHT_MAX)
+	tooltip.queue_free()
+	await process_frame
+
+	var long_tooltip: Control = factory.create_text_tooltip("很长的说明\n选择一张攻击牌，使其显示在牌库顶端，并在下一次抽牌时优先出现。")
+	root.add_child(long_tooltip)
+	await process_frame
+	var long_size := long_tooltip.get_combined_minimum_size()
+	if long_size.x < EXPECTED_TOOLTIP_LONG_WIDTH_MIN or long_size.x > EXPECTED_TOOLTIP_LONG_WIDTH_MAX:
+		failures.append("long factory tooltip width must stay near the readable max, got %.1f" % long_size.x)
+	long_tooltip.queue_free()
+	await process_frame
+
+
+func _assert_tooltip_size(tooltip: Control, label: String, max_width: float, max_height: float) -> void:
+	var size := tooltip.get_combined_minimum_size()
+	if size.x > max_width:
+		failures.append("%s width must fit short text, got %.1f" % [label, size.x])
+	if size.y > max_height:
+		failures.append("%s height must fit short text without blank space, got %.1f" % [label, size.y])
 
 
 func _assert_scripted_tooltip_providers() -> void:
