@@ -5,7 +5,7 @@
 
 [node name="Tooltip" type="PanelContainer"]
 self_modulate = Color(1, 1, 1, 1)
-custom_minimum_size = Vector2(240, 0)
+custom_minimum_size = Vector2(260, 0)
 offset_left = 384.0
 offset_top = 320.0
 offset_right = 624.0
@@ -17,5 +17,6 @@ script = ExtResource("2_rty5c")
 layout_mode = 2
 theme = ExtResource("1_803pf")
 bbcode_enabled = true
+autowrap_mode = 2
 fit_content = true
 scroll_active = false
