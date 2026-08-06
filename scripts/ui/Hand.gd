@@ -16,8 +16,9 @@ const HAND_NOT_EXCEEDED_COLOR: Color = Color.LIGHT_GREEN
 
 ### Card Picking
 @onready var card_picking: Control = $%CardPicking
-@onready var card_picking_label: Label = $%CardPicking/CardPickLabel
-@onready var confirm_pick_button: Button = $%CardPicking/ConfirmPickButton
+@onready var card_pick_prompt_panel: PanelContainer = $%CardPickPromptPanel
+@onready var card_picking_label: Label = $%CardPickLabel
+@onready var confirm_pick_button: Button = $%ConfirmPickButton
 
 var current_card_pick_action: ActionBasePickCards = null	# an action currently requesting cards from the player to select. If null clicking cards plays them
 
@@ -114,6 +115,12 @@ const CARD_PICK_POSITIONS: Array = [
 	[-3.25, -2.75, -2.25, -1.5, -0.75, 0.75 ,1.5, 2.25, 2.75, 3.25],
 ]
 const CARD_PICK_Y_OFFSET = -300 # Where picked cards in hand appear relative to the Hand container
+const CARD_PICK_PROMPT_TOP: float = 198.0
+const CARD_PICK_PROMPT_MIN_WIDTH: float = 360.0
+const CARD_PICK_PROMPT_MAX_WIDTH: float = 620.0
+const CARD_PICK_PROMPT_MIN_HEIGHT: float = 96.0
+const CARD_PICK_PROMPT_MAX_HEIGHT: float = 136.0
+const CARD_PICK_PROMPT_HORIZONTAL_PADDING: float = 72.0
 
 
 func _ready():
@@ -853,8 +860,32 @@ func update_card_pick_ui():
 	if current_card_pick_action != null:
 		confirm_pick_button.disabled = not current_card_pick_action.are_enough_cards_picked()
 	
-		card_picking_label.text = current_card_pick_action.get_card_pick_text() 
-	
+		card_picking_label.text = current_card_pick_action.get_card_pick_text()
+	_fit_card_pick_prompt_panel()
+
+
+func _fit_card_pick_prompt_panel() -> void:
+	card_picking_label.custom_minimum_size.x = 0.0
+	var label_font_size: int = card_picking_label.get_theme_font_size("font_size")
+	var label_width: float = float(card_picking_label.text.length()) * float(label_font_size) * 0.78
+	var button_width: float = confirm_pick_button.get_combined_minimum_size().x
+	var target_width: float = clampf(
+		maxf(label_width, button_width) + CARD_PICK_PROMPT_HORIZONTAL_PADDING,
+		CARD_PICK_PROMPT_MIN_WIDTH,
+		CARD_PICK_PROMPT_MAX_WIDTH
+	)
+	var content_width: float = maxf(1.0, target_width - CARD_PICK_PROMPT_HORIZONTAL_PADDING)
+	card_picking_label.custom_minimum_size.x = content_width
+	card_pick_prompt_panel.custom_minimum_size = Vector2(target_width, CARD_PICK_PROMPT_MIN_HEIGHT)
+	card_pick_prompt_panel.reset_size()
+	var target_height: float = clampf(
+		card_pick_prompt_panel.get_combined_minimum_size().y,
+		CARD_PICK_PROMPT_MIN_HEIGHT,
+		CARD_PICK_PROMPT_MAX_HEIGHT
+	)
+	card_pick_prompt_panel.position = Vector2((card_picking.size.x - target_width) * 0.5, CARD_PICK_PROMPT_TOP)
+	card_pick_prompt_panel.size = Vector2(target_width, target_height)
+
 
 func attempt_pick_card(card: Card):
 	# user selected a card while a pick request is made

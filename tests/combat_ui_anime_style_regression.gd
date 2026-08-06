@@ -26,6 +26,7 @@ func _run() -> void:
 	await _check_enemy_intent_badge()
 	await _check_combat_hud_badges()
 	await _check_consumable_button_badge()
+	await _check_combat_card_pick_prompt_panel()
 
 	if failures.is_empty():
 		print("ALL_TESTS_PASSED")
@@ -167,3 +168,90 @@ func _check_consumable_button_badge() -> void:
 
 	consumable_scene.queue_free()
 	await process_frame
+
+
+func _check_combat_card_pick_prompt_panel() -> void:
+	var root_scene: Node = load(ROOT_SCENE_PATH).instantiate()
+	root.add_child(root_scene)
+	await process_frame
+	await process_frame
+
+	var combat := root_scene.get_node("RunScreen/Combat") as Control
+	var hand := combat.get_node("Hand") as Control
+	var card_picking := combat.get_node("CardPicking") as Control
+	if card_picking.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		failures.append("CardPicking must ignore mouse input outside the confirm button")
+
+	var prompt_panel := card_picking.get_node_or_null("CardPickPromptPanel") as PanelContainer
+	if prompt_panel == null:
+		failures.append("CardPicking must include a compact CardPickPromptPanel background")
+		root_scene.queue_free()
+		await process_frame
+		return
+
+	if prompt_panel.mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		failures.append("CardPickPromptPanel must not block hand card clicks")
+	var panel_style := prompt_panel.get_theme_stylebox("panel") as StyleBoxFlat
+	if panel_style == null:
+		failures.append("CardPickPromptPanel must use a StyleBoxFlat panel")
+	else:
+		if panel_style.bg_color.a < 0.56 or panel_style.bg_color.a > 0.86:
+			failures.append("CardPickPromptPanel must use a readable translucent background")
+		if panel_style.border_width_bottom < 2:
+			failures.append("CardPickPromptPanel must keep a visible accent border")
+		if panel_style.corner_radius_top_left > 10:
+			failures.append("CardPickPromptPanel corners must stay compact")
+
+	var label := prompt_panel.get_node_or_null("MarginContainer/VBoxContainer/CardPickLabel") as Label
+	if label == null:
+		failures.append("CardPickPromptPanel must contain the card pick label")
+	var confirm_button := prompt_panel.get_node_or_null("MarginContainer/VBoxContainer/ConfirmPickButton") as Button
+	if confirm_button == null:
+		failures.append("CardPickPromptPanel must contain the confirm pick button")
+	elif confirm_button.custom_minimum_size.x < 220.0 or confirm_button.custom_minimum_size.x > 360.0:
+		failures.append("ConfirmPickButton must remain a compact command inside the prompt panel")
+
+	if label != null and confirm_button != null:
+		var short_action := _make_card_pick_action({
+			"card_pick_text": "选择 {0} 张手牌。已选择 {1} 张牌",
+			"min_card_amount": 1,
+			"max_card_amount": 1,
+		})
+		hand.set("current_card_pick_action", short_action)
+		hand.call("update_card_pick_ui")
+		await process_frame
+		var short_size := prompt_panel.size
+		if short_size.x > 460.0 or short_size.y > 136.0:
+			failures.append("short card pick prompt must fit content, got %.1fx%.1f" % [short_size.x, short_size.y])
+
+		var long_action := _make_card_pick_action({
+			"card_pick_text": "选择 {0} 张手牌随机化费用。已选择 {1} 张牌",
+			"min_card_amount": 1,
+			"max_card_amount": 3,
+		})
+		hand.set("current_card_pick_action", long_action)
+		hand.call("update_card_pick_ui")
+		await process_frame
+		var long_size := prompt_panel.size
+		if long_size.x <= short_size.x:
+			failures.append("longer card pick prompt must grow from the short prompt")
+		if long_size.x > 620.0 or long_size.y > 136.0:
+			failures.append("long card pick prompt must stay compact, got %.1fx%.1f" % [long_size.x, long_size.y])
+
+		var hand_top: float = (combat.get_node("Hand") as Control).global_position.y
+		var panel_bottom: float = prompt_panel.global_position.y + prompt_panel.size.y
+		if panel_bottom > hand_top - 20.0:
+			failures.append("CardPickPromptPanel must stay above the hand cards")
+
+	root_scene.queue_free()
+	await process_frame
+
+
+func _make_card_pick_action(values: Dictionary) -> Object:
+	var action_script := load("res://scripts/actions/pick_card_actions/ActionBasePickCards.gd")
+	var action: Object = action_script.new()
+	var typed_values: Dictionary[String, Variant] = {}
+	for key: Variant in values.keys():
+		typed_values[str(key)] = values[key]
+	action.set("values", typed_values)
+	return action
