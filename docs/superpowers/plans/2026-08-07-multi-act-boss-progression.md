@@ -1,22 +1,21 @@
-# Multi-Act Boss Progression Implementation Plan
+# 多幕 Boss 推进实现计划
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a complete three-act combat progression with act-specific normal combat, miniboss, and Boss pools while keeping final Boss art as documented placeholders.
+**Goal:** 构建完整三幕战斗推进，让第二幕和第三幕拥有独立普通战斗、小 Boss、Boss 事件池，并保留已记录的 Boss 临时美术占位策略。
 
-**Architecture:** Keep `ActionGenerateAct.gd` unchanged and make the progression data-driven through `ActData`, `EventPoolData`, `EventData`, and `EnemyData` JSON files. Tests first verify the data contract and runtime map generation, then data files fill the failing contract.
+**Architecture:** 保持 `ActionGenerateAct.gd` 不变，通过 `ActData`、`EventPoolData`、`EventData`、`EnemyData` JSON 文件完成数据驱动推进。先用测试锁定数据合同和运行时地图生成行为，再补齐数据文件让合同通过。
 
-**Tech Stack:** Godot 4 GDScript, JSON data under `external/data/`, Python regression tests for static data contracts, headless Godot regression tests for runtime map generation.
+**Tech Stack:** Godot 4 GDScript，`external/data/` 下的 JSON 数据，Python 静态数据回归测试，Godot headless 运行时地图回归测试。
 
-## Global Constraints
+## 全局约束
 
-- First act behavior and existing enemy IDs remain unchanged.
-- `act_2` and `act_3` must use act-specific easy, hard, miniboss, and Boss event pools.
-- Boss behavior must use existing actions only: attack generation, block, summon, and status application.
-- Boss placeholder art must use `external/sprites/enemies/enemy_act_1_boss_1.png`.
-- New normal enemy and miniboss art may reuse existing same-style enemy PNGs.
-- Do not change rewards, shop, rest, cards, or map generation algorithm.
-- Superpower project documents are written in Chinese unless the user requests another language; this implementation plan uses the required skill template header in English and project-specific notes in English for worker clarity.
+- 第一幕行为和现有敌人 ID 保持不变。
+- `act_2` 和 `act_3` 必须使用各自专属的 easy、hard、miniboss、Boss 事件池。
+- Boss 行为只使用现有动作：攻击生成、格挡、召唤、施加状态。
+- Boss 临时美术必须使用 `external/sprites/enemies/enemy_act_1_boss_1.png`。
+- 新普通敌人和小 Boss 美术可以复用现有同风格敌人 PNG。
+- 不改变奖励、商店、休息点、卡牌或地图生成算法。
 
 ---
 

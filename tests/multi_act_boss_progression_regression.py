@@ -113,6 +113,18 @@ def assert_attack_graph_is_closed(enemy_id: str, enemy: dict) -> None:
         for next_state_id in weights:
             assert next_state_id in states, f"{enemy_id}:{state_id} points to missing state {next_state_id}"
 
+    reachable = set()
+    stack = ["initial"]
+    while stack:
+        state_id = stack.pop()
+        if state_id in reachable:
+            continue
+        reachable.add(state_id)
+        stack.extend(states[state_id].get("next_attack_weights", {}).keys())
+
+    unreachable = set(states) - reachable
+    assert not unreachable, f"{enemy_id} has unreachable attack states: {sorted(unreachable)}"
+
 
 def assert_enemy_actions_are_valid(enemy_id: str, enemy: dict) -> None:
     for script_path, values in walk_action_values(enemy):
