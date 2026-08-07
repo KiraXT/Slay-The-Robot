@@ -1,0 +1,12 @@
+{
+    "patch_data": {},
+    "properties": {
+        "event_pool_event_object_ids": [
+            "event_act_3_hard_combat_null_wall",
+            "event_act_3_hard_combat_core_phalanx",
+            "event_act_3_hard_combat_orbital_crossfire"
+        ],
+        "event_pool_fallback_event_object_id": "event_act_3_hard_combat_null_wall",
+        "object_id": "event_pool_act_3_hard"
+    }
+}

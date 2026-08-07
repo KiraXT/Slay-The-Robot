@@ -1,0 +1,12 @@
+{
+    "patch_data": {},
+    "properties": {
+        "event_pool_event_object_ids": [
+            "event_act_3_easy_combat_core_blade_pair",
+            "event_act_3_easy_combat_null_priest_guard",
+            "event_act_3_easy_combat_drone_screen"
+        ],
+        "event_pool_fallback_event_object_id": "event_act_3_easy_combat_core_blade_pair",
+        "object_id": "event_pool_act_3_easy"
+    }
+}

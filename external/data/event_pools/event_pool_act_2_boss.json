@@ -1,0 +1,10 @@
+{
+    "patch_data": {},
+    "properties": {
+        "event_pool_event_object_ids": [
+            "event_act_2_boss_foundry_heart"
+        ],
+        "event_pool_fallback_event_object_id": "event_act_2_boss_foundry_heart",
+        "object_id": "event_pool_act_2_boss"
+    }
+}

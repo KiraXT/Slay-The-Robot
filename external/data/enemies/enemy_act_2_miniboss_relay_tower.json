@@ -1,0 +1,80 @@
+{
+    "patch_data": {},
+    "properties": {
+        "enemy_actions_on_death": [],
+        "enemy_attack_states": {
+            "1": {
+                "attack_damage": 0,
+                "block": 10,
+                "custom_actions": [
+                    {
+                        "res://scripts/actions/ActionSummonEnemies.gd": {
+                            "number_of_spawns": 2,
+                            "random_enemy_object_ids": [
+                                "enemy_act_2_repair_drone"
+                            ],
+                            "spawn_slots": [
+                                1,
+                                2
+                            ],
+                            "target_override": 1,
+                            "time_delay": 0.5
+                        }
+                    }
+                ],
+                "next_attack_weights": {
+                    "2": 1
+                },
+                "number_of_attacks": 0
+            },
+            "2": {
+                "attack_damage": 6,
+                "block": 8,
+                "custom_actions": [
+                    {
+                        "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                            "status_charge_amount": 1,
+                            "status_effect_object_id": "status_effect_damage_increase",
+                            "target_override": 1,
+                            "time_delay": 0.3
+                        }
+                    }
+                ],
+                "next_attack_weights": {
+                    "3": 1
+                },
+                "number_of_attacks": 2
+            },
+            "3": {
+                "attack_damage": 14,
+                "block": 14,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "2": 1
+                },
+                "number_of_attacks": 1
+            },
+            "initial": {
+                "attack_damage": 0,
+                "block": 0,
+                "custom_actions": [],
+                "next_attack_weights": {
+                    "1": 1
+                },
+                "number_of_attacks": 0
+            }
+        },
+        "enemy_block": 0,
+        "enemy_difficulty_to_enemy_modfiers": {},
+        "enemy_health": 135,
+        "enemy_health_max": 135,
+        "enemy_initial_status_effects": {},
+        "enemy_is_minion": false,
+        "enemy_name": "中继高塔",
+        "enemy_object_id": "",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_1_miniboss_command_core.png",
+        "enemy_type": 1,
+        "object_id": "enemy_act_2_miniboss_relay_tower",
+        "object_uid": ""
+    }
+}
