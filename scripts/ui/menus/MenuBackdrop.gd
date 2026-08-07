@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 func load_title_layers() -> void:
 	for node_name: String in TITLE_LAYER_PATHS:
 		var layer: TextureRect = get_node(node_name)
-		layer.texture = _load_optional_texture(TITLE_LAYER_PATHS[node_name])
+		layer.texture = _load_optional_title_layer(TITLE_LAYER_PATHS[node_name])
 		layer.visible = layer.texture.get_size() != Vector2.ZERO
 	$FallbackSky.visible = not $Sky.visible
 
@@ -57,9 +57,7 @@ func set_character_background(path: String, immediate: bool = false) -> void:
 	var current: TextureRect = background_layers[active_background_index]
 	var target_index := 1 - active_background_index
 	var target: TextureRect = background_layers[target_index]
-	var texture: Texture2D = _load_optional_texture(path) if not path.is_empty() else $Platform.texture
-	if texture == null or texture.get_size() == Vector2.ZERO:
-		texture = $Platform.texture
+	var texture := _load_character_background(path)
 	target.texture = texture
 	if immediate:
 		current.modulate.a = 0.0
@@ -113,6 +111,23 @@ func _load_optional_texture(path: String) -> Texture2D:
 	if not _texture_file_exists(path):
 		return ImageTexture.new()
 	return FileLoader.load_texture(path)
+
+
+func _load_optional_title_layer(path: String) -> Texture2D:
+	return _load_optional_texture(path)
+
+
+func _load_first_available_texture(candidate_paths: Array[String], fallback_type: String) -> Texture2D:
+	for path: String in candidate_paths:
+		var texture := _load_optional_texture(path)
+		if texture.get_size() != Vector2.ZERO:
+			return texture
+	return FileLoader.load_texture_or_fallback("", fallback_type)
+
+
+func _load_character_background(path: String) -> Texture2D:
+	var candidate_paths: Array[String] = [path]
+	return _load_first_available_texture(candidate_paths, "background")
 
 
 func _texture_file_exists(path: String) -> bool:

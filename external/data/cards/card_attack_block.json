@@ -1,0 +1,59 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "card_attack_block",
+        "object_uid": "",
+        "card_name": "攻击并格挡",
+        "card_description": "保留。造成 [damage] 点伤害。若回合结束时仍在手牌中，则获得 [block] 点格挡。",
+        "card_type": 0,
+        "card_rarity": 2,
+        "card_color_id": "color_purple",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": true,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": true,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/purple/card_attack_block.png",
+        "card_visual_profile": "attack",
+        "card_play_sfx": "card_attack",
+        "card_impact_vfx": "impact_slash",
+        "card_screen_shake": "small",
+        "card_hit_pause": 0.035,
+        "card_keyword_object_ids": [
+            "keyword_block"
+        ],
+        "card_values": {
+            "damage": 7,
+            "number_of_attacks": 1,
+            "block": 7
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {
+                    "time_delay": 0,
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_end_of_turn_actions": [
+            {
+                "res://scripts/actions/ActionBlock.gd": {
+                    "time_delay": 0.5,
+                    "target_override": 1,
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {
+            "damage": 3,
+            "block": 3
+        },
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

@@ -20,6 +20,15 @@ func init(_status_effect_data, _parent_combatant: BaseCombatant):
 func _connect_signals() -> void:
 	pass
 
+func _disconnect_signals() -> void:
+	pass
+
+func on_status_removed() -> void:
+	_disconnect_signals()
+
+func on_status_reapplied(_charge_amount: int, _secondary_charge_amount: int, _custom_values: Dictionary) -> void:
+	pass
+
 ## Status action logic
 ## Override for custom logic or conditionals
 ## Called from BaseCombatant.perform_status_effect_actions()

@@ -9,7 +9,7 @@ func _connect_signals() -> void:
 	is_armed = not bool(status_custom_values.get("arm_on_next_player_turn", false))
 	Signals.player_turn_started.connect(_on_player_turn_started)
 
-	if bool(status_custom_values.get("expire_on_player_turn_ended", false)):
+	if _should_expire_on_player_turn_end():
 		Signals.player_turn_ended.connect(_on_player_turn_ended)
 
 	var trigger_signal: String = _get_trigger_signal()
@@ -30,6 +30,31 @@ func _connect_signals() -> void:
 			push_error("Unsupported tagged-card trigger_signal: %s" % trigger_signal)
 
 
+func _disconnect_signals() -> void:
+	if Signals.player_turn_started.is_connected(_on_player_turn_started):
+		Signals.player_turn_started.disconnect(_on_player_turn_started)
+	if Signals.player_turn_ended.is_connected(_on_player_turn_ended):
+		Signals.player_turn_ended.disconnect(_on_player_turn_ended)
+
+	var trigger_signal: String = _get_trigger_signal()
+	match trigger_signal:
+		"card_play_started":
+			if Signals.card_play_started.is_connected(_on_card_play_started):
+				Signals.card_play_started.disconnect(_on_card_play_started)
+		"card_played":
+			if Signals.card_played.is_connected(_on_card_played):
+				Signals.card_played.disconnect(_on_card_played)
+		"card_drawn":
+			if Signals.card_drawn.is_connected(_on_card_drawn):
+				Signals.card_drawn.disconnect(_on_card_drawn)
+		"card_discarded":
+			if Signals.card_discarded.is_connected(_on_card_discarded):
+				Signals.card_discarded.disconnect(_on_card_discarded)
+		"card_exhausted":
+			if Signals.card_exhausted.is_connected(_on_card_exhausted):
+				Signals.card_exhausted.disconnect(_on_card_exhausted)
+
+
 func _on_player_turn_started() -> void:
 	if bool(status_custom_values.get("arm_on_next_player_turn", false)) and not is_armed:
 		is_armed = true
@@ -40,7 +65,7 @@ func _on_player_turn_started() -> void:
 func _on_player_turn_ended() -> void:
 	if bool(status_custom_values.get("arm_on_next_player_turn", false)) and not is_armed:
 		return
-	if bool(status_custom_values.get("remove_card_tags_on_expire", false)):
+	if _should_remove_card_tags_on_expire():
 		for card_data: CardData in _get_matching_cards_from_piles():
 			_remove_configured_tags(card_data)
 	_consume_charges(status_charges)
@@ -105,7 +130,7 @@ func _attempt_trigger_for_cards(cards: Array, event_card_play_request: CardPlayR
 		triggers_total += 1
 		processed_count += 1
 
-		if bool(status_custom_values.get("remove_card_tags_on_trigger", true)):
+		if _should_remove_tag_on_trigger():
 			_remove_configured_tags(card_data)
 
 	if processed_count > 0 and bool(status_custom_values.get("consume_charge_on_trigger", false)):
@@ -215,6 +240,18 @@ func _remove_configured_tags(card_data: CardData) -> void:
 			changed = true
 	if changed:
 		Signals.card_properties_changed.emit(card_data)
+
+
+func _should_remove_tag_on_trigger() -> bool:
+	return bool(status_custom_values.get("remove_tag_on_trigger", status_custom_values.get("remove_card_tags_on_trigger", true)))
+
+
+func _should_expire_on_player_turn_end() -> bool:
+	return bool(status_custom_values.get("expire_on_player_turn_end", status_custom_values.get("expire_on_player_turn_ended", false)))
+
+
+func _should_remove_card_tags_on_expire() -> bool:
+	return bool(status_custom_values.get("remove_card_tags_on_expire", false))
 
 
 func _consume_charges(charge_amount: int) -> void:

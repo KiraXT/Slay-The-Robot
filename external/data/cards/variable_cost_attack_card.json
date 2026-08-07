@@ -1,0 +1,59 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "variable_cost_attack_card",
+        "object_uid": "",
+        "card_name": "X费攻击",
+        "card_description": "每消耗1点能量造成 [damage] 点伤害",
+        "card_type": 0,
+        "card_rarity": 3,
+        "card_color_id": "color_white",
+        "card_energy_cost": 0,
+        "card_energy_cost_is_variable": true,
+        "card_energy_cost_variable_upper_bound": 3,
+        "card_requires_target": true,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/white/variable_cost_attack_card.png",
+        "card_visual_profile": "attack",
+        "card_play_sfx": "card_attack_heavy",
+        "card_impact_vfx": "impact_heavy",
+        "card_screen_shake": "medium",
+        "card_hit_pause": 0.055,
+        "card_keyword_object_ids": [],
+        "card_values": {
+            "damage": 7,
+            "number_of_attacks": 1
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/meta_actions/ActionVariableCostModifier.gd": {
+                    "multiplied_values": [
+                        "damage"
+                    ],
+                    "action_data": [
+                        {
+                            "res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {
+                                "damage": 7,
+                                "number_of_attacks": 1,
+                                "time_delay": 0,
+                                "actions_on_lethal": []
+                            }
+                        }
+                    ],
+                    "time_delay": 0,
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {
+            "damage": 2
+        },
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

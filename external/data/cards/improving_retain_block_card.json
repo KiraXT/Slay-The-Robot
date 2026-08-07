@@ -1,0 +1,56 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "improving_retain_block_card",
+        "object_uid": "",
+        "card_name": "保留格挡",
+        "card_description": "保留。获得 [block] 点格挡。每次保留时格挡提升 3 点",
+        "card_type": 1,
+        "card_rarity": 1,
+        "card_color_id": "color_purple",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": false,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": true,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/purple/improving_retain_block_card.png",
+        "card_visual_profile": "skill",
+        "card_play_sfx": "card_skill_guard",
+        "card_impact_vfx": "guard_burst",
+        "card_screen_shake": "",
+        "card_hit_pause": 0,
+        "card_keyword_object_ids": [],
+        "card_values": {
+            "block": 5,
+            "improve_amount": 3
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/ActionBlock.gd": {
+                    "time_delay": 0.5,
+                    "target_override": 1,
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_retain_actions": [
+            {
+                "res://scripts/actions/cardset_actions/ActionImproveCardValues.gd": {
+                    "pick_played_card": true,
+                    "improve_parent_card": false,
+                    "card_value_improvements": {
+                        "block": 3
+                    }
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {},
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

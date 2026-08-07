@@ -6,7 +6,7 @@
         "card_name": "夹好书签",
         "card_description": "选择 1 张手牌保留。那张牌下回合费用变为 0。",
         "card_type": 1,
-        "card_rarity": 1,
+        "card_rarity": 2,
         "card_color_id": "color_orange",
         "card_energy_cost": 1,
         "card_energy_cost_is_variable": false,
@@ -39,9 +39,9 @@
                     "card_pick_text": "选择 1 张牌保留。那张牌下回合费用变为 0。",
                     "action_data": [
                         {
-                            "res://scripts/actions/cardset_actions/ActionTagCards.gd": {
-                                "card_tags_to_add": [
-                                    "tag_bookmark_clip"
+                            "res://scripts/actions/cardset_actions/ActionModifyCardTags.gd": {
+                                "add_tags": [
+                                    "temporary_bookmark_clip_discount"
                                 ]
                             }
                         },
@@ -59,14 +59,13 @@
                     "status_custom_values": {
                         "trigger_signal": "player_turn_started",
                         "card_tags": [
-                            "tag_bookmark_clip"
+                            "temporary_bookmark_clip_discount"
                         ],
                         "search_card_piles": [
                             "hand"
                         ],
                         "arm_on_next_player_turn": true,
                         "consume_charge_on_trigger": true,
-                        "remove_card_tags_on_trigger": true,
                         "action_data": [
                             {
                                 "res://scripts/actions/cardset_actions/ActionChangeCardEnergies.gd": {
@@ -74,7 +73,8 @@
                                     "card_energy_cost_until_turn": 0
                                 }
                             }
-                        ]
+                        ],
+                        "remove_tag_on_trigger": true
                     }
                 }
             }
