@@ -66,7 +66,7 @@
         "enemy_is_minion": false,
         "enemy_name": "信号干扰器",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_act_1_disruptor_unit.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_2_signal_jammer.png",
         "enemy_type": 0,
         "object_id": "enemy_act_2_signal_jammer",
         "object_uid": ""

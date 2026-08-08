@@ -57,7 +57,7 @@
         "enemy_is_minion": false,
         "enemy_name": "熔炉守卫",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_act_1_miniboss_bastion_guard.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_2_miniboss_forge_guardian.png",
         "enemy_type": 1,
         "object_id": "enemy_act_2_miniboss_forge_guardian",
         "object_uid": ""

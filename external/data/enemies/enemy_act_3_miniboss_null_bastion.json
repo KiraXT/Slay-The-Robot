@@ -66,7 +66,7 @@
         "enemy_is_minion": false,
         "enemy_name": "归零壁垒",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_act_1_miniboss_bastion_guard.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_3_miniboss_null_bastion.png",
         "enemy_type": 1,
         "object_id": "enemy_act_3_miniboss_null_bastion",
         "object_uid": ""

@@ -57,7 +57,7 @@
         "enemy_is_minion": false,
         "enemy_name": "核心刃卫",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_4.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_3_core_blade.png",
         "enemy_type": 0,
         "object_id": "enemy_act_3_core_blade",
         "object_uid": ""
