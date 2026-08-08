@@ -42,6 +42,16 @@ EXPECTED_ENEMIES = {
         "texture_path": "external/sprites/enemies/enemy_act_1_boss_1.png",
         "min_visible_height": 330,
     },
+    "enemy_act_2_boss_foundry_heart": {
+        "name": "熔炉心脏",
+        "texture_path": "external/sprites/enemies/enemy_act_2_boss_foundry_heart.png",
+        "min_visible_height": 330,
+    },
+    "enemy_act_3_boss_overmind_core": {
+        "name": "至高主脑核心",
+        "texture_path": "external/sprites/enemies/enemy_act_3_boss_overmind_core.png",
+        "min_visible_height": 330,
+    },
     "enemy_minion_1": {
         "name": "裂爪子机",
         "texture_path": "external/sprites/enemies/enemy_minion_1.png",
@@ -71,10 +81,7 @@ def read_png_size_and_alpha(path: Path) -> tuple[int, int, int]:
     color_type = header[25]
     assert color_type in (4, 6), f"{path} should include alpha channel"
 
-    try:
-        from PIL import Image
-    except ModuleNotFoundError:
-        return width, height, min(width, height)
+    from PIL import Image
 
     image = Image.open(path).convert("RGBA")
     alpha = image.getchannel("A")

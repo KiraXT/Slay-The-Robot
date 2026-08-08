@@ -93,7 +93,7 @@
         "enemy_is_minion": false,
         "enemy_name": "熔炉心脏",
         "enemy_object_id": "",
-        "enemy_texture_path": "external/sprites/enemies/enemy_act_1_boss_1.png",
+        "enemy_texture_path": "external/sprites/enemies/enemy_act_2_boss_foundry_heart.png",
         "enemy_type": 2,
         "object_id": "enemy_act_2_boss_foundry_heart",
         "object_uid": ""

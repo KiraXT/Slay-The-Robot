@@ -173,8 +173,8 @@ def main() -> None:
     assert act_1_boss["enemy_health"] < act_2_boss["enemy_health"] < act_3_boss["enemy_health"]
     assert act_2_boss["enemy_type"] == EXPECTED_BOSSES["enemy_act_2_boss_foundry_heart"]["type"]
     assert act_3_boss["enemy_type"] == EXPECTED_BOSSES["enemy_act_3_boss_overmind_core"]["type"]
-    assert act_2_boss["enemy_texture_path"] == "external/sprites/enemies/enemy_act_1_boss_1.png"
-    assert act_3_boss["enemy_texture_path"] == "external/sprites/enemies/enemy_act_1_boss_1.png"
+    assert act_2_boss["enemy_texture_path"] == "external/sprites/enemies/enemy_act_2_boss_foundry_heart.png"
+    assert act_3_boss["enemy_texture_path"] == "external/sprites/enemies/enemy_act_3_boss_overmind_core.png"
 
     print("validated multi-act boss progression data")
 
