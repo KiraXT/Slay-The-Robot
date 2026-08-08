@@ -24,10 +24,27 @@
         "card_hit_pause": 0,
         "card_keyword_object_ids": [],
         "card_values": {},
+        "card_play_validators": [
+            {
+                "res://scripts/validators/deck/ValidatorDeckHasUpgradeableCard.gd": {}
+            }
+        ],
         "card_play_actions": [
             {
                 "res://scripts/actions/pick_card_actions/ActionPickUpgradeCards.gd": {
-                    "actions_on_lethal": []
+                    "actions_on_lethal": [],
+                    "card_pick_text": "选择 1 张牌永久升级",
+                    "card_pick_type": 1,
+                    "force_manual_selection": true,
+                    "max_card_amount": 1,
+                    "min_card_amount": 1,
+                    "min_cards_are_required_for_action": true,
+                    "upgrade_parent_card": false,
+                    "validator_data": [
+                        {
+                            "res://scripts/validators/card/ValidatorCardUpgradeable.gd": {}
+                        }
+                    ]
                 }
             }
         ],

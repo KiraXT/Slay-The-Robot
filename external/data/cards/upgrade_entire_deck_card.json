@@ -26,8 +26,14 @@
         "card_values": {},
         "card_play_actions": [
             {
-                "res://scripts/actions/pick_card_actions/ActionPickUpgradeCards.gd": {
-                    "actions_on_lethal": []
+                "res://scripts/actions/cardset_actions/ActionUpgradeCards.gd": {
+                    "card_pick_type": 2,
+                    "upgrade_parent_card": false,
+                    "validator_data": [
+                        {
+                            "res://scripts/validators/card/ValidatorCardUpgradeable.gd": {}
+                        }
+                    ]
                 }
             }
         ],
