@@ -7,6 +7,7 @@ extends Control
 @onready var map = $%Map
 
 var suspended_for_card_pick: bool = false
+var excluded_rest_action_object_ids: Dictionary[String, bool] = {}
 
 func _ready():
 	Signals.combat_started.connect(_on_combat_started)
@@ -17,10 +18,12 @@ func _ready():
 
 func _on_map_location_selected(_location_data: LocationData):
 	if _location_data.location_type == LocationData.LOCATION_TYPES.REST_SITE:
+		excluded_rest_action_object_ids.clear()
 		visible = true
 		populate_rest_actions()
 	else:
 		visible = false
+		excluded_rest_action_object_ids.clear()
 		clear_rest_actions()
 
 func populate_rest_actions() -> void:
@@ -35,6 +38,7 @@ func populate_rest_actions() -> void:
 			rest_action_container.add_child(rest_action_button)
 			rest_action_button.init(rest_action_object_id)
 			rest_action_button.rest_action_button_up.connect(_on_rest_action_button_up)
+			rest_action_button.excluded = excluded_rest_action_object_ids.has(rest_action_object_id)
 			rest_action_button.disabled = not rest_action_button.validate_rest_button()
 
 func _on_rest_action_button_up(rest_action_button: RestActionButton):
@@ -45,22 +49,21 @@ func _on_rest_action_button_up(rest_action_button: RestActionButton):
 		var generated_actions: Array[BaseAction] = ActionGenerator.create_actions(null, null, [], action_data, null)
 		ActionHandler.add_actions(generated_actions, false)
 	
-		# disable buttons based on pressed button's exclusivity
-		var rest_action_cost_type: int = rest_action_data.rest_action_cost_type
-		
-		if rest_action_cost_type == RestActionData.REST_ACTION_COST_TYPES.INCLUSIVE:
-			# disable non repeatable free buttons after single use
-			rest_action_button.excluded = true
-		if rest_action_cost_type == RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE:
-			# disable all exclusive buttons if action taken exclusive
-			for other_button: RestActionButton in rest_action_container.get_children():
-				var other_button_rest_action_data: RestActionData = Global.get_rest_action_data(other_button.rest_action_object_id)
-				if other_button_rest_action_data.rest_action_cost_type == RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE:
-					other_button.excluded = true
+		_apply_rest_action_cost(rest_action_data)
 	
 	# re-validate all rest buttons
 	for button: RestActionButton in rest_action_container.get_children():
+		button.excluded = excluded_rest_action_object_ids.has(button.rest_action_object_id)
 		button.disabled = not button.validate_rest_button()
+
+func _apply_rest_action_cost(rest_action_data: RestActionData) -> void:
+	if rest_action_data.rest_action_cost_type == RestActionData.REST_ACTION_COST_TYPES.INCLUSIVE:
+		excluded_rest_action_object_ids[rest_action_data.object_id] = true
+	elif rest_action_data.rest_action_cost_type == RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE:
+		for rest_action_object_id: String in Global.player_data.player_available_rest_action_object_ids:
+			var available_rest_action_data: RestActionData = Global.get_rest_action_data(rest_action_object_id)
+			if available_rest_action_data != null and available_rest_action_data.rest_action_cost_type == RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE:
+				excluded_rest_action_object_ids[rest_action_object_id] = true
 
 func clear_rest_actions():
 	for child in rest_action_container.get_children():

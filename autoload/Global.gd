@@ -717,7 +717,7 @@ func add_test_rest_actions() -> void:
 	# upgrade card rest action
 	var rest_action_upgrade_card: RestActionData = RestActionData.new("rest_action_upgrade_card")
 	rest_action_upgrade_card.rest_action_name = "Upgrade"
-	rest_action_upgrade_card.rest_action_cost_type = RestActionData.REST_ACTION_COST_TYPES.INCLUSIVE_REPEATABLE
+	rest_action_upgrade_card.rest_action_cost_type = RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE
 	rest_action_upgrade_card.rest_actions = [
 	{
 	Scripts.ACTION_PICK_CARDS: {
@@ -747,7 +747,7 @@ func add_test_rest_actions() -> void:
 	# remove cards action
 	var rest_action_remove_cards: RestActionData = RestActionData.new("rest_action_remove_cards")
 	rest_action_remove_cards.rest_action_name = "Remove Cards"
-	rest_action_remove_cards.rest_action_cost_type = RestActionData.REST_ACTION_COST_TYPES.INCLUSIVE
+	rest_action_remove_cards.rest_action_cost_type = RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE
 	rest_action_remove_cards.rest_actions = [
 		{
 		Scripts.ACTION_PICK_CARDS: {
