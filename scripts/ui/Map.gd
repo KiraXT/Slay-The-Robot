@@ -189,6 +189,27 @@ func hide_map():
 func _on_map_button_up():
 	show_map()
 
+func _input(event: InputEvent) -> void:
+	if _handle_back_navigation_event(event):
+		get_viewport().set_input_as_handled()
+
+
+func _handle_back_navigation_event(event: InputEvent) -> bool:
+	if not visible or _is_gm_console_open() or not event is InputEventKey:
+		return false
+	var key_event: InputEventKey = event
+	if not key_event.pressed or key_event.echo or not key_event.is_action_pressed("ui_cancel"):
+		return false
+	_on_back_button_up()
+	return true
+
+
+func _is_gm_console_open() -> bool:
+	for console in get_tree().get_nodes_in_group("gm_console"):
+		if console.visible:
+			return true
+	return false
+
 func _on_map_location_button_up(map_location: MapLocation):
 	# map must be in travel mode
 	if can_travel:

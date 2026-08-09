@@ -64,6 +64,21 @@ func _test_run_back_navigation(root_scene: Node, escape_event: InputEventKey) ->
 	map.visible = true
 	await _press_escape(root_scene, escape_event)
 	_assert_false(map.visible, "ESC must close the map through its Back action")
+	map.visible = true
+	if not map.has_method("_handle_back_navigation_event"):
+		failures.append("Map must handle ESC back navigation directly")
+	else:
+		map.call("_handle_back_navigation_event", escape_event)
+		_assert_false(map.visible, "the map ESC handler must close the map through its Back action")
+	map.visible = true
+	var console: Node = root_scene.get_node("GMConsole")
+	_assert_true(root_scene.call("_toggle_gm_console"), "GM console must open for map ESC priority testing")
+	await _press_escape(root_scene, escape_event)
+	_assert_false(console.visible, "ESC must close the GM console before closing the map")
+	_assert_true(map.visible, "closing the GM console must not close the map")
+	if console.visible:
+		console.call("hide_console")
+	map.visible = false
 
 	var card_selection: Node = root_scene.get_node("RunScreen/CardSelectionOverlay")
 	card_selection.call("set_card_mode", 0)
