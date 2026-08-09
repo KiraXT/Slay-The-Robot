@@ -81,9 +81,50 @@ func _test_run_back_navigation(root_scene: Node, escape_event: InputEventKey) ->
 	map.visible = false
 
 	var card_selection: Node = root_scene.get_node("RunScreen/CardSelectionOverlay")
+	for view_method in ["view_deck", "view_draw_pile", "view_discard", "view_exhaust"]:
+		card_selection.call(view_method)
+		_assert_true(card_selection.visible, "%s must open the card browsing overlay before ESC is tested" % view_method)
+		await _press_escape(root_scene, escape_event)
+		_assert_false(card_selection.visible, "ESC must close the %s browsing overlay through its Back action" % view_method)
 	card_selection.call("set_card_mode", 0)
+	if not card_selection.has_method("_handle_back_navigation_event"):
+		failures.append("CardSelectionOverlay must handle ESC card browsing directly")
+	else:
+		card_selection.call("_handle_back_navigation_event", escape_event)
+		_assert_false(card_selection.visible, "the card browsing ESC handler must close the overlay through its Back action")
+	card_selection.call("set_card_mode", 0)
+	_assert_true(root_scene.call("_toggle_gm_console"), "GM console must open for card browsing ESC priority testing")
 	await _press_escape(root_scene, escape_event)
-	_assert_false(card_selection.visible, "ESC must close the card browsing overlay through its Back action")
+	_assert_false(console.visible, "ESC must close the GM console before closing card browsing")
+	_assert_true(card_selection.visible, "the GM console must remain higher priority than card browsing")
+	console.call("hide_console")
+	card_selection.visible = false
+	card_selection.call("set_card_mode", 1)
+	await _press_escape(root_scene, escape_event)
+	_assert_true(card_selection.visible, "ESC must not cancel an active card selection")
+	card_selection.visible = false
+
+	var pause_overlay: Node = root_scene.get_node("RunScreen/PauseOverlay")
+	var global: Node = root.get_node("Global")
+	global.call("pause_game")
+	_assert_true(pause_overlay.visible, "pause overlay must open before ESC is tested")
+	await _press_escape(root_scene, escape_event)
+	_assert_false(paused, "ESC must resume a paused game")
+	_assert_false(pause_overlay.visible, "ESC must close the pause overlay through Resume")
+	global.call("pause_game")
+	if not pause_overlay.has_method("_handle_back_navigation_event"):
+		failures.append("PauseOverlay must handle ESC directly")
+	else:
+		pause_overlay.call("_handle_back_navigation_event", escape_event)
+		_assert_false(pause_overlay.visible, "the pause ESC handler must resume the game and close the pause overlay")
+	global.call("pause_game")
+	_assert_true(root_scene.call("_toggle_gm_console"), "GM console must open for paused ESC priority testing")
+	await _press_escape(root_scene, escape_event)
+	_assert_false(console.visible, "ESC must close the GM console before resuming a paused game")
+	_assert_true(paused, "closing the GM console must not resume a paused game")
+	_assert_true(pause_overlay.visible, "closing the GM console must keep the pause overlay open")
+	if paused:
+		global.call("unpause_game")
 
 
 func _assert_true(value: bool, label: String) -> void:

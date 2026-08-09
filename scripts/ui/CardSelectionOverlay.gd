@@ -22,6 +22,37 @@ func _ready():
 	Signals.run_started.connect(_on_run_started)
 	Signals.run_ended.connect(_on_run_ended)
 
+
+func _input(event: InputEvent) -> void:
+	if _handle_back_navigation_event(event):
+		get_viewport().set_input_as_handled()
+
+
+func _handle_back_navigation_event(event: InputEvent) -> bool:
+	if not visible or card_mode != CARD_MODES.VIEW:
+		return false
+	if _is_gm_console_open() or _is_pause_overlay_open():
+		return false
+	if not event is InputEventKey:
+		return false
+	var key_event: InputEventKey = event
+	if not key_event.pressed or key_event.echo or not key_event.is_action_pressed("ui_cancel"):
+		return false
+	_on_back_button_up()
+	return true
+
+
+func _is_gm_console_open() -> bool:
+	for console in get_tree().get_nodes_in_group("gm_console"):
+		if console is CanvasItem and console.visible:
+			return true
+	return false
+
+
+func _is_pause_overlay_open() -> bool:
+	var pause_overlay := get_node_or_null("../PauseOverlay") as Control
+	return pause_overlay != null and pause_overlay.visible
+
 func _on_card_pick_requested(card_pick_action: ActionBasePickCards):
 	if card_pick_action != null:
 		if ActionBasePickCards.DECK_PICK_TYPES.has(card_pick_action.get_card_pick_type()):
