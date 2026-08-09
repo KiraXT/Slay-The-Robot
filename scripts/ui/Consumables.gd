@@ -31,6 +31,26 @@ func _ready():
 	Signals.run_started.connect(_on_run_started)
 	Signals.run_ended.connect(_on_run_ended)
 
+
+func _input(event: InputEvent) -> void:
+	_handle_dropdown_dismissal_event(event)
+
+
+func _handle_dropdown_dismissal_event(event: InputEvent) -> bool:
+	if not consumable_dropdown.visible or consumable_target_requested:
+		return false
+	if not event is InputEventMouseButton:
+		return false
+	var mouse_event: InputEventMouseButton = event
+	if not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
+		return false
+	if use_consumable_button.get_global_rect().has_point(mouse_event.position):
+		return false
+	if discard_consumable_button.get_global_rect().has_point(mouse_event.position):
+		return false
+	_on_background_button_up()
+	return true
+
 func populate_consumable_buttons():
 	clear_consumable_buttons()
 	
@@ -68,9 +88,11 @@ func hide_consumable_dropdown() -> void:
 	consumable_dropdown.hide()
 
 func _on_background_button_up():
-	# user clicked off ui, reset
+	# User clicked off UI, reset the active consumable interaction.
 	hide_consumable_dropdown()
 	selected_consumable_slot_index = NO_CONSUMABLE
+	consumable_target_requested = false
+	select_target_label.hide()
 
 func _on_use_consumable_button_up():
 	if not ActionHandler.actions_being_performed:
@@ -83,6 +105,7 @@ func _on_use_consumable_button_up():
 						# prompt for target
 						select_target_label.show()
 						consumable_target_requested = true
+						hide_consumable_dropdown()
 					else:
 						# automatically use consumable
 						use_consumable(null, selected_consumable_slot_index)
