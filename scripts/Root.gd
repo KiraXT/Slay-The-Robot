@@ -23,6 +23,7 @@ func _create_gm_console() -> void:
 		return
 	gm_console = GM_CONSOLE_SCRIPT.new()
 	gm_console.name = "GMConsole"
+	gm_console.add_to_group("gm_console")
 	add_child(gm_console)
 
 
@@ -47,12 +48,22 @@ func _is_gm_console_cancel_event(event: InputEvent) -> bool:
 	return key_event.pressed and not key_event.echo and key_event.is_action_pressed("ui_cancel")
 
 
+func _is_back_navigation_event(event: InputEvent) -> bool:
+	if not event is InputEventKey:
+		return false
+	var key_event: InputEventKey = event
+	return key_event.pressed and not key_event.echo and key_event.is_action_pressed("ui_cancel")
+
+
 func _input(event: InputEvent) -> void:
 	if _is_gm_console_cancel_event(event):
 		gm_console.hide_console()
 		get_viewport().set_input_as_handled()
 		return
 	if _is_gm_console_toggle_event(event) and _toggle_gm_console():
+		get_viewport().set_input_as_handled()
+		return
+	if _is_back_navigation_event(event) and _activate_visible_back_button():
 		get_viewport().set_input_as_handled()
 		return
 	if not event is InputEventMouseButton:
@@ -71,6 +82,23 @@ func _input(event: InputEvent) -> void:
 		var released_over_button := _get_hovered_button()
 		var press_id := _fallback_press_id
 		call_deferred("_complete_fallback_click", released_over_button, press_id)
+
+
+func _activate_visible_back_button() -> bool:
+	var active_back_button: BaseButton = null
+	var highest_z_index := -1000000
+	for node in find_children("BackButton"):
+		var back_button := node as BaseButton
+		if back_button == null or back_button.disabled or not back_button.is_visible_in_tree():
+			continue
+		var z_index: int = back_button.z_index
+		if active_back_button == null or z_index >= highest_z_index:
+			active_back_button = back_button
+			highest_z_index = z_index
+	if active_back_button == null:
+		return false
+	active_back_button.button_up.emit()
+	return true
 
 
 func _process(_delta: float) -> void:

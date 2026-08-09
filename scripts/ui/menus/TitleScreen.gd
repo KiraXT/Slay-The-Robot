@@ -126,11 +126,20 @@ func _notification(what: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _is_gm_console_open():
+		return
 	if screen_state not in [ScreenState.ENTERING, ScreenState.TO_CHARACTER_SELECT, ScreenState.TO_MAIN_MENU, ScreenState.LEAVING]:
 		return
 	if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel") or (event is InputEventMouseButton and event.pressed):
 		skip_active_transition()
 		get_viewport().set_input_as_handled()
+
+
+func _is_gm_console_open() -> bool:
+	for console in get_tree().get_nodes_in_group("gm_console"):
+		if console.visible:
+			return true
+	return false
 
 
 func _on_transition_finished(target_state: String) -> void:
