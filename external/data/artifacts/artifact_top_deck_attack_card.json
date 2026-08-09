@@ -18,7 +18,29 @@
         "artifact_add_actions": [
             {
                 "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
-                    "card_pick_text": "选择一张牌置于牌库顶端"
+                    "action_data": [
+                        {
+                            "res://scripts/actions/cardset_actions/ActionChangeCardProperties.gd": {
+                                "change_parent_card": false,
+                                "card_properties": {
+                                    "card_first_shuffle_priority": 1
+                                }
+                            }
+                        }
+                    ],
+                    "card_pick_text": "选择一张攻击牌置于牌库顶端",
+                    "card_pick_type": 1,
+                    "force_manual_selection": true,
+                    "max_card_amount": 1,
+                    "min_card_amount": 1,
+                    "min_cards_are_required_for_action": true,
+                    "validator_data": [
+                        {
+                            "res://scripts/validators/card/ValidatorCardType.gd": {
+                                "card_types": [0]
+                            }
+                        }
+                    ]
                 }
             }
         ],

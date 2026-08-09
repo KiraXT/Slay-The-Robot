@@ -29,6 +29,8 @@ func _check_rest_action(global: Node, object_id: String) -> void:
 	var rest_action = global.get_rest_action_data(object_id)
 	var pick_values: Dictionary = rest_action.rest_actions[0][PICK_ACTION_PATH]
 
+	if rest_action.rest_action_cost_type != RestActionData.REST_ACTION_COST_TYPES.EXCLUSIVE:
+		failures.append("%s must consume the current rest action" % object_id)
 	if pick_values.get("quick_pick", true):
 		failures.append("%s should disable quick_pick" % object_id)
 	if not pick_values.get("force_manual_selection", false):

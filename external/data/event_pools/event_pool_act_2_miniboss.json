@@ -1,0 +1,11 @@
+{
+    "patch_data": {},
+    "properties": {
+        "event_pool_event_object_ids": [
+            "event_act_2_miniboss_forge_guardian",
+            "event_act_2_miniboss_relay_tower"
+        ],
+        "event_pool_fallback_event_object_id": "event_act_2_miniboss_forge_guardian",
+        "object_id": "event_pool_act_2_miniboss"
+    }
+}

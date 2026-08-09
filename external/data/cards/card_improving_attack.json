@@ -1,0 +1,63 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "card_improving_attack",
+        "object_uid": "",
+        "card_name": "进化攻击",
+        "card_description": "获得 [block] 点格挡并造成 [damage] 点伤害。击杀时伤害和格挡各提升 2",
+        "card_type": 0,
+        "card_rarity": 2,
+        "card_color_id": "color_blue",
+        "card_energy_cost": 2,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": true,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/blue/card_improving_attack.png",
+        "card_visual_profile": "attack",
+        "card_play_sfx": "card_attack_heavy",
+        "card_impact_vfx": "impact_heavy",
+        "card_screen_shake": "medium",
+        "card_hit_pause": 0.055,
+        "card_keyword_object_ids": [],
+        "card_values": {
+            "damage": 5,
+            "number_of_attacks": 1,
+            "block": 5
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/ActionBlock.gd": {
+                    "time_delay": 0.5,
+                    "target_override": 1,
+                    "actions_on_lethal": []
+                }
+            },
+            {
+                "res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {
+                    "time_delay": 0,
+                    "actions_on_lethal": [
+                        {
+                            "res://scripts/actions/cardset_actions/ActionImproveCardValues.gd": {
+                                "pick_played_card": true,
+                                "improve_parent_card": false,
+                                "card_value_improvements": {
+                                    "damage": 2,
+                                    "block": 2
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {},
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

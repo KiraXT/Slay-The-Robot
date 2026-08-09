@@ -194,6 +194,10 @@ func add_status_effect_charges(status_effect_object_id: String, charge_amount: i
 	if len(status_effects) == 0:
 		var _status_effect: StatusEffect = _create_status_effect(status_effect_object_id, custom_values)
 		status_effects = status_id_to_status_effects[status_effect_object_id]
+	else:
+		for status_effect: StatusEffect in status_effects:
+			var status_effect_script: BaseStatusEffect = status_effect.status_effect_script
+			status_effect_script.on_status_reapplied(charge_amount, secondary_charge_amount, custom_values)
 
 	# iterate over all statuses and apply charges
 	for status_effect in status_effects.duplicate():
@@ -291,6 +295,7 @@ func get_status_charges(status_effect_object_id: String) -> int:
 func _remove_status_effect(status_effect: StatusEffect) -> void:
 	var status_effect_data: StatusEffectData = status_effect.status_effect_script.status_effect_data
 	var status_effect_object_id: String = status_effect_data.object_id
+	status_effect.status_effect_script.on_status_removed()
 
 	# get status list
 	var status_effects: Array[StatusEffect] = status_id_to_status_effects[status_effect_object_id]

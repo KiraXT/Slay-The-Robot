@@ -42,6 +42,76 @@ EXPECTED_ENEMIES = {
         "texture_path": "external/sprites/enemies/enemy_act_1_boss_1.png",
         "min_visible_height": 330,
     },
+    "enemy_act_2_boss_foundry_heart": {
+        "name": "熔炉心脏",
+        "texture_path": "external/sprites/enemies/enemy_act_2_boss_foundry_heart.png",
+        "min_visible_height": 330,
+    },
+    "enemy_act_3_boss_overmind_core": {
+        "name": "至高主脑核心",
+        "texture_path": "external/sprites/enemies/enemy_act_3_boss_overmind_core.png",
+        "min_visible_height": 330,
+    },
+    "enemy_act_2_scrap_lancer": {
+        "name": "废料长枪机",
+        "texture_path": "external/sprites/enemies/enemy_act_2_scrap_lancer.png",
+        "min_visible_height": 230,
+    },
+    "enemy_act_2_barrier_smith": {
+        "name": "护栏锻造机",
+        "texture_path": "external/sprites/enemies/enemy_act_2_barrier_smith.png",
+        "min_visible_height": 230,
+    },
+    "enemy_act_2_signal_jammer": {
+        "name": "信号干扰器",
+        "texture_path": "external/sprites/enemies/enemy_act_2_signal_jammer.png",
+        "min_visible_height": 230,
+    },
+    "enemy_act_2_repair_drone": {
+        "name": "修补无人机",
+        "texture_path": "external/sprites/enemies/enemy_act_2_repair_drone.png",
+        "min_visible_height": 180,
+    },
+    "enemy_act_2_miniboss_forge_guardian": {
+        "name": "熔炉守卫",
+        "texture_path": "external/sprites/enemies/enemy_act_2_miniboss_forge_guardian.png",
+        "min_visible_height": 280,
+    },
+    "enemy_act_2_miniboss_relay_tower": {
+        "name": "中继高塔",
+        "texture_path": "external/sprites/enemies/enemy_act_2_miniboss_relay_tower.png",
+        "min_visible_height": 280,
+    },
+    "enemy_act_3_core_blade": {
+        "name": "核心刃卫",
+        "texture_path": "external/sprites/enemies/enemy_act_3_core_blade.png",
+        "min_visible_height": 230,
+    },
+    "enemy_act_3_null_priest": {
+        "name": "归零祭仪机",
+        "texture_path": "external/sprites/enemies/enemy_act_3_null_priest.png",
+        "min_visible_height": 230,
+    },
+    "enemy_act_3_shield_obelisk": {
+        "name": "护盾方尖碑",
+        "texture_path": "external/sprites/enemies/enemy_act_3_shield_obelisk.png",
+        "min_visible_height": 260,
+    },
+    "enemy_act_3_orbital_drone": {
+        "name": "轨道无人机",
+        "texture_path": "external/sprites/enemies/enemy_act_3_orbital_drone.png",
+        "min_visible_height": 180,
+    },
+    "enemy_act_3_miniboss_null_bastion": {
+        "name": "归零壁垒",
+        "texture_path": "external/sprites/enemies/enemy_act_3_miniboss_null_bastion.png",
+        "min_visible_height": 280,
+    },
+    "enemy_act_3_miniboss_orbital_array": {
+        "name": "轨道阵列",
+        "texture_path": "external/sprites/enemies/enemy_act_3_miniboss_orbital_array.png",
+        "min_visible_height": 280,
+    },
     "enemy_minion_1": {
         "name": "裂爪子机",
         "texture_path": "external/sprites/enemies/enemy_minion_1.png",
@@ -71,10 +141,7 @@ def read_png_size_and_alpha(path: Path) -> tuple[int, int, int]:
     color_type = header[25]
     assert color_type in (4, 6), f"{path} should include alpha channel"
 
-    try:
-        from PIL import Image
-    except ModuleNotFoundError:
-        return width, height, min(width, height)
+    from PIL import Image
 
     image = Image.open(path).convert("RGBA")
     alpha = image.getchannel("A")

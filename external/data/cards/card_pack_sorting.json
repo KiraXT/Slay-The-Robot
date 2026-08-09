@@ -38,9 +38,9 @@
                     "card_pick_text": "选择 1 张牌放到抽牌堆顶。抽到它时获得能量。",
                     "action_data": [
                         {
-                            "res://scripts/actions/cardset_actions/ActionTagCards.gd": {
-                                "card_tags_to_add": [
-                                    "tag_pack_sorting"
+                            "res://scripts/actions/cardset_actions/ActionModifyCardTags.gd": {
+                                "add_tags": [
+                                    "temporary_pack_sorting_energy"
                                 ]
                             }
                         },
@@ -60,17 +60,17 @@
                     "status_custom_values": {
                         "trigger_signal": "card_drawn",
                         "card_tags": [
-                            "tag_pack_sorting"
+                            "temporary_pack_sorting_energy"
                         ],
                         "consume_charge_on_trigger": true,
-                        "remove_card_tags_on_trigger": true,
                         "action_data": [
                             {
                                 "res://scripts/actions/ActionAddEnergy.gd": {
                                     "energy_amount": 1
                                 }
                             }
-                        ]
+                        ],
+                        "remove_tag_on_trigger": true
                     }
                 }
             }

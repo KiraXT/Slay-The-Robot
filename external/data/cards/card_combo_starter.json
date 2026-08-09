@@ -4,7 +4,7 @@
         "object_id": "card_combo_starter",
         "object_uid": "",
         "card_name": "连段起手",
-        "card_description": "本回合下一张攻击造成的伤害提高 [damage_bonus]。",
+        "card_description": "本回合下一张攻击造成的伤害提高 [damage]。",
         "card_type": 1,
         "card_rarity": 1,
         "card_color_id": "color_red",
@@ -24,7 +24,7 @@
         "card_hit_pause": 0.025,
         "card_keyword_object_ids": [],
         "card_values": {
-            "damage_bonus": 3,
+            "damage": 3,
             "status_charge_amount": 1
         },
         "card_play_actions": [
@@ -34,31 +34,43 @@
                     "status_effect_object_id": "status_effect_combo_starter",
                     "status_charge_amount": 1,
                     "status_custom_values": {
-                        "trigger_signal": "card_play_started",
-                        "max_triggers_per_turn": 99,
                         "card_type_filter": [
                             0
                         ],
+                        "value_modifiers": {
+                            "damage": 3
+                        },
                         "consume_charge_on_trigger": true,
-                        "expire_on_player_turn_ended": true,
-                        "ignore_duplicate_plays": true,
-                        "action_data": [
-                            {
-                                "res://scripts/actions/meta_actions/ActionModifyCurrentCardPlayValues.gd": {
-                                    "value_modifiers": {
-                                        "damage": 3
-                                    },
-                                    "operation": "add"
-                                }
-                            }
-                        ]
+                        "clear_on_player_turn_end": true,
+                        "ignore_duplicate_plays": true
                     }
                 }
             }
         ],
-        "card_upgrade_value_improvements": {},
+        "card_upgrade_value_improvements": {
+            "damage": 2
+        },
         "card_first_upgrade_property_changes": {
-            "card_energy_cost": 0
+            "card_play_actions": [
+                {
+                    "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                        "target_override": 2,
+                        "status_effect_object_id": "status_effect_combo_starter",
+                        "status_charge_amount": 1,
+                        "status_custom_values": {
+                            "card_type_filter": [
+                                0
+                            ],
+                            "value_modifiers": {
+                                "damage": 5
+                            },
+                            "consume_charge_on_trigger": true,
+                            "clear_on_player_turn_end": true,
+                            "ignore_duplicate_plays": true
+                        }
+                    }
+                }
+            ]
         },
         "card_upgrade_amount": 0,
         "card_upgrade_amount_max": 1,

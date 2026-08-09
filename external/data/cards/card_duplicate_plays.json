@@ -1,0 +1,48 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "card_duplicate_plays",
+        "object_uid": "",
+        "card_name": "重复出牌",
+        "card_description": "每回合复制第一张打出的牌",
+        "card_type": 2,
+        "card_rarity": 3,
+        "card_color_id": "color_green",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": false,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/green/card_duplicate_plays.png",
+        "card_visual_profile": "power",
+        "card_play_sfx": "card_power",
+        "card_impact_vfx": "power_aura",
+        "card_screen_shake": "",
+        "card_hit_pause": 0.025,
+        "card_keyword_object_ids": [],
+        "card_values": {
+            "status_charge_amount": 1,
+            "status_secondary_charge_amount": 0,
+            "status_effect_object_id": "status_effect_duplicate_card_plays"
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/status_actions/ActionApplyStatus.gd": {
+                    "time_delay": 0.5,
+                    "target_override": 1,
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {
+            "status_charge_amount": 3
+        },
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

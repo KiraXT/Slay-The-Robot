@@ -45,6 +45,14 @@ const VALID_IMAGE_EXTENSIONS: Array[String] = [
 	".png", ".jpg", ".jpeg", ".svg"
 ]
 
+const FALLBACK_TEXTURE_PATHS: Dictionary = {
+	"card": "external/sprites/fallback/fallback_card.png",
+	"character": "external/sprites/fallback/fallback_character.png",
+	"enemy": "external/sprites/fallback/fallback_enemy.png",
+	"icon": "external/sprites/fallback/fallback_icon.png",
+	"background": "external/sprites/fallback/fallback_background.png",
+}
+
 func _ready():
 	# change the base folder path based on the build type
 	DebugLogger.log_line("FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag \"exported\" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html",Color.YELLOW, DebugLogger.Severities.WARNING)
@@ -94,6 +102,26 @@ func load_texture(image_partial_path, is_absolute: bool = false) -> ImageTexture
 		else:
 			push_error("Image failed to load: ", full_path)
 			return ImageTexture.new()	# return an empty image
+
+
+func load_texture_or_fallback(image_partial_path: String, fallback_type: String = "", is_absolute: bool = false) -> ImageTexture:
+	if _texture_file_exists(image_partial_path, is_absolute):
+		return load_texture(image_partial_path, is_absolute)
+
+	var fallback_path: String = FALLBACK_TEXTURE_PATHS.get(fallback_type, "")
+	if fallback_path != "" and _texture_file_exists(fallback_path, false):
+		return load_texture(fallback_path, false)
+
+	return ImageTexture.new()
+
+
+func _texture_file_exists(image_partial_path: String, is_absolute: bool = false) -> bool:
+	if image_partial_path.strip_edges() == "":
+		return false
+	var full_path := image_partial_path
+	if not is_absolute:
+		full_path = _get_modified_filepath(image_partial_path)
+	return FileAccess.file_exists(full_path)
 		
 func load_animation(animation_id: String, animation_data: Dictionary) -> SpriteFrames:
 	# given an animation id and animation data, will generate and cache a SpriteFrames from external images

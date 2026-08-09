@@ -2,7 +2,7 @@
     "patch_data": {},
     "properties": {
         "object_id": "rest_action_upgrade_card",
-        "rest_action_cost_type": 2,
+        "rest_action_cost_type": 0,
         "rest_action_name": "升级卡牌",
         "rest_action_texture_path": "",
         "rest_action_validators": [

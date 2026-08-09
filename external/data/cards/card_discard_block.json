@@ -1,0 +1,73 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "card_discard_block",
+        "object_uid": "",
+        "card_name": "弃牌格挡",
+        "card_description": "弃置最多 [max_card_amount] 张牌，并且每弃1张获得 [block] 点格挡",
+        "card_type": 1,
+        "card_rarity": 1,
+        "card_color_id": "color_red",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": false,
+        "card_exhausts": false,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/red/card_discard_block.png",
+        "card_visual_profile": "skill",
+        "card_play_sfx": "card_skill_draw",
+        "card_impact_vfx": "card_flow",
+        "card_screen_shake": "",
+        "card_hit_pause": 0,
+        "card_keyword_object_ids": [
+            "keyword_block"
+        ],
+        "card_values": {
+            "block": 5,
+            "min_card_amount": 0,
+            "max_card_amount": 3
+        },
+        "card_play_actions": [
+            {
+                "res://scripts/actions/pick_card_actions/ActionPickCards.gd": {
+                    "actions_on_lethal": [],
+                    "min_card_amount": 0,
+                    "max_card_amount": 3,
+                    "card_pick_type": 0,
+                    "card_pick_text": "选择最多 {0} 张牌弃掉。已选择 {1} 张牌",
+                    "action_data": [
+                        {
+                            "res://scripts/actions/meta_actions/ActionVariableCardsetModifier.gd": {
+                                "multiplied_values": [
+                                    "block"
+                                ],
+                                "action_data": [
+                                    {
+                                        "res://scripts/actions/status_actions/ActionBlock.gd": {
+                                            "time_delay": 0.5,
+                                            "target_override": 1
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "res://scripts/actions/cardset_actions/ActionDiscardCards.gd": {}
+                        }
+                    ]
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {
+            "block": 3,
+            "max_card_amount": 1
+        },
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

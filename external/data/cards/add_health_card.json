@@ -1,0 +1,40 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "add_health_card",
+        "object_uid": "",
+        "card_name": "生命提升",
+        "card_description": "获得 [health_amount] 点生命，并提高 [health_max_amount] 点最大生命",
+        "card_type": 1,
+        "card_rarity": 3,
+        "card_color_id": "color_white",
+        "card_energy_cost": 1,
+        "card_energy_cost_is_variable": false,
+        "card_energy_cost_variable_upper_bound": -1,
+        "card_requires_target": false,
+        "card_exhausts": true,
+        "card_is_ethereal": false,
+        "card_is_retained": false,
+        "card_appears_in_card_packs": true,
+        "card_texture_path": "external/sprites/cards/white/add_health_card.png",
+        "card_visual_profile": "skill",
+        "card_play_sfx": "card_skill_heal",
+        "card_impact_vfx": "heal_burst",
+        "card_screen_shake": "",
+        "card_hit_pause": 0,
+        "card_keyword_object_ids": [],
+        "card_values": {},
+        "card_play_actions": [
+            {
+                "res://scripts/actions/ActionAddHealth.gd": {
+                    "actions_on_lethal": []
+                }
+            }
+        ],
+        "card_upgrade_value_improvements": {},
+        "card_first_upgrade_property_changes": {},
+        "card_upgrade_amount": 0,
+        "card_upgrade_amount_max": 1,
+        "card_first_shuffle_priority": 0
+    }
+}

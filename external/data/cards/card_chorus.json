@@ -6,7 +6,7 @@
         "card_name": "副歌",
         "card_description": "能力。每回合第一次打出攻击或技能时，复制那张牌。",
         "card_type": 2,
-        "card_rarity": 3,
+        "card_rarity": 2,
         "card_color_id": "color_green",
         "card_energy_cost": 1,
         "card_energy_cost_is_variable": false,

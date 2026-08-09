@@ -1,0 +1,38 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "event_act_3_easy_combat_drone_screen",
+        "event_background_texture_path": "",
+        "event_dialogue_object_id": "",
+        "event_dialogue_data": null,
+        "event_enemy_placement_is_automatic": true,
+        "event_enemy_placement_positions": [
+            [
+                0,
+                -40
+            ],
+            [
+                0,
+                40
+            ],
+            [
+                160,
+                0
+            ]
+        ],
+        "event_initial_combat_actions": [],
+        "event_pool_validator_data": [],
+        "event_weighted_enemy_object_ids": [
+            {
+                "enemy_act_3_orbital_drone": 1.0
+            },
+            {
+                "enemy_act_3_orbital_drone": 1.0
+            },
+            {
+                "enemy_act_3_core_blade": 1.0
+            }
+        ],
+        "location_event_pool_validator_failed_strategy": 1
+    }
+}

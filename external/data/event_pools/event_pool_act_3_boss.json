@@ -1,0 +1,10 @@
+{
+    "patch_data": {},
+    "properties": {
+        "event_pool_event_object_ids": [
+            "event_act_3_boss_overmind_core"
+        ],
+        "event_pool_fallback_event_object_id": "event_act_3_boss_overmind_core",
+        "object_id": "event_pool_act_3_boss"
+    }
+}

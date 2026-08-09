@@ -1,0 +1,31 @@
+{
+    "patch_data": {},
+    "properties": {
+        "object_id": "event_act_2_easy_combat_barrier_lancer",
+        "event_background_texture_path": "",
+        "event_dialogue_object_id": "",
+        "event_dialogue_data": null,
+        "event_enemy_placement_is_automatic": true,
+        "event_enemy_placement_positions": [
+            [
+                0,
+                -40
+            ],
+            [
+                0,
+                40
+            ]
+        ],
+        "event_initial_combat_actions": [],
+        "event_pool_validator_data": [],
+        "event_weighted_enemy_object_ids": [
+            {
+                "enemy_act_2_barrier_smith": 1.0
+            },
+            {
+                "enemy_act_2_scrap_lancer": 1.0
+            }
+        ],
+        "location_event_pool_validator_failed_strategy": 1
+    }
+}

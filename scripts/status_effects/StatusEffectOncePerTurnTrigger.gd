@@ -25,6 +25,31 @@ func _connect_signals() -> void:
 			push_error("Unsupported once-per-turn trigger_signal: %s" % trigger_signal)
 
 
+func _disconnect_signals() -> void:
+	if Signals.player_turn_started.is_connected(_on_player_turn_started):
+		Signals.player_turn_started.disconnect(_on_player_turn_started)
+	if Signals.player_turn_ended.is_connected(_on_player_turn_ended):
+		Signals.player_turn_ended.disconnect(_on_player_turn_ended)
+
+	var trigger_signal: String = str(status_custom_values.get("trigger_signal", ""))
+	match trigger_signal:
+		"card_play_started":
+			if Signals.card_play_started.is_connected(_on_card_play_event):
+				Signals.card_play_started.disconnect(_on_card_play_event)
+		"card_played":
+			if Signals.card_played.is_connected(_on_card_play_event):
+				Signals.card_played.disconnect(_on_card_play_event)
+		"card_drawn":
+			if Signals.card_drawn.is_connected(_on_card_data_event):
+				Signals.card_drawn.disconnect(_on_card_data_event)
+		"card_discarded":
+			if Signals.card_discarded.is_connected(_on_card_discarded):
+				Signals.card_discarded.disconnect(_on_card_discarded)
+		"card_exhausted":
+			if Signals.card_exhausted.is_connected(_on_card_data_event):
+				Signals.card_exhausted.disconnect(_on_card_data_event)
+
+
 func _on_player_turn_started() -> void:
 	triggers_this_turn = 0
 
